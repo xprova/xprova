@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>com.github.xprova</groupId>
 			<artifactId>netlist-graph</artifactId>
-			<version>master-SNAPSHOT</version>
+			<version>master-21f64a7fd5-1</version>
 		</dependency>
 
 	</dependencies>
