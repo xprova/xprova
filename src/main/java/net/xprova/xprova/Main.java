@@ -1,18 +1,18 @@
 package net.xprova.xprova;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Scanner;
 
 import net.xprova.graph.Graph;
 import net.xprova.netlist.GateLibrary;
 import net.xprova.netlist.Netlist;
-import net.xprova.netlistgraph.ConnectivityException;
 import net.xprova.netlistgraph.Generator;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
-import net.xprova.verilogparser.StructuralException;
-import net.xprova.verilogparser.UnsupportedGrammerException;
+import net.xprova.piccolo.Console;
 import net.xprova.verilogparser.VerilogParser;
 
 public class Main {
@@ -158,36 +158,93 @@ public class Main {
 
 	}
 
-	public static void main(String[] args) {
+	private static String loadBanner() {
+
+		Scanner s = null;
+
+		String bannerFileContent;
 
 		try {
 
-			if (args.length == 3) {
+			final InputStream stream;
 
-				doCMDWork(args[0], args[1], args[2]);
+			stream = Console.class.getClassLoader().getResourceAsStream("xprova_banner.txt");
 
-			} else {
+			s = new Scanner(stream);
 
-				printUsage();
-
-			}
-
-		} catch (UnsupportedGrammerException e) {
-
-			System.err.println(e.getMessage());
-
-		} catch (StructuralException e) {
-
-			System.err.println(e.getMessage());
-
-		} catch (ConnectivityException e) {
-
-			System.err.println(e.getMessage());
+			bannerFileContent = s.useDelimiter("\\Z").next();
 
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			bannerFileContent = "<could not load internal banner file>\n";
+
+		} finally {
+
+			if (s != null)
+				s.close();
+
 		}
+
+		return bannerFileContent;
+
+	}
+
+	private static void runDebug(Console c) {
+
+		c.runCommand("ll tests/tiny.lib");
+		c.runCommand("rv tests/simple.v");
+		c.runCommand("list_designs");
+
+	}
+
+	public static void main(String[] args) {
+
+		Console c = new Console();
+
+		c.addHandler(new ConsoleHandler());
+
+		c.setBanner(loadBanner());
+
+		if (args.length == 1 && "runTests".equals(args[0])) {
+
+			runDebug(c);
+
+			return;
+
+		} else {
+
+			c.run();
+
+		}
+
+		// try {
+		//
+		// if (args.length == 3) {
+		//
+		// doCMDWork(args[0], args[1], args[2]);
+		//
+		// } else {
+		//
+		// printUsage();
+		//
+		// }
+		//
+		// } catch (UnsupportedGrammerException e) {
+		//
+		// System.err.println(e.getMessage());
+		//
+		// } catch (StructuralException e) {
+		//
+		// System.err.println(e.getMessage());
+		//
+		// } catch (ConnectivityException e) {
+		//
+		// System.err.println(e.getMessage());
+		//
+		// } catch (Exception e) {
+		//
+		// e.printStackTrace();
+		// }
 
 	}
 

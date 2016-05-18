@@ -35,6 +35,12 @@
 			<version>master-21f64a7fd5-1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.xprova</groupId>
+			<artifactId>piccolo-cli-lib</artifactId>
+			<version>5227a81e3c</version>
+		</dependency>
+
 	</dependencies>
 
 
