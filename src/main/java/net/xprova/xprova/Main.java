@@ -193,7 +193,8 @@ public class Main {
 
 		c.runCommand("ll tests/tiny.lib");
 		c.runCommand("rv tests/simple.v");
-		c.runCommand("list_designs");
+		c.runCommand("info");
+		c.runCommand("export_dot tests/simple.dot");
 
 	}
 

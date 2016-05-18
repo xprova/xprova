@@ -1,12 +1,13 @@
-module top (clk, rst, a, b, c, y);
+module top (clk, rst, a, z);
 
-	input clk, rst, a, b, c;
-	output y;
+	input clk, rst, a;
+	output z;
 
-	NOT u1 (x, n1);
-	AND u2 (n2, x, a);
-	OR u3 (n3, n2, b);
-	AND u4 (y, n3, c);
+
+
+	// OR u3 (z, a, b);
+	NOT u1 (.y(z), .a(a));
+	// AND u4 (y, z, c);
 
 endmodule
 

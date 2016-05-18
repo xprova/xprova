@@ -1,10 +1,13 @@
 package net.xprova.xprova;
 
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import net.xprova.netlist.GateLibrary;
 import net.xprova.netlist.Netlist;
+import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.piccolo.Command;
 import net.xprova.verilogparser.VerilogParser;
 
@@ -12,9 +15,9 @@ public class ConsoleHandler {
 
 	private GateLibrary lib = null;
 
-	private PrintStream out = System.out;
+	private NetlistGraph netlistGraph = null;
 
-	private ArrayList<Netlist> loadedDesigns = null;
+	private PrintStream out = System.out;
 
 	@Command(aliases = { "load_lib", "ll" })
 	public void loadLibrary(String libFile) throws Exception {
@@ -51,42 +54,49 @@ public class ConsoleHandler {
 
 		} else {
 
-			loadedDesigns = VerilogParser.parseFile(verilogFile, lib);
+			ArrayList<Netlist> nls = VerilogParser.parseFile(verilogFile, lib);
 
-			out.printf("Loaded %d modules from file %s\n", loadedDesigns.size(), verilogFile);
+			if (nls.size() > 1) {
 
-		}
-
-	}
-
-	@Command(aliases = "list_designs")
-	public void listDesigns() {
-
-		if (loadedDesigns == null) {
-
-			out.println("No designs are loaded");
-
-		} else {
-
-			for (Netlist design : loadedDesigns) {
-
-				out.println(design.name);
+				out.println("warning: file contains multiple modules");
 
 			}
 
+			netlistGraph = new NetlistGraph(nls.get(0));
+
+			out.printf("loaded design <%s>\n", nls.get(0).name);
+
 		}
 
 	}
 
-	public void printNetlistInfo(String designName) {
+	@Command(aliases = { "info" })
+	public void printNetlistInfo() {
 
-		for (Netlist design : loadedDesigns) {
+		if (netlistGraph == null) {
 
-			out.println(design.name);
+			out.println("No design is currently loaded");
+
+		} else {
+
+			netlistGraph.printStats("n/a");
 
 		}
 
+	}
 
+	@Command(aliases = { "export_dot" })
+	public void exportDotFile(String dotFile) throws FileNotFoundException, UnsupportedEncodingException {
+
+		if (netlistGraph == null) {
+
+			out.println("No design is currently loaded");
+
+		} else {
+
+			netlistGraph.printGraph(dotFile);
+
+		}
 	}
 
 }
