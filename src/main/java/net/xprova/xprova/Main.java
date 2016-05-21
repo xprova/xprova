@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 
+import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
 import net.xprova.netlist.GateLibrary;
 import net.xprova.netlist.Netlist;
 import net.xprova.netlistgraph.Generator;
 import net.xprova.netlistgraph.NetlistGraph;
+import net.xprova.netlistgraph.NetlistGraphDotFormatter;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Console;
 import net.xprova.verilogparser.VerilogParser;
@@ -109,7 +111,9 @@ public class Main {
 
 		String[] ignoreList = new String[] { "clk", "reset", "resetn", "clk1", "clk2", "U1", "n45" };
 
-		subgraph.printGraph(dotFile, subgraph.getVertices(), ignoreList);
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(subgraph);
+
+		GraphDotPrinter.printGraph(dotFile, subgraph, formatter, subgraph.getVertices(), ignoreList);
 
 	}
 
@@ -130,7 +134,9 @@ public class Main {
 		String[] ignoreList = new String[] { "clk", "reset", "resetn", "clk1", "clk2", "U1", "n45", "n1", "n2", "rst",
 				"u1_sync1_n2", "u1_sync1_U4" };
 
-		subgraph.printGraph(dotFile, subgraph.getVertices(), ignoreList);
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(subgraph);
+
+		GraphDotPrinter.printGraph(dotFile, subgraph, formatter, subgraph.getVertices(), ignoreList);
 
 	}
 
@@ -171,8 +177,8 @@ public class Main {
 
 			c.runCommand("ll tests/minfar.lib");
 			c.runCommand("read_verilog -m top tests/source.v");
-			c.runCommand("export_dot -n=SB,RB,CK tests/source.dot");
-			c.runCommand("! dot -Tps tests/source.dot -o tests/source.ps");
+			c.runCommand("export_dot --ignore-pins=SB,RB,CK --type=f tests/source.dot");
+			c.runCommand("! neato -Tps tests/source.dot -o tests/source.ps");
 
 		} catch (Exception e) {
 

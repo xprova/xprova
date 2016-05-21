@@ -2,6 +2,7 @@ package net.xprova.xprova;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -9,9 +10,13 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import net.xprova.dot.GraphDotPrinter;
+import net.xprova.graph.Graph;
 import net.xprova.netlist.GateLibrary;
 import net.xprova.netlist.Netlist;
 import net.xprova.netlistgraph.NetlistGraph;
+import net.xprova.netlistgraph.NetlistGraphDotFormatter;
+import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Command;
 import net.xprova.verilogparser.VerilogParser;
 
@@ -141,12 +146,16 @@ public class ConsoleHandler {
 
 		// parse command input
 
-		Option optModule = Option.builder("n").desc("list of pins to ignore").hasArg().argName("IGNORE_PINS")
-				.required(false).build();
+		Option optModule = Option.builder().desc("list of pins to ignore").hasArg().argName("IGNORE_PINS")
+				.required(false).longOpt("ignore-pins").build();
+
+		Option optType = Option.builder("t").longOpt("type").hasArg().desc("graph elements (n|g|f)").build();
 
 		Options options = new Options();
 
 		options.addOption(optModule);
+
+		options.addOption(optType);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -167,7 +176,41 @@ public class ConsoleHandler {
 
 		// produce graph
 
-		String ignoreList = line.getOptionValue("n", "");
+		String ignoreList = line.getOptionValue("ignore-pins", "");
+
+		HashSet<Vertex> selectedVertices;
+
+		if (!line.hasOption('t')) {
+
+			// no type specified, include all vertex types (net, gate,
+			// flip-flop)
+
+			selectedVertices = netlistGraph.getVertices();
+
+		} else {
+
+			// vertex types were specified
+
+			String vTypes = line.getOptionValue('t');
+
+			selectedVertices = new HashSet<Vertex>();
+
+			HashSet<Vertex> flipflops = netlistGraph.getModulesByType("QDFFRSBX1");
+
+			HashSet<Vertex> gates = netlistGraph.getModules();
+
+			gates.removeAll(flipflops);
+
+			if (vTypes.contains("n"))
+				selectedVertices.addAll(netlistGraph.getNets());
+
+			if (vTypes.contains("f"))
+				selectedVertices.addAll(flipflops);
+
+			if (vTypes.contains("g"))
+				selectedVertices.addAll(gates);
+
+		}
 
 		if (netlistGraph == null) {
 
@@ -175,7 +218,11 @@ public class ConsoleHandler {
 
 		} else {
 
-			netlistGraph.printGraph(dotFile, netlistGraph.getVertices(), ignoreList.split(","));
+			Graph<Vertex> sg = netlistGraph.reduce(selectedVertices);
+
+			NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(netlistGraph);
+
+			GraphDotPrinter.printGraph(dotFile, sg, formatter, selectedVertices, ignoreList.split(","));
 
 		}
 	}
