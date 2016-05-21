@@ -191,10 +191,16 @@ public class Main {
 
 	private static void runDebug(Console c) {
 
-		c.runCommand("ll tests/tiny.lib");
-		c.runCommand("rv tests/simple.v");
-		c.runCommand("info");
-		c.runCommand("export_dot tests/simple.dot");
+		try {
+
+			c.runCommand("ll tests/tiny.lib");
+			c.runCommand("read_verilog -m inverter tests/simple.v");
+
+		} catch (Exception e) {
+
+			e.getCause().printStackTrace();
+
+		}
 
 	}
 
@@ -202,7 +208,7 @@ public class Main {
 
 		Console c = new Console();
 
-		c.addHandler(new ConsoleHandler());
+		c.addHandler(new ConsoleHandler(System.out));
 
 		c.setBanner(loadBanner());
 
