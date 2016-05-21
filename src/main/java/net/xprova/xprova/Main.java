@@ -1,6 +1,5 @@
 package net.xprova.xprova;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -103,13 +102,6 @@ public class Main {
 	//
 	// }
 
-	private static void runCmd(String cmd) throws IOException {
-
-		final Runtime rt = Runtime.getRuntime();
-
-		rt.exec(cmd);
-
-	}
 
 	private static void produceFlopMsInputGraph(NetlistGraph graph, Vertex flop, String dotFile) throws Exception {
 
@@ -117,7 +109,7 @@ public class Main {
 
 		String[] ignoreList = new String[] { "clk", "reset", "resetn", "clk1", "clk2", "U1", "n45" };
 
-		subgraph.printGraph(dotFile, ignoreList);
+		subgraph.printGraph(dotFile, subgraph.getVertices(), ignoreList);
 
 	}
 
@@ -138,23 +130,7 @@ public class Main {
 		String[] ignoreList = new String[] { "clk", "reset", "resetn", "clk1", "clk2", "U1", "n45", "n1", "n2", "rst",
 				"u1_sync1_n2", "u1_sync1_U4" };
 
-		subgraph.printGraph(dotFile, ignoreList);
-
-	}
-
-	public static void printUsage() {
-
-		// following format guidelines from http://docopt.org/
-
-		String[] usageMsgLines = { "xprova v0.0.1-SNAPSHOT", "", "Usage:", "  xprova source.v library.v augmented.v",
-				// "",
-				// "Options:",
-				// " -h --help Show this screen.", // TODO
-				// " --version Show version.", // TODO
-		};
-
-		for (int i = 0; i < usageMsgLines.length; i++)
-			System.out.println(usageMsgLines[i]);
+		subgraph.printGraph(dotFile, subgraph.getVertices(), ignoreList);
 
 	}
 
@@ -193,8 +169,10 @@ public class Main {
 
 		try {
 
-			c.runCommand("ll tests/tiny.lib");
-			c.runCommand("read_verilog -m inverter tests/simple.v");
+			c.runCommand("ll tests/minfar.lib");
+			c.runCommand("read_verilog -m top tests/source.v");
+			c.runCommand("export_dot -n=SB,RB,CK tests/source.dot");
+			c.runCommand("! dot -Tps tests/source.dot -o tests/source.ps");
 
 		} catch (Exception e) {
 
@@ -223,35 +201,6 @@ public class Main {
 			c.run();
 
 		}
-
-		// try {
-		//
-		// if (args.length == 3) {
-		//
-		// doCMDWork(args[0], args[1], args[2]);
-		//
-		// } else {
-		//
-		// printUsage();
-		//
-		// }
-		//
-		// } catch (UnsupportedGrammerException e) {
-		//
-		// System.err.println(e.getMessage());
-		//
-		// } catch (StructuralException e) {
-		//
-		// System.err.println(e.getMessage());
-		//
-		// } catch (ConnectivityException e) {
-		//
-		// System.err.println(e.getMessage());
-		//
-		// } catch (Exception e) {
-		//
-		// e.printStackTrace();
-		// }
 
 	}
 

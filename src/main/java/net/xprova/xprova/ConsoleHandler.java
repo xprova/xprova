@@ -1,8 +1,6 @@
 package net.xprova.xprova;
 
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.cli.CommandLine;
@@ -139,7 +137,37 @@ public class ConsoleHandler {
 	}
 
 	@Command(aliases = { "export_dot" })
-	public void exportDotFile(String dotFile) throws FileNotFoundException, UnsupportedEncodingException {
+	public void exportDotFile(String[] args) throws Exception {
+
+		// parse command input
+
+		Option optModule = Option.builder("n").desc("list of pins to ignore").hasArg().argName("IGNORE_PINS")
+				.required(false).build();
+
+		Options options = new Options();
+
+		options.addOption(optModule);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line;
+
+		line = parser.parse(options, args);
+
+		if (line.getArgList().isEmpty())
+			throw new Exception("no file specified");
+
+		// use first non-empty argument as file name
+
+		String dotFile = "";
+
+		for (String str : line.getArgList())
+			if (!str.isEmpty())
+				dotFile = str.trim();
+
+		// produce graph
+
+		String ignoreList = line.getOptionValue("n", "");
 
 		if (netlistGraph == null) {
 
@@ -147,7 +175,7 @@ public class ConsoleHandler {
 
 		} else {
 
-			netlistGraph.printGraph(dotFile);
+			netlistGraph.printGraph(dotFile, netlistGraph.getVertices(), ignoreList.split(","));
 
 		}
 	}
