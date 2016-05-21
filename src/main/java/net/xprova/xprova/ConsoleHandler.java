@@ -14,6 +14,7 @@ import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
 import net.xprova.netlist.GateLibrary;
 import net.xprova.netlist.Netlist;
+import net.xprova.netlistgraph.Generator;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.NetlistGraphDotFormatter;
 import net.xprova.netlistgraph.Vertex;
@@ -126,6 +127,20 @@ public class ConsoleHandler {
 
 	}
 
+	@Command(aliases = { "write_verilog" })
+	public void writeVerilogFile(String args[]) throws Exception {
+
+		if (args.length != 1) {
+
+			throw new Exception("requires one argument: filename");
+
+		}
+
+		String outputVerilogFile = args[0];
+
+		Generator.generateFile(netlistGraph, outputVerilogFile);
+	}
+
 	@Command(aliases = { "info" })
 	public void printNetlistInfo() {
 
@@ -135,7 +150,7 @@ public class ConsoleHandler {
 
 		} else {
 
-			netlistGraph.printStats("n/a");
+			netlistGraph.printStats();
 
 		}
 
@@ -146,22 +161,30 @@ public class ConsoleHandler {
 
 		// parse command input
 
-		Option optModule = Option.builder().desc("list of pins to ignore").hasArg().argName("IGNORE_PINS")
-				.required(false).longOpt("ignore-pins").build();
+		Option optIgnoreEdges = Option.builder().desc("list of edges to ignore").hasArg().argName("IGNORE_EDGES")
+				.required(false).longOpt("ignore-edges").build();
 
-		Option optType = Option.builder("t").longOpt("type").hasArg().desc("graph elements (n|g|f)").build();
+		Option optIgnoreVertices = Option.builder().desc("list of vertices to ignore").hasArg()
+				.argName("IGNORE_VERTICES").required(false).longOpt("ignore-vertices").build();
+
+		Option optType = Option.builder("t").longOpt("type").hasArg().desc("graph elements: ([n]ets|[g]ates|[f]lops)")
+				.build();
+
+		Option optTo = Option.builder().longOpt("to").hasArg().desc("destination flip-flop").build();
 
 		Options options = new Options();
 
-		options.addOption(optModule);
+		options.addOption(optIgnoreEdges);
+
+		options.addOption(optIgnoreVertices);
 
 		options.addOption(optType);
 
+		options.addOption(optTo);
+
 		CommandLineParser parser = new DefaultParser();
 
-		CommandLine line;
-
-		line = parser.parse(options, args);
+		CommandLine line = parser.parse(options, args);
 
 		if (line.getArgList().isEmpty())
 			throw new Exception("no file specified");
@@ -176,7 +199,39 @@ public class ConsoleHandler {
 
 		// produce graph
 
-		String ignoreList = line.getOptionValue("ignore-pins", "");
+		if (netlistGraph == null) {
+
+			out.println("No design is currently loaded");
+
+			return;
+
+		}
+
+		NetlistGraph effectiveNetlist;
+
+		if (line.hasOption("to")) {
+
+			String vName = line.getOptionValue("to");
+
+			Vertex flop = netlistGraph.getVertex(vName);
+
+			HashSet<Vertex> flipflops = Manipulator.getFlops(netlistGraph);
+
+			HashSet<Vertex> flopInputVertices = netlistGraph.bfs(flop, flipflops, true);
+
+			Graph<Vertex> flopGraph = netlistGraph.reduce(flipflops);
+
+			flopInputVertices.add(flop);
+
+			flopInputVertices.addAll(flopGraph.getSources(flop));
+
+			effectiveNetlist = netlistGraph.getSubGraph(flopInputVertices);
+
+		} else {
+
+			effectiveNetlist = netlistGraph;
+
+		}
 
 		HashSet<Vertex> selectedVertices;
 
@@ -185,7 +240,7 @@ public class ConsoleHandler {
 			// no type specified, include all vertex types (net, gate,
 			// flip-flop)
 
-			selectedVertices = netlistGraph.getVertices();
+			selectedVertices = effectiveNetlist.getVertices();
 
 		} else {
 
@@ -195,14 +250,14 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			HashSet<Vertex> flipflops = netlistGraph.getModulesByType("QDFFRSBX1");
+			HashSet<Vertex> flipflops = effectiveNetlist.getModulesByType("QDFFRSBX1");
 
-			HashSet<Vertex> gates = netlistGraph.getModules();
+			HashSet<Vertex> gates = effectiveNetlist.getModules();
 
 			gates.removeAll(flipflops);
 
 			if (vTypes.contains("n"))
-				selectedVertices.addAll(netlistGraph.getNets());
+				selectedVertices.addAll(effectiveNetlist.getNets());
 
 			if (vTypes.contains("f"))
 				selectedVertices.addAll(flipflops);
@@ -212,19 +267,31 @@ public class ConsoleHandler {
 
 		}
 
-		if (netlistGraph == null) {
+		Graph<Vertex> sg = effectiveNetlist.reduce(selectedVertices);
 
-			out.println("No design is currently loaded");
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(netlistGraph);
 
-		} else {
+		if (line.hasOption("ignore-edges")) {
 
-			Graph<Vertex> sg = netlistGraph.reduce(selectedVertices);
-
-			NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(netlistGraph);
-
-			GraphDotPrinter.printGraph(dotFile, sg, formatter, selectedVertices, ignoreList.split(","));
+			formatter.setIgnoredEdges(line.getOptionValue("ignore-edges").split(","));
 
 		}
+
+		if (line.hasOption("ignore-vertices")) {
+
+			formatter.setIgnoredVertices(line.getOptionValue("ignore-vertices").split(","));
+
+		}
+
+		GraphDotPrinter.printGraph(dotFile, sg, formatter, selectedVertices);
+
+	}
+
+	@Command(aliases = { "augment_netlist", "aug" })
+	public void augmentNetlist() throws Exception {
+
+		Manipulator2.transformCDC(netlistGraph);
+
 	}
 
 }
