@@ -29,6 +29,8 @@ public class ConsoleHandler {
 
 	private PrintStream out;
 
+	private String[] flipFlopTypes = null;
+
 	public ConsoleHandler(PrintStream ps) {
 
 		out = ps;
@@ -215,6 +217,13 @@ public class ConsoleHandler {
 
 			Vertex flop = netlistGraph.getVertex(vName);
 
+			if (flop == null) {
+
+				throw new Exception(
+						String.format("netlist <%s> does not contain flip-flip <%s>", netlistGraph.getName(), vName));
+
+			}
+
 			HashSet<Vertex> flipflops = Manipulator.getFlops(netlistGraph);
 
 			HashSet<Vertex> flopInputVertices = netlistGraph.bfs(flop, flipflops, true);
@@ -250,7 +259,9 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			HashSet<Vertex> flipflops = effectiveNetlist.getModulesByType("QDFFRSBX1");
+			HashSet<Vertex> flipflops = Manipulator.getFlops(effectiveNetlist);
+
+			// are flipflops are flipflops2 the same?
 
 			HashSet<Vertex> gates = effectiveNetlist.getModules();
 
@@ -290,7 +301,26 @@ public class ConsoleHandler {
 	@Command(aliases = { "augment_netlist", "aug" })
 	public void augmentNetlist() throws Exception {
 
-		Manipulator2.transformCDC(netlistGraph);
+		if (netlistGraph == null) {
+
+			out.println("No design is currently loaded");
+
+		} else {
+
+			Manipulator2.transformCDC(netlistGraph);
+
+		}
+
+	}
+
+	@Command(aliases = { "set_flops" })
+	public void setFlops(String[] args) {
+
+		// specify flip-flop modules
+
+		Manipulator.flipFlopTypes = args;
+
+		Manipulator2.flipFlopTypes = args;
 
 	}
 

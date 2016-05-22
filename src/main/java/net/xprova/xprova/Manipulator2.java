@@ -1,5 +1,6 @@
 package net.xprova.xprova;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -10,20 +11,27 @@ import net.xprova.netlistgraph.VertexType;
 
 public class Manipulator2 {
 
-	private static final String clkPort = "CK", portD = "D", portV = "V",
-			dup_suffix = "_dup", portM = "M", portT = "T";
+	private static final String clkPort = "CK", portD = "D", portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
 
-	public static HashSet<Vertex> getFlops(NetlistGraph graph) {
+	public static String[] flipFlopTypes = null;
+
+	public static HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
+
+		if (flipFlopTypes == null) {
+
+			throw new Exception("flipFlopTypes not set");
+		}
+
+		HashSet<String> fTypes = new HashSet<String>(Arrays.asList(flipFlopTypes));
 
 		HashSet<Vertex> flops = new HashSet<Vertex>();
 
 		for (Vertex v : graph.getModules()) {
 
-			if (graph.getNet(v, clkPort) != null) {
+			if (fTypes.contains(v.subtype))
 
 				flops.add(v);
 
-			}
 		}
 
 		return flops;
@@ -50,7 +58,7 @@ public class Manipulator2 {
 
 	}
 
-	public static HashSet<Vertex> getDomainFlops(NetlistGraph graph, Vertex clk) {
+	public static HashSet<Vertex> getDomainFlops(NetlistGraph graph, Vertex clk) throws Exception {
 
 		HashSet<Vertex> flops = getFlops(graph);
 
@@ -113,8 +121,7 @@ public class Manipulator2 {
 			// determine hazardous combinational logic
 			// this is the set of gates and nets that depend on hazardous flops
 
-			HashSet<Vertex> hazardousCombLogic = graph.bfs(hazardousFlops,
-					flops, false);
+			HashSet<Vertex> hazardousCombLogic = graph.bfs(hazardousFlops, flops, false);
 
 			// Okay, now to build the V inputs of susceptible flops we want to
 			// retrace back from their D inputs, duplicating all nets until we
@@ -132,7 +139,8 @@ public class Manipulator2 {
 			// their
 			// adapters
 
-			HashSet<Vertex> current = new HashSet<Vertex>(); // current duplicates
+			HashSet<Vertex> current = new HashSet<Vertex>(); // current
+																// duplicates
 
 			HashSet<Vertex> visited = new HashSet<Vertex>();
 
@@ -156,13 +164,11 @@ public class Manipulator2 {
 
 					Integer dNet_dupCount = dupCount.get(dNet);
 
-					dNet_dupCount = (dNet_dupCount == null) ? 1
-							: dNet_dupCount + 1;
+					dNet_dupCount = (dNet_dupCount == null) ? 1 : dNet_dupCount + 1;
 
 					dupCount.put(dNet, dNet_dupCount);
 
-					vNet.name = affixToNetName(vNet.name, dup_suffix
-							+ dNet_dupCount);
+					vNet.name = affixToNetName(vNet.name, dup_suffix + dNet_dupCount);
 
 					graph.addVertex(vNet);
 
@@ -210,9 +216,7 @@ public class Manipulator2 {
 
 									h2x_adapter_count = h2x_adapter_count + 1;
 
-									h2x_adapter = new Vertex("H2X_u"
-											+ h2x_adapter_count,
-											VertexType.MODULE, "H2X");
+									h2x_adapter = new Vertex("H2X_u" + h2x_adapter_count, VertexType.MODULE, "H2X");
 
 									graph.addVertex(h2x_adapter);
 
@@ -227,21 +231,18 @@ public class Manipulator2 {
 									// otherwise (when it's in another domain)
 									// connect to its T port
 
-									boolean sameDomain = graph.getNet(s,
-											clkPort) == vclk;
+									boolean sameDomain = graph.getNet(s, clkPort) == vclk;
 
 									String port = sameDomain ? portM : portT;
 
-									Vertex adapterInput = new Vertex("H2X_u"
-											+ h2x_adapter_count + "_inp",
+									Vertex adapterInput = new Vertex("H2X_u" + h2x_adapter_count + "_inp",
 											VertexType.NET, "wire");
 
 									graph.addVertex(adapterInput);
 
 									graph.addConnection(s, adapterInput, port);
 
-									graph.addConnection(adapterInput,
-											h2x_adapter, "I");
+									graph.addConnection(adapterInput, h2x_adapter, "I");
 
 									s.subtype = "DFFx";
 
@@ -251,8 +252,7 @@ public class Manipulator2 {
 
 									h2x_adapter = xNets.get(s);
 
-									throw new Exception("flipflop <" + s
-											+ "> has an H2X adapter already");
+									throw new Exception("flipflop <" + s + "> has an H2X adapter already");
 
 									// with xNets in place the code should be
 									// able
@@ -274,8 +274,7 @@ public class Manipulator2 {
 
 								}
 
-								graph.addConnection(h2x_adapter, dupMap.get(v),
-										"O");
+								graph.addConnection(h2x_adapter, dupMap.get(v), "O");
 
 							} else {
 
@@ -290,11 +289,11 @@ public class Manipulator2 {
 
 								s.subtype = "DFFx";
 
-//								System.out
-//										.println("just added connection to port "
-//												+ port
-//												+ " of vertex "
-//												+ dupMap.get(v));
+								// System.out
+								// .println("just added connection to port "
+								// + port
+								// + " of vertex "
+								// + dupMap.get(v));
 
 							}
 
@@ -315,19 +314,16 @@ public class Manipulator2 {
 
 								Integer s_dupCount = dupCount.get(s);
 
-								s_dupCount = (s_dupCount == null) ? 1
-										: s_dupCount + 1;
+								s_dupCount = (s_dupCount == null) ? 1 : s_dupCount + 1;
 
 								dupCount.put(s, s_dupCount);
 
 								// s_dup.name = s_dup.name + dup_suffix
 								// + s_dupCount;
 
-								s_dup.name = affixToNetName(s_dup.name,
-										dup_suffix + s_dupCount);
+								s_dup.name = affixToNetName(s_dup.name, dup_suffix + s_dupCount);
 
-								if ("input".equals(s_dup.subtype)
-										|| "output".equals(s_dup.subtype)) {
+								if ("input".equals(s_dup.subtype) || "output".equals(s_dup.subtype)) {
 
 									// when duplicating any net which is an i/o
 									// port
@@ -341,7 +337,7 @@ public class Manipulator2 {
 
 								dupMap.put(s, s_dup);
 
-//								System.out.println("just duplicated " + s);
+								// System.out.println("just duplicated " + s);
 
 							}
 
@@ -448,9 +444,7 @@ public class Manipulator2 {
 
 			if (k2 != net.length() - 1) {
 
-				System.err
-						.println("warning: tried to change name of an invalid net: "
-								+ net);
+				System.err.println("warning: tried to change name of an invalid net: " + net);
 
 			}
 

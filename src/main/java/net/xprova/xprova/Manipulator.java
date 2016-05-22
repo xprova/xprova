@@ -1,5 +1,6 @@
 package net.xprova.xprova;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -16,8 +17,10 @@ public class Manipulator {
 
 	private static final String clkPort = "CK", portD = "D", portQ = "Q";
 
-	private static HashSet<Vertex> getCombinationalPath(NetlistGraph graph,
-			Vertex v1, Vertex v2, HashSet<Vertex> flipflops) throws Exception {
+	public static String[] flipFlopTypes = null;
+
+	private static HashSet<Vertex> getCombinationalPath(NetlistGraph graph, Vertex v1, Vertex v2,
+			HashSet<Vertex> flipflops) throws Exception {
 
 		// returns all vertices that lie on the combinational path from v1 to v2
 
@@ -58,11 +61,8 @@ public class Manipulator {
 
 					if (onPathSources.get(s).contains(s)) {
 
-						throw new Exception(
-								"combinational path between flip-flops " + v1
-										+ " and " + v2
-										+ " contains a cycle, vertex " + s
-										+ " feeds to itself");
+						throw new Exception("combinational path between flip-flops " + v1 + " and " + v2
+								+ " contains a cycle, vertex " + s + " feeds to itself");
 
 					}
 
@@ -112,8 +112,7 @@ public class Manipulator {
 
 	}
 
-	public static NetlistGraph getMsPath(NetlistGraph graph,
-			Vertex destinationFF) throws Exception {
+	public static NetlistGraph getMsPath(NetlistGraph graph, Vertex destinationFF) throws Exception {
 
 		HashSet<Vertex> flipflops = getFlops(graph);
 
@@ -125,8 +124,7 @@ public class Manipulator {
 
 		for (Vertex source : msFlopGraph.getSources(destinationFF)) {
 
-			inPath.addAll(getCombinationalPath(graph, source, destinationFF,
-					flipflops));
+			inPath.addAll(getCombinationalPath(graph, source, destinationFF, flipflops));
 
 			inPath.add(source);
 
@@ -138,7 +136,7 @@ public class Manipulator {
 
 	}
 
-	public static HashSet<Vertex> getCDCFlops(NetlistGraph graph) {
+	public static HashSet<Vertex> getCDCFlops(NetlistGraph graph) throws Exception {
 
 		HashSet<Vertex> flipflops = getFlops(graph);
 
@@ -167,21 +165,30 @@ public class Manipulator {
 
 	}
 
-	public static HashSet<Vertex> getFlops(NetlistGraph graph) {
+	public static HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
 
-		HashSet<Vertex> result = new HashSet<Vertex>();
+		if (flipFlopTypes == null) {
 
-		for (Vertex m : graph.getModulesByType("QDFFRSBX1"))
-			result.add(m);
+			throw new Exception("flipFlopTypes not set");
+		}
 
-		for (Vertex m : graph.getModulesByType("DFFm"))
-			result.add(m);
+		HashSet<String> fTypes = new HashSet<String>(Arrays.asList(flipFlopTypes));
 
-		return result;
+		HashSet<Vertex> flops = new HashSet<Vertex>();
+
+		for (Vertex v : graph.getModules()) {
+
+			if (fTypes.contains(v.subtype))
+
+				flops.add(v);
+
+		}
+
+		return flops;
 
 	}
 
-	public static HashSet<Vertex> getDomainFlops(NetlistGraph graph, String clk) {
+	public static HashSet<Vertex> getDomainFlops(NetlistGraph graph, String clk) throws Exception {
 
 		HashSet<Vertex> flops = getFlops(graph);
 
@@ -201,7 +208,7 @@ public class Manipulator {
 
 	}
 
-	public static HashSet<Vertex> getMSFlops(NetlistGraph graph) {
+	public static HashSet<Vertex> getMSFlops(NetlistGraph graph) throws Exception {
 
 		// returns all flip-flops that can potentially become metastable
 		// this includes destinations of CDC paths and other flip-flops
@@ -233,9 +240,9 @@ public class Manipulator {
 	 * @param graph
 	 * @param clk
 	 * @return
+	 * @throws Exception
 	 */
-	public static HashSet<Vertex> getHazardousFlops(NetlistGraph graph,
-			String clk) {
+	public static HashSet<Vertex> getHazardousFlops(NetlistGraph graph, String clk) throws Exception {
 
 		// first add all flops in different clock domains
 
@@ -254,9 +261,7 @@ public class Manipulator {
 
 	}
 
-
-
-	public static Graph<Vertex> getMsFlopGraph(NetlistGraph graph) {
+	public static Graph<Vertex> getMsFlopGraph(NetlistGraph graph) throws Exception {
 
 		Graph<Vertex> msFlopGraph = new Graph<Vertex>();
 
@@ -333,8 +338,7 @@ public class Manipulator {
 
 	}
 
-	private static Graph<Vertex> getFlopIO(NetlistGraph graph,
-			HashSet<Vertex> flipflops) {
+	private static Graph<Vertex> getFlopIO(NetlistGraph graph, HashSet<Vertex> flipflops) {
 
 		// returns a graph composed of flipflops, their immediate inputs,
 		// immediate outputs and their interconnections
@@ -382,8 +386,7 @@ public class Manipulator {
 
 			Vertex flopVnet = new Vertex(flop + "_v", VertexType.NET, "wire");
 
-			Vertex flopVOR = new Vertex("ZOR" + (vorMods.keySet().size() + 1),
-					VertexType.MODULE, "ZOR1");
+			Vertex flopVOR = new Vertex("ZOR" + (vorMods.keySet().size() + 1), VertexType.MODULE, "ZOR1");
 
 			// adding vertices
 
@@ -439,8 +442,7 @@ public class Manipulator {
 
 			for (Vertex flopSource : msFlopGraph.getSources(flop)) {
 
-				HashSet<Vertex> path = getCombinationalPath(graph, flopSource,
-						flop, flipflops);
+				HashSet<Vertex> path = getCombinationalPath(graph, flopSource, flop, flipflops);
 
 				flopcdcPaths.addAll(path);
 
@@ -496,8 +498,7 @@ public class Manipulator {
 
 					graph.removeConnection(input, flop2);
 
-					insertInterpreter(graph, input, flop2, portD, dupCounts,
-							mNets, dclk);
+					insertInterpreter(graph, input, flop2, portD, dupCounts, mNets, dclk);
 
 					continue;
 
@@ -511,9 +512,8 @@ public class Manipulator {
 
 					Vertex sourceMZ = zNets.get(sourceFlop);
 
-					inputDup = dupPath(graph, flipflopOutputs, flopcdcPaths,
-							dupCounts, source, sourceMZ, input, mNets, dclk,
-							sourceMsFlopOutputs);
+					inputDup = dupPath(graph, flipflopOutputs, flopcdcPaths, dupCounts, source, sourceMZ, input, mNets,
+							dclk, sourceMsFlopOutputs);
 
 					port = "V_" + vcount;
 
@@ -529,9 +529,8 @@ public class Manipulator {
 
 				port = graph.getPinName(input, flop);
 
-				inputDup = Manipulator.forkPathRecur(graph, input,
-						flipflopOutputs, flopcdcPaths, dupCounts, mNets, dclk,
-						sourceMsFlopOutputs);
+				inputDup = Manipulator.forkPathRecur(graph, input, flipflopOutputs, flopcdcPaths, dupCounts, mNets,
+						dclk, sourceMsFlopOutputs);
 
 				graph.removeConnection(input, flop);
 
@@ -561,11 +560,9 @@ public class Manipulator {
 
 				// create and add xor vertex
 
-				int dupCount = dupCounts.containsKey(XOR) ? dupCounts.get(XOR)
-						: 1;
+				int dupCount = dupCounts.containsKey(XOR) ? dupCounts.get(XOR) : 1;
 
-				Vertex xor = new Vertex("XOR" + dupCount, VertexType.MODULE,
-						"XOR");
+				Vertex xor = new Vertex("XOR" + dupCount, VertexType.MODULE, "XOR");
 
 				dupCounts.put(XOR, dupCount + 1);
 
@@ -643,8 +640,7 @@ public class Manipulator {
 
 		for (Vertex v : needRs) {
 
-			Vertex rinp = new Vertex("r[" + rcount + "]", VertexType.NET,
-					"input");
+			Vertex rinp = new Vertex("r[" + rcount + "]", VertexType.NET, "input");
 
 			graph.addVertex(rinp);
 
@@ -687,11 +683,9 @@ public class Manipulator {
 	 * @param sourceMZ
 	 *            : the MZ net of the flip-flop that drives sourceNet
 	 */
-	private static Vertex dupPath(NetlistGraph graph,
-			HashSet<Vertex> flipflopOutputs, HashSet<Vertex> path,
-			HashMap<Vertex, Integer> dupCounts, Vertex sourceNet,
-			Vertex sourceMZ, Vertex finalNet, HashMap<Vertex, Vertex> mNets,
-			Vertex dclk, HashSet<Vertex> sourceMsFlopOutputs) throws Exception {
+	private static Vertex dupPath(NetlistGraph graph, HashSet<Vertex> flipflopOutputs, HashSet<Vertex> path,
+			HashMap<Vertex, Integer> dupCounts, Vertex sourceNet, Vertex sourceMZ, Vertex finalNet,
+			HashMap<Vertex, Vertex> mNets, Vertex dclk, HashSet<Vertex> sourceMsFlopOutputs) throws Exception {
 
 		HashMap<Vertex, Vertex> dupMap = new HashMap<Vertex, Vertex>();
 
@@ -737,8 +731,7 @@ public class Manipulator {
 
 				String port = graph.getPinName(source, v);
 
-				Vertex dupSource = dupMap.containsKey(source) ? dupMap
-						.get(source) : source;
+				Vertex dupSource = dupMap.containsKey(source) ? dupMap.get(source) : source;
 
 				if (source == sourceNet) {
 
@@ -759,8 +752,7 @@ public class Manipulator {
 
 						// yes, create interpreter
 
-						insertInterpreter(graph, source, vdup, port, dupCounts,
-								mNets, dclk);
+						insertInterpreter(graph, source, vdup, port, dupCounts, mNets, dclk);
 
 					} else {
 
@@ -803,9 +795,7 @@ public class Manipulator {
 
 			if (k2 != net.length() - 1) {
 
-				System.err
-						.println("warning: tried to change name of an invalid net: "
-								+ net);
+				System.err.println("warning: tried to change name of an invalid net: " + net);
 
 			}
 
@@ -819,10 +809,8 @@ public class Manipulator {
 
 	}
 
-	private static void insertInterpreter(NetlistGraph graph, Vertex source,
-			Vertex destination, String port,
-			HashMap<Vertex, Integer> dupCounts, HashMap<Vertex, Vertex> mNets,
-			Vertex dclk) throws Exception {
+	private static void insertInterpreter(NetlistGraph graph, Vertex source, Vertex destination, String port,
+			HashMap<Vertex, Integer> dupCounts, HashMap<Vertex, Vertex> mNets, Vertex dclk) throws Exception {
 
 		// determining associated m net of source
 
@@ -839,20 +827,15 @@ public class Manipulator {
 
 		// creating interpreter and output net
 
-		int dupCount2 = dupCounts.containsKey(INTERPRETER) ? dupCounts
-				.get(INTERPRETER) : 1;
+		int dupCount2 = dupCounts.containsKey(INTERPRETER) ? dupCounts.get(INTERPRETER) : 1;
 
-		int dupCount3 = dupCounts.containsKey(source) ? dupCounts.get(source)
-				: 1;
+		int dupCount3 = dupCounts.containsKey(source) ? dupCounts.get(source) : 1;
 
-		Vertex interpreter = new Vertex("INTERP" + dupCount2,
-				VertexType.MODULE, modClass);
+		Vertex interpreter = new Vertex("INTERP" + dupCount2, VertexType.MODULE, modClass);
 
-		String intOutNetName = affixToNetName(source.toString(), "_i"
-				+ dupCount3);
+		String intOutNetName = affixToNetName(source.toString(), "_i" + dupCount3);
 
-		Vertex interpreter_output = new Vertex(intOutNetName, VertexType.NET,
-				"wire");
+		Vertex interpreter_output = new Vertex(intOutNetName, VertexType.NET, "wire");
 
 		dupCounts.put(INTERPRETER, dupCount2 + 1);
 
@@ -882,13 +865,11 @@ public class Manipulator {
 
 	}
 
-	private static Vertex duplicateVertex(Vertex original,
-			HashMap<Vertex, Integer> dupCounts) {
+	private static Vertex duplicateVertex(Vertex original, HashMap<Vertex, Integer> dupCounts) {
 
 		Vertex vdup = new Vertex(original);
 
-		int dupCount = dupCounts.containsKey(original) ? dupCounts
-				.get(original) : 1;
+		int dupCount = dupCounts.containsKey(original) ? dupCounts.get(original) : 1;
 
 		vdup.name = affixToNetName(vdup.name, "_" + dupCount);
 
@@ -924,10 +905,9 @@ public class Manipulator {
 	 *
 	 * @return duplicate of path end node
 	 */
-	private static Vertex forkPathRecur(NetlistGraph graph, Vertex v,
-			HashSet<Vertex> flopOutputNets, HashSet<Vertex> path,
-			HashMap<Vertex, Integer> dupCounts, HashMap<Vertex, Vertex> mNets,
-			Vertex dclk, HashSet<Vertex> sourceMsFlopOutputs) throws Exception {
+	private static Vertex forkPathRecur(NetlistGraph graph, Vertex v, HashSet<Vertex> flopOutputNets,
+			HashSet<Vertex> path, HashMap<Vertex, Integer> dupCounts, HashMap<Vertex, Vertex> mNets, Vertex dclk,
+			HashSet<Vertex> sourceMsFlopOutputs) throws Exception {
 
 		// this is a recursive function that duplicates a path and unmerges all
 		// many-to-one connections
@@ -958,8 +938,7 @@ public class Manipulator {
 
 					// yes, insert interpreter
 
-					insertInterpreter(graph, source, vdup, port, dupCounts,
-							mNets, dclk);
+					insertInterpreter(graph, source, vdup, port, dupCounts, mNets, dclk);
 
 				} else {
 
@@ -973,8 +952,7 @@ public class Manipulator {
 
 				// other module/net on the path of metastable nodes, fork ...
 
-				s = forkPathRecur(graph, source, flopOutputNets, path,
-						dupCounts, mNets, dclk, sourceMsFlopOutputs);
+				s = forkPathRecur(graph, source, flopOutputNets, path, dupCounts, mNets, dclk, sourceMsFlopOutputs);
 
 				graph.addConnection(s, vdup, port);
 

@@ -43,14 +43,18 @@ public class Main {
 		try {
 
 			c.runCommand("ll tests/minfar.lib");
-			c.runCommand("read_verilog -m top tests/source.v");
-			// c.runCommand("augment_netlist");
-			// c.runCommand("write_verilog tests/augmented.v");
-			// c.runCommand("temp2 unit2_AC_reg_2_ tests/source.dot");
-			c.runCommand("export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk2 "
-					+ "--type=fng --to=unit2_AC_reg_2_ tests/source.dot");
 
-			// c.runCommand("! dot -Tpng tests/source.dot -o tests/source.png");
+			c.runCommand("set_flops QDFFRSBX1 DFFx");
+
+			c.runCommand("read_verilog -m top tests/source.v");
+
+			c.runCommand("augment_netlist");
+
+			c.runCommand("write_verilog tests/augmented.v");
+
+			c.runCommand("export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk2 "
+					+ "--type=f --to=unit2_AC_reg_2_ tests/source.dot");
+
 			c.runCommand("! dot -Tpdf tests/source.dot -o tests/source.pdf");
 
 		} catch (Exception e) {
