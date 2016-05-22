@@ -29,8 +29,6 @@ public class ConsoleHandler {
 
 	private PrintStream out;
 
-	private String[] flipFlopTypes = null;
-
 	public ConsoleHandler(PrintStream ps) {
 
 		out = ps;
@@ -174,6 +172,9 @@ public class ConsoleHandler {
 
 		Option optTo = Option.builder().longOpt("to").hasArg().desc("destination flip-flop").build();
 
+		Option optCombine = Option.builder().longOpt("combine").hasArg().desc("list of vertex prefixes to combine")
+				.build();
+
 		Options options = new Options();
 
 		options.addOption(optIgnoreEdges);
@@ -183,6 +184,8 @@ public class ConsoleHandler {
 		options.addOption(optType);
 
 		options.addOption(optTo);
+
+		options.addOption(optCombine);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -280,6 +283,13 @@ public class ConsoleHandler {
 
 		Graph<Vertex> sg = effectiveNetlist.reduce(selectedVertices);
 
+		if (line.hasOption("combine")) {
+
+			for (String s : line.getOptionValue("combine").split(","))
+				combineVertices(s, selectedVertices, effectiveNetlist, sg);
+
+		}
+
 		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(netlistGraph);
 
 		if (line.hasOption("ignore-edges")) {
@@ -295,6 +305,53 @@ public class ConsoleHandler {
 		}
 
 		GraphDotPrinter.printGraph(dotFile, sg, formatter, selectedVertices);
+
+	}
+
+	private void combineVertices(String prefix, HashSet<Vertex> selectedVertices, NetlistGraph effectiveNetlist,
+			Graph<Vertex> sg) throws Exception {
+
+		HashSet<Vertex> grp1 = new HashSet<Vertex>();
+
+		HashSet<String> grp1_types = new HashSet<String>();
+
+		Vertex comb = null;
+
+		int n = prefix.length();
+
+		for (Vertex v : selectedVertices) {
+
+			String upToNCharacters = v.name.substring(0, Math.min(v.name.length(), n));
+
+			if (upToNCharacters.equals(prefix)) {
+
+				grp1.add(v);
+
+				grp1_types.add(v.subtype);
+
+				comb = v;
+
+			}
+
+		}
+
+		if (!grp1.isEmpty()) {
+
+			grp1.remove(comb);
+
+			selectedVertices.removeAll(grp1);
+
+			comb.name = prefix;
+
+			if (grp1_types.size() > 1) {
+
+				comb.subtype = "BLOCK";
+
+			}
+
+			sg.combineVertices(comb, grp1);
+
+		}
 
 	}
 

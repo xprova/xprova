@@ -48,12 +48,14 @@ public class Main {
 
 			c.runCommand("read_verilog -m top tests/source.v");
 
-			c.runCommand("augment_netlist");
+//			c.runCommand("augment_netlist");
 
 			c.runCommand("write_verilog tests/augmented.v");
 
-			c.runCommand("export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk2 "
-					+ "--type=f --to=unit2_AC_reg_2_ tests/source.dot");
+			c.runCommand("export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk1,clk2 "
+					+ "--type=f "
+					+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
+					+ "tests/source.dot");
 
 			c.runCommand("! dot -Tpdf tests/source.dot -o tests/source.pdf");
 
