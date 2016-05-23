@@ -219,7 +219,7 @@ public class ConsoleHandler {
 
 		NetlistGraph effectiveNetlist;
 
-		Transformer t1 = new Transformer(defsFF);
+		Transformer t1 = new Transformer(netlistGraph, defsFF);
 
 		if (line.hasOption("to")) {
 
@@ -234,7 +234,7 @@ public class ConsoleHandler {
 
 			}
 
-			HashSet<Vertex> flipflops = t1.getFlops(netlistGraph);
+			HashSet<Vertex> flipflops = t1.getFlops();
 
 			HashSet<Vertex> flopInputVertices = netlistGraph.bfs(flop, flipflops, true);
 
@@ -269,7 +269,9 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			HashSet<Vertex> flipflops = t1.getFlops(effectiveNetlist);
+			Transformer t2 = new Transformer(effectiveNetlist, defsFF);
+
+			HashSet<Vertex> flipflops = t2.getFlops();
 
 			// are flipflops are flipflops2 the same?
 
@@ -371,9 +373,9 @@ public class ConsoleHandler {
 
 		} else {
 
-			Transformer t1 = new Transformer(defsFF);
+			Transformer t1 = new Transformer(netlistGraph, defsFF);
 
-			t1.transformCDC(netlistGraph);
+			t1.transformCDC();
 
 		}
 
@@ -389,7 +391,7 @@ public class ConsoleHandler {
 	}
 
 	@Command(aliases = { "def_ff" })
-	public void addDefFF(String modName, String clkPort, String rstPort) throws Exception {
+	public void addDefFF(String modName, String clkPort, String rstPort, String dPort) throws Exception {
 
 		if (defsFF.containsKey(modName)) {
 
@@ -397,7 +399,7 @@ public class ConsoleHandler {
 
 		} else {
 
-			FlipFlop ff = new FlipFlop(modName, clkPort, rstPort);
+			FlipFlop ff = new FlipFlop(modName, clkPort, rstPort, dPort);
 
 			defsFF.put(modName, ff);
 
@@ -408,18 +410,41 @@ public class ConsoleHandler {
 	@Command(aliases = { "list_ff" })
 	public void listDefFF() {
 
-		String strFormat = "%20s   %10s   %10s\n";
+		String strFormat = "%20s %14s %14s %14s\n";
 
-		out.println();
-
-		out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port"));
-		out.print(String.format(strFormat, "----------------", "----------", "----------"));
+		out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port", "Data Port"));
+		out.print(String.format(strFormat, "----------------", "----------", "----------", "---------"));
 
 		for (FlipFlop f : defsFF.values()) {
 
-			out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort));
+			out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort, f.dPort));
 
 		}
+
+	}
+
+	@Command(aliases = { "report_domains" })
+	public void reportClockDomains() throws Exception {
+
+		Transformer t1 = new Transformer(netlistGraph, defsFF);
+
+		HashSet<Vertex> clks = t1.getClocks();
+
+		String strFormat = "%20s %14s\n";
+
+		out.printf("Found %d clock domain(s):\n\n", clks.size());
+
+		out.print(String.format(strFormat, "Clock Domain Net", "  FFs"));
+		out.print(String.format(strFormat, "----------------", "-----"));
+
+		for (Vertex clk : clks) {
+
+			int count = t1.getDomainFlops(clk).size();
+
+			out.print(String.format(strFormat, clk, count));
+
+		}
+
 
 	}
 

@@ -11,17 +11,21 @@ import net.xprova.netlistgraph.VertexType;
 
 public class Transformer {
 
-	private final String clkPort = "CK", portD = "D", portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
+	private final String portV = "V", dup_suffix = "_dup", portM = "M", portT = "T", modelFF = "DFFx";
 
-	private HashMap<String, FlipFlop> defsFF = null;
+	private HashMap<String, FlipFlop> defsFF;
 
-	public Transformer(HashMap<String, FlipFlop> defsFF) {
+	private NetlistGraph graph;
+
+	public Transformer(NetlistGraph graph, HashMap<String, FlipFlop> defsFF) {
+
+		this.graph = graph;
 
 		this.defsFF = defsFF;
 
 	}
 
-	public HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
+	public HashSet<Vertex> getFlops() throws Exception {
 
 		Set<String> fTypes = defsFF.keySet();
 
@@ -39,15 +43,17 @@ public class Transformer {
 
 	}
 
-	public HashSet<Vertex> getClocks(NetlistGraph graph) {
+	public HashSet<Vertex> getClocks() {
 
 		HashSet<Vertex> clocks = new HashSet<Vertex>();
 
 		for (Vertex v : graph.getModules()) {
 
-			Vertex clk = graph.getNet(v, clkPort);
+			FlipFlop entry = defsFF.get(v.subtype);
 
-			if (clk != null) {
+			if (entry != null) {
+
+				Vertex clk = graph.getNet(v, entry.clkPort);
 
 				clocks.add(clk);
 
@@ -59,13 +65,15 @@ public class Transformer {
 
 	}
 
-	public HashSet<Vertex> getDomainFlops(NetlistGraph graph, Vertex clk) throws Exception {
+	public HashSet<Vertex> getDomainFlops(Vertex clk) throws Exception {
 
-		HashSet<Vertex> flops = getFlops(graph);
+		HashSet<Vertex> flops = getFlops();
 
 		HashSet<Vertex> domainFlops = new HashSet<Vertex>();
 
 		for (Vertex f : flops) {
+
+			String clkPort = defsFF.get(f.subtype).clkPort;
 
 			if (clk == graph.getNet(f, clkPort)) {
 
@@ -79,9 +87,9 @@ public class Transformer {
 
 	}
 
-	public void transformCDC(NetlistGraph graph) throws Exception {
+	public void transformCDC() throws Exception {
 
-		HashSet<Vertex> clocks = getClocks(graph);
+		HashSet<Vertex> clocks = getClocks();
 
 		HashMap<Vertex, Integer> dupCount = new HashMap<Vertex, Integer>();
 
@@ -92,17 +100,17 @@ public class Transformer {
 
 		for (Vertex vclk : clocks) {
 
-			Graph<Vertex> flopGraph = graph.reduce(getFlops(graph));
+			Graph<Vertex> flopGraph = graph.reduce(getFlops());
 
-			HashSet<Vertex> flops = getFlops(graph);
+			HashSet<Vertex> flops = getFlops();
 
-			HashSet<Vertex> localFlops = getDomainFlops(graph, vclk);
+			HashSet<Vertex> localFlops = getDomainFlops(vclk);
 
 			// determine hazardous flops
 
 			// (a) first add all flops in different clock domains
 
-			HashSet<Vertex> hazardousFlops = getFlops(graph);
+			HashSet<Vertex> hazardousFlops = getFlops();
 
 			hazardousFlops.removeAll(localFlops);
 
@@ -147,7 +155,7 @@ public class Transformer {
 
 			for (Vertex s : susFlops) {
 
-				Vertex dNet = graph.getNet(s, portD);
+				Vertex dNet = graph.getNet(s, defsFF.get(s).dPort);
 
 				Vertex vNet;
 
@@ -183,7 +191,7 @@ public class Transformer {
 
 				graph.addConnection(vNet, s, portV);
 
-				s.subtype = "DFFx";
+				s.subtype = modelFF;
 
 			}
 
@@ -206,8 +214,7 @@ public class Transformer {
 							if (insertAdapters) {
 
 								// need to insert an adapter or connect to an
-								// existing
-								// adapter
+								// existing adapter
 
 								Vertex h2x_adapter;
 
@@ -222,17 +229,15 @@ public class Transformer {
 									graph.addVertex(h2x_adapter);
 
 									// OK, now need to connect the adapter to
-									// the
-									// hazardous flop
+									// the hazardous flop
 
 									// if the hazardous flop is in the same
-									// clock
-									// domain then connect to its M port
+									// clock domain then connect to its M port
 
 									// otherwise (when it's in another domain)
 									// connect to its T port
 
-									boolean sameDomain = graph.getNet(s, clkPort) == vclk;
+									boolean sameDomain = graph.getNet(s, defsFF.get(s).clkPort) == vclk;
 
 									String port = sameDomain ? portM : portT;
 
@@ -245,7 +250,7 @@ public class Transformer {
 
 									graph.addConnection(adapterInput, h2x_adapter, "I");
 
-									s.subtype = "DFFx";
+									s.subtype = modelFF;
 
 									xNets.put(s, h2x_adapter);
 
@@ -256,20 +261,15 @@ public class Transformer {
 									throw new Exception("flipflop <" + s + "> has an H2X adapter already");
 
 									// with xNets in place the code should be
-									// able
-									// to
-									// handle this case
+									// able to handle this case
 
 									// I am throwing an exception here because
-									// this
-									// case
-									// doesn't occur in my current test design
-									// so I can't check if this works correctly
+									// this cased oesn't occur in my current
+									// test design so I can't check if this
+									// works correctly
 
 									// if this exception is thrown, comment it
-									// out
-									// and
-									// then see if the tool correctly
+									// out and then see if the tool correctly
 									// connects dupMap.get(v) to the existing
 									// h2x_adapter
 
@@ -282,13 +282,13 @@ public class Transformer {
 								// connect directly to either M or T port
 								// without an adapter
 
-								boolean sameDomain = graph.getNet(s, clkPort) == vclk;
+								boolean sameDomain = graph.getNet(s, defsFF.get(s).clkPort) == vclk;
 
 								String port = sameDomain ? portM : portT;
 
 								graph.addConnection(s, dupMap.get(v), port);
 
-								s.subtype = "DFFx";
+								s.subtype = modelFF;
 
 								// System.out
 								// .println("just added connection to port "
@@ -381,7 +381,7 @@ public class Transformer {
 		// if DFFx flop has an m pin connection (it can propagate metastability)
 		// then it must also have an r2 bit
 
-		HashSet<Vertex> DFFxs = graph.getModulesByType("DFFx");
+		HashSet<Vertex> DFFxs = graph.getModulesByType(modelFF);
 		/*
 		 * graph.addPort("r"); // add port first
 		 *

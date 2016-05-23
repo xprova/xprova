@@ -42,34 +42,41 @@ public class Main {
 
 		try {
 
-			c.runCommand("ll tests/minfar.lib");
+			String cmds[] = { "ll tests/minfar.lib",
 
-//			c.runCommand("set_flops QDFFRSBX1 DFFx");
+					// "set_flops QDFFRSBX1 DFFx",
 
-			c.runCommand("def_ff QDFFRSBX1 CK RS");
+					"def_ff QDFFRSBX1 CK RS D",
 
-			c.runCommand("def_ff DFF CK RS");
+					// "def_ff DFF CK RS",
 
-			c.runCommand("list_ff");
+					"list_ff",
 
-			c.runCommand("read_verilog -m top tests/source.v");
+					"read_verilog -m top tests/source.v",
 
-//			c.runCommand("augment_netlist");
+					// "augment_netlist",
 
-			c.runCommand("write_verilog tests/augmented.v");
+					// "write_verilog tests/augmented.v",
 
-			c.runCommand("export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk1,clk2 "
-					+ "--type=fg "
-					+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
-					+ "tests/source.dot");
+					"export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk1,clk2 " + "--type=fg "
+							+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
+							+ "tests/source.dot",
 
-			c.runCommand("! dot -Tpdf tests/source.dot -o tests/source.pdf");
+					// "! dot -Tpdf tests/source.dot -o tests/source.pdf"
+
+					"report_domains" };
+
+			for (String cmd : cmds) {
+
+				c.runCommand(cmd);
+
+				System.out.println("");
+
+			}
 
 		} catch (Exception e) {
 
 			e.printStackTrace();
-
-//			e.getCause().printStackTrace();
 
 		}
 
