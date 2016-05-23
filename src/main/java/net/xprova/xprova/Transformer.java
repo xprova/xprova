@@ -2,7 +2,6 @@ package net.xprova.xprova;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 import net.xprova.graph.Graph;
 import net.xprova.netlistgraph.NetlistGraph;
@@ -22,24 +21,6 @@ public class Transformer {
 		this.graph = graph;
 
 		this.defsFF = defsFF;
-
-	}
-
-	public HashSet<Vertex> getFlops() throws Exception {
-
-		Set<String> fTypes = defsFF.keySet();
-
-		HashSet<Vertex> flops = new HashSet<Vertex>();
-
-		for (Vertex v : graph.getModules()) {
-
-			if (fTypes.contains(v.subtype))
-
-				flops.add(v);
-
-		}
-
-		return flops;
 
 	}
 
@@ -67,7 +48,7 @@ public class Transformer {
 
 	public HashSet<Vertex> getDomainFlops(Vertex clk) throws Exception {
 
-		HashSet<Vertex> flops = getFlops();
+		HashSet<Vertex> flops = graph.getModulesByTypes(defsFF.keySet());
 
 		HashSet<Vertex> domainFlops = new HashSet<Vertex>();
 
@@ -98,11 +79,13 @@ public class Transformer {
 
 		int h2x_adapter_count = 0;
 
+
+
 		for (Vertex vclk : clocks) {
 
-			Graph<Vertex> flopGraph = graph.reduce(getFlops());
+			HashSet<Vertex> flops = graph.getModulesByTypes(defsFF.keySet());
 
-			HashSet<Vertex> flops = getFlops();
+			Graph<Vertex> flopGraph = graph.reduce(flops);
 
 			HashSet<Vertex> localFlops = getDomainFlops(vclk);
 
@@ -110,7 +93,7 @@ public class Transformer {
 
 			// (a) first add all flops in different clock domains
 
-			HashSet<Vertex> hazardousFlops = getFlops();
+			HashSet<Vertex> hazardousFlops = new HashSet<Vertex>(flops);
 
 			hazardousFlops.removeAll(localFlops);
 

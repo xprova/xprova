@@ -2,6 +2,7 @@ package net.xprova.xprova;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -26,7 +27,7 @@ public class ConsoleHandler {
 
 	private GateLibrary lib = null;
 
-	private NetlistGraph netlistGraph = null;
+	private NetlistGraph graph = null;
 
 	private PrintStream out = null;
 
@@ -124,7 +125,7 @@ public class ConsoleHandler {
 			if (selNetlist == null)
 				throw new Exception(String.format("Cannot find module <%s> in file <%s>", moduleName, verilogFile));
 
-			netlistGraph = new NetlistGraph(selNetlist);
+			graph = new NetlistGraph(selNetlist);
 
 			out.printf("Loaded design <%s>\n", selNetlist.name);
 
@@ -143,19 +144,19 @@ public class ConsoleHandler {
 
 		String outputVerilogFile = args[0];
 
-		Generator.generateFile(netlistGraph, outputVerilogFile);
+		Generator.generateFile(graph, outputVerilogFile);
 	}
 
 	@Command(aliases = { "info" })
 	public void printNetlistInfo() {
 
-		if (netlistGraph == null) {
+		if (graph == null) {
 
 			out.println("No design is currently loaded");
 
 		} else {
 
-			netlistGraph.printStats();
+			graph.printStats();
 
 		}
 
@@ -209,7 +210,7 @@ public class ConsoleHandler {
 
 		// produce graph
 
-		if (netlistGraph == null) {
+		if (graph == null) {
 
 			out.println("No design is currently loaded");
 
@@ -219,36 +220,34 @@ public class ConsoleHandler {
 
 		NetlistGraph effectiveNetlist;
 
-		Transformer t1 = new Transformer(netlistGraph, defsFF);
-
 		if (line.hasOption("to")) {
 
 			String vName = line.getOptionValue("to");
 
-			Vertex flop = netlistGraph.getVertex(vName);
+			Vertex flop = graph.getVertex(vName);
 
 			if (flop == null) {
 
 				throw new Exception(
-						String.format("netlist <%s> does not contain flip-flip <%s>", netlistGraph.getName(), vName));
+						String.format("netlist <%s> does not contain flip-flip <%s>", graph.getName(), vName));
 
 			}
 
-			HashSet<Vertex> flipflops = t1.getFlops();
+			HashSet<Vertex> flipflops = graph.getModulesByTypes(defsFF.keySet());
 
-			HashSet<Vertex> flopInputVertices = netlistGraph.bfs(flop, flipflops, true);
+			HashSet<Vertex> flopInputVertices = graph.bfs(flop, flipflops, true);
 
-			Graph<Vertex> flopGraph = netlistGraph.reduce(flipflops);
+			Graph<Vertex> flopGraph = graph.reduce(flipflops);
 
 			flopInputVertices.add(flop);
 
 			flopInputVertices.addAll(flopGraph.getSources(flop));
 
-			effectiveNetlist = netlistGraph.getSubGraph(flopInputVertices);
+			effectiveNetlist = graph.getSubGraph(flopInputVertices);
 
 		} else {
 
-			effectiveNetlist = netlistGraph;
+			effectiveNetlist = graph;
 
 		}
 
@@ -269,9 +268,7 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			Transformer t2 = new Transformer(effectiveNetlist, defsFF);
-
-			HashSet<Vertex> flipflops = t2.getFlops();
+			HashSet<Vertex> flipflops = graph.getModulesByTypes(defsFF.keySet());
 
 			// are flipflops are flipflops2 the same?
 
@@ -299,7 +296,7 @@ public class ConsoleHandler {
 
 		}
 
-		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(netlistGraph);
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(graph);
 
 		if (line.hasOption("ignore-edges")) {
 
@@ -367,13 +364,13 @@ public class ConsoleHandler {
 	@Command(aliases = { "augment_netlist", "aug" })
 	public void augmentNetlist() throws Exception {
 
-		if (netlistGraph == null) {
+		if (graph == null) {
 
 			out.println("No design is currently loaded");
 
 		} else {
 
-			Transformer t1 = new Transformer(netlistGraph, defsFF);
+			Transformer t1 = new Transformer(graph, defsFF);
 
 			t1.transformCDC();
 
@@ -426,7 +423,7 @@ public class ConsoleHandler {
 	@Command(aliases = { "report_domains" })
 	public void reportClockDomains() throws Exception {
 
-		Transformer t1 = new Transformer(netlistGraph, defsFF);
+		Transformer t1 = new Transformer(graph, defsFF);
 
 		HashSet<Vertex> clks = t1.getClocks();
 
@@ -445,6 +442,44 @@ public class ConsoleHandler {
 
 		}
 
+	}
+
+	@Command(aliases = { "report_paths" })
+	public void reportCrossoverPaths() {
+
+		String strFormat = "%20s -> %20s";
+
+		ArrayList<String> paths = new ArrayList<String>();
+
+		HashSet<Vertex> flops = graph.getModulesByTypes(defsFF.keySet());
+
+		Graph<Vertex> ffGraph = graph.reduce(flops);
+
+		for (Vertex src : flops) {
+
+			for (Vertex dst : ffGraph.getDestinations(src)) {
+
+				Vertex clk1 = graph.getNet(src, defsFF.get(src.subtype).clkPort);
+				Vertex clk2 = graph.getNet(dst, defsFF.get(dst.subtype).clkPort);
+
+				if (clk1 != clk2)
+					paths.add(String.format(strFormat, src, dst));
+
+			}
+
+		}
+
+		Collections.sort(paths);
+
+		// output
+
+		out.printf("Found %d crossover paths:\n\n", paths.size());
+
+		for (String p : paths) {
+
+			out.println(p);
+
+		}
 
 	}
 

@@ -64,7 +64,9 @@ public class Main {
 
 					// "! dot -Tpdf tests/source.dot -o tests/source.pdf"
 
-					"report_domains" };
+					"report_domains",
+
+					"report_paths" };
 
 			for (String cmd : cmds) {
 
