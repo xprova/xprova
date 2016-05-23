@@ -2,6 +2,7 @@ package net.xprova.xprova;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.commons.cli.CommandLine;
@@ -27,11 +28,15 @@ public class ConsoleHandler {
 
 	private NetlistGraph netlistGraph = null;
 
-	private PrintStream out;
+	private PrintStream out = null;
+
+	private HashMap<String, FlipFlop> defsFF = null;
 
 	public ConsoleHandler(PrintStream ps) {
 
 		out = ps;
+
+		defsFF = new HashMap<String, FlipFlop>();
 
 	}
 
@@ -214,6 +219,8 @@ public class ConsoleHandler {
 
 		NetlistGraph effectiveNetlist;
 
+		Transformer t1 = new Transformer(defsFF);
+
 		if (line.hasOption("to")) {
 
 			String vName = line.getOptionValue("to");
@@ -227,7 +234,7 @@ public class ConsoleHandler {
 
 			}
 
-			HashSet<Vertex> flipflops = Manipulator.getFlops(netlistGraph);
+			HashSet<Vertex> flipflops = t1.getFlops(netlistGraph);
 
 			HashSet<Vertex> flopInputVertices = netlistGraph.bfs(flop, flipflops, true);
 
@@ -262,7 +269,7 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			HashSet<Vertex> flipflops = Manipulator.getFlops(effectiveNetlist);
+			HashSet<Vertex> flipflops = t1.getFlops(effectiveNetlist);
 
 			// are flipflops are flipflops2 the same?
 
@@ -364,20 +371,55 @@ public class ConsoleHandler {
 
 		} else {
 
-			Manipulator2.transformCDC(netlistGraph);
+			Transformer t1 = new Transformer(defsFF);
+
+			t1.transformCDC(netlistGraph);
 
 		}
 
 	}
 
-	@Command(aliases = { "set_flops" })
-	public void setFlops(String[] args) {
+	@Command(aliases = { "clear_ff_defs" })
+	public void clearDefsFF(String[] args) {
 
 		// specify flip-flop modules
 
-		Manipulator.flipFlopTypes = args;
+		defsFF.clear();
 
-		Manipulator2.flipFlopTypes = args;
+	}
+
+	@Command(aliases = { "def_ff" })
+	public void addDefFF(String modName, String clkPort, String rstPort) throws Exception {
+
+		if (defsFF.containsKey(modName)) {
+
+			throw new Exception(String.format("definition already exists for flip-flop <%s> ", modName));
+
+		} else {
+
+			FlipFlop ff = new FlipFlop(modName, clkPort, rstPort);
+
+			defsFF.put(modName, ff);
+
+		}
+
+	}
+
+	@Command(aliases = { "list_ff" })
+	public void listDefFF() {
+
+		String strFormat = "%20s   %10s   %10s\n";
+
+		out.println();
+
+		out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port"));
+		out.print(String.format(strFormat, "----------------", "----------", "----------"));
+
+		for (FlipFlop f : defsFF.values()) {
+
+			out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort));
+
+		}
 
 	}
 

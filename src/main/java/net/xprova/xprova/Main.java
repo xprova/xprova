@@ -44,7 +44,13 @@ public class Main {
 
 			c.runCommand("ll tests/minfar.lib");
 
-			c.runCommand("set_flops QDFFRSBX1 DFFx");
+//			c.runCommand("set_flops QDFFRSBX1 DFFx");
+
+			c.runCommand("def_ff QDFFRSBX1 CK RS");
+
+			c.runCommand("def_ff DFF CK RS");
+
+			c.runCommand("list_ff");
 
 			c.runCommand("read_verilog -m top tests/source.v");
 
@@ -53,7 +59,7 @@ public class Main {
 			c.runCommand("write_verilog tests/augmented.v");
 
 			c.runCommand("export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk1,clk2 "
-					+ "--type=f "
+					+ "--type=fg "
 					+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
 					+ "tests/source.dot");
 
@@ -61,7 +67,9 @@ public class Main {
 
 		} catch (Exception e) {
 
-			e.getCause().printStackTrace();
+			e.printStackTrace();
+
+//			e.getCause().printStackTrace();
 
 		}
 

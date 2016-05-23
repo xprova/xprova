@@ -1,28 +1,29 @@
 package net.xprova.xprova;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import net.xprova.graph.Graph;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
 
-public class Manipulator2 {
+public class Transformer {
 
-	private static final String clkPort = "CK", portD = "D", portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
+	private final String clkPort = "CK", portD = "D", portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
 
-	public static String[] flipFlopTypes = null;
+	private HashMap<String, FlipFlop> defsFF = null;
 
-	public static HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
+	public Transformer(HashMap<String, FlipFlop> defsFF) {
 
-		if (flipFlopTypes == null) {
+		this.defsFF = defsFF;
 
-			throw new Exception("flipFlopTypes not set");
-		}
+	}
 
-		HashSet<String> fTypes = new HashSet<String>(Arrays.asList(flipFlopTypes));
+	public HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
+
+		Set<String> fTypes = defsFF.keySet();
 
 		HashSet<Vertex> flops = new HashSet<Vertex>();
 
@@ -38,7 +39,7 @@ public class Manipulator2 {
 
 	}
 
-	public static HashSet<Vertex> getClocks(NetlistGraph graph) {
+	public HashSet<Vertex> getClocks(NetlistGraph graph) {
 
 		HashSet<Vertex> clocks = new HashSet<Vertex>();
 
@@ -58,7 +59,7 @@ public class Manipulator2 {
 
 	}
 
-	public static HashSet<Vertex> getDomainFlops(NetlistGraph graph, Vertex clk) throws Exception {
+	public HashSet<Vertex> getDomainFlops(NetlistGraph graph, Vertex clk) throws Exception {
 
 		HashSet<Vertex> flops = getFlops(graph);
 
@@ -78,7 +79,7 @@ public class Manipulator2 {
 
 	}
 
-	public static void transformCDC(NetlistGraph graph) throws Exception {
+	public void transformCDC(NetlistGraph graph) throws Exception {
 
 		HashSet<Vertex> clocks = getClocks(graph);
 
@@ -427,7 +428,7 @@ public class Manipulator2 {
 
 	}
 
-	private static String affixToNetName(String net, String postfix) {
+	private String affixToNetName(String net, String postfix) {
 
 		// this function appends postfix to net while handling the cases
 		// when net contains an array net (e.g. data[0])

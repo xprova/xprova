@@ -9,6 +9,7 @@ import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
 
+@Deprecated
 public class Manipulator {
 
 	// the below are dummy vertices used as keys for dupCount entries
@@ -165,7 +166,7 @@ public class Manipulator {
 
 	}
 
-	public static HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
+	private static HashSet<Vertex> getFlops(NetlistGraph graph) throws Exception {
 
 		if (flipFlopTypes == null) {
 
