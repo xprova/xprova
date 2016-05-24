@@ -45,7 +45,7 @@ public class Main {
 			String cmds[] = { "ll tests/minfar.lib",
 
 					// "set_flops QDFFRSBX1 DFFx",
-
+"#ff",
 					"def_ff QDFFRSBX1 CK RS D",
 
 					// "def_ff DFF CK RS",

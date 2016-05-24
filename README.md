@@ -91,3 +91,28 @@ Simply run `write_verilog augmented.v`
 
 The tool can output various graph representations of the netlist using the
 command `export_dot`.
+
+```
+export_dot output.dot
+
+# to create a graph of nets and gates only (ignore flip-flops):
+export_dot --type=ng output.dot
+
+# to create a graph of gates and flops only (ignore nets):
+export_dot --type=gf output.dot
+
+# to create a graph of flip flops only:
+export_dot --type=f output.dot
+
+# so basically the option --type can take any char combination of "ngf"
+
+# to omit verticess (useful to remove reset and clock connections):
+export_dot --ignore-vertices=rst,clk1,clk2 output.dot
+
+# to omit edges (ditto):
+export_dot --ignore-edges=SB,RB,CK
+
+# to combine multiple vertices into one:
+export_dot --combine=add[0],add[1],add[2] output.dot
+
+```
