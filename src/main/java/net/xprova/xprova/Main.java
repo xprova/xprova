@@ -42,27 +42,29 @@ public class Main {
 
 		try {
 
-			String cmds[] = { "ll tests/minfar.lib",
+			String cmds[] = { "ll tests/tiny.lib",
 
 					// "set_flops QDFFRSBX1 DFFx",
-"#ff",
+
 					"def_ff QDFFRSBX1 CK RS D",
+					"def_ff DFF CK RS D",
+					"def_ff DFFx CK RS D",
 
 					// "def_ff DFF CK RS",
 
 					"list_ff",
 
-					"read_verilog -m top tests/source.v",
+					"read_verilog -m top tests/multiclock.v",
 
-					// "augment_netlist",
+					 "augment_netlist",
 
 					// "write_verilog tests/augmented.v",
 
-					"export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,clk1,clk2 " + "--type=fg "
+					"export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,reset,clk1,clk2 " + "--type=fng "
 							+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
 							+ "tests/source.dot",
 
-					// "! dot -Tpdf tests/source.dot -o tests/source.pdf"
+					 "! dot -Tpdf tests/source.dot -o tests/source.pdf",
 
 					"report_domains",
 

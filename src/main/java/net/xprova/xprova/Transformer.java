@@ -79,8 +79,6 @@ public class Transformer {
 
 		int h2x_adapter_count = 0;
 
-
-
 		for (Vertex vclk : clocks) {
 
 			HashSet<Vertex> flops = graph.getModulesByTypes(defsFF.keySet());
@@ -138,7 +136,7 @@ public class Transformer {
 
 			for (Vertex s : susFlops) {
 
-				Vertex dNet = graph.getNet(s, defsFF.get(s).dPort);
+				Vertex dNet = graph.getNet(s, defsFF.get(s.subtype).dPort);
 
 				Vertex vNet;
 
@@ -265,7 +263,7 @@ public class Transformer {
 								// connect directly to either M or T port
 								// without an adapter
 
-								boolean sameDomain = graph.getNet(s, defsFF.get(s).clkPort) == vclk;
+								boolean sameDomain = graph.getNet(s, defsFF.get(s.subtype).clkPort) == vclk;
 
 								String port = sameDomain ? portM : portT;
 

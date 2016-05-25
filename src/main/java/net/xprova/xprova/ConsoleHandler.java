@@ -48,7 +48,7 @@ public class ConsoleHandler {
 
 		lib = new GateLibrary(libMods);
 
-		out.printf("Loaded %d modules from library from %s\n", libMods.size(), libFile);
+		out.printf("Loaded %d modules from library %s\n", libMods.size(), libFile);
 
 	}
 
