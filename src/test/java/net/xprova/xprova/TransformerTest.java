@@ -35,6 +35,8 @@ public class TransformerTest  {
 
 		defsFF.put("DFFx", new FlipFlop("DFFx", "CK", "RS", "D"));
 
+		defsFF.put("DFFx2", new FlipFlop("DFFx", "CK", "RS", "D"));
+
 	}
 
 	@Test
@@ -73,6 +75,8 @@ public class TransformerTest  {
 
 		assertEquals(t.getClocks().size(), 2);
 
+		assertEquals(graph.getModulesByType("DFF").size(), 5);
+
 		// augment design
 
 		t.transformCDC();
@@ -83,6 +87,12 @@ public class TransformerTest  {
 		assertEquals(graph.getModules().size(), 5);
 
 		assertEquals(graph.getNets().size(), 11);
+
+		assertEquals(graph.getModulesByType("DFF").size(), 2); // flops 1 and 5
+
+		assertEquals(graph.getModulesByType("DFFx2").size(), 1); // flop 2
+
+		assertEquals(graph.getModulesByType("DFFx").size(), 2); // flops 3 and 4
 
 	}
 
@@ -120,6 +130,8 @@ public class TransformerTest  {
 
 		assertEquals(t.getClocks().size(), 2);
 
+		assertEquals(graph.getModulesByType("NOT").size(), 1);
+
 		// augment design
 
 		t.transformCDC();
@@ -129,6 +141,14 @@ public class TransformerTest  {
 		assertEquals(graph.getModules().size(), 7);
 
 		assertEquals(graph.getNets().size(), 13);
+
+		assertEquals(graph.getModulesByType("NOT").size(), 2);
+
+		assertEquals(graph.getModulesByType("DFF").size(), 2); // flops 1 and 5
+
+		assertEquals(graph.getModulesByType("DFFx2").size(), 1); // flop 2
+
+		assertEquals(graph.getModulesByType("DFFx").size(), 2); // flops 3 and 4
 
 	}
 

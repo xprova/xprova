@@ -58,7 +58,7 @@ public class Main {
 
 					 "augment_netlist",
 
-					// "write_verilog tests/augmented.v",
+					 "write_verilog tests/augmented.v",
 
 					"export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,reset,clk1,clk2 " + "--type=fng "
 							+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
