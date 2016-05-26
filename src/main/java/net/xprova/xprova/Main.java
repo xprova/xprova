@@ -58,13 +58,13 @@ public class Main {
 
 					 "augment_netlist",
 
-					 "write_verilog tests/augmented.v",
+					 "write_verilog output/augmented.v",
 
 					"export_dot --ignore-edges=SB,RB,CK --ignore-vertices=U1,resetn,reset,clk1,clk2 " + "--type=fng "
 							+ "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
-							+ "tests/source.dot",
+							+ "output/netlist.dot",
 
-					 "! dot -Tpdf tests/source.dot -o tests/source.pdf",
+					 "! dot -Tpdf output/netlist.dot -o output/netlist.pdf",
 
 					"report_domains",
 
