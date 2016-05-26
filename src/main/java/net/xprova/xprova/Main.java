@@ -42,7 +42,7 @@ public class Main {
 
 		try {
 
-			String cmds[] = { "ll tests/tiny.lib",
+			String cmds[] = { "ll examples/gate_library_mini.v",
 
 					// "set_flops QDFFRSBX1 DFFx",
 
@@ -54,7 +54,7 @@ public class Main {
 
 					"list_ff",
 
-					"read_verilog -m top tests/multiclock.v",
+					"read_verilog -m top examples/simple_2.v",
 
 					 "augment_netlist",
 
