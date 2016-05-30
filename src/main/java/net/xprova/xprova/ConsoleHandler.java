@@ -605,4 +605,18 @@ public class ConsoleHandler {
 
 	}
 
+	@Command
+	public void genCode() throws Exception {
+
+		(new CodeGenerator(graph, out)).generate();
+
+	}
+
+	@Command
+	public void testCode() {
+
+		(new CodeSimulator()).simulate();
+
+	}
+
 }
