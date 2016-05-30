@@ -4,8 +4,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -402,6 +404,8 @@ public class ConsoleHandler {
 
 			defsFF.put(modName, ff);
 
+			out.printf("defined flip-flop <%s>\n", modName);
+
 		}
 
 	}
@@ -509,9 +513,21 @@ public class ConsoleHandler {
 
 		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
 
+		List<Vertex> sortedMods = new ArrayList<Vertex>(graph.getModules());
+
+		Collections.sort(sortedMods, new Comparator<Vertex>() {
+
+			@Override
+			public int compare(Vertex arg0, Vertex arg1) {
+
+				return arg0.name.compareTo(arg1.name);
+			}
+
+		});
+
 		HashMap<String, Integer> modCounts = new HashMap<String, Integer>();
 
-		for (Vertex v : graph.getModules()) {
+		for (Vertex v : sortedMods) {
 
 			if (!ignored.contains(v.name)) {
 
@@ -563,7 +579,19 @@ public class ConsoleHandler {
 
 		nonIO.removeAll(graph.getIONets());
 
-		for (Vertex n : nonIO) {
+		List<Vertex> nonIOList = new ArrayList<Vertex>(nonIO);
+
+		Collections.sort(nonIOList, new Comparator<Vertex>() {
+
+			@Override
+			public int compare(Vertex arg0, Vertex arg1) {
+
+				return arg0.name.compareTo(arg1.name);
+			}
+
+		});
+
+		for (Vertex n : nonIOList) {
 
 			if (!ignored.contains(n.name)) {
 
