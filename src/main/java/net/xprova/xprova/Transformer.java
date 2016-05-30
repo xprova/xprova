@@ -10,7 +10,9 @@ import net.xprova.netlistgraph.VertexType;
 
 public class Transformer {
 
-	private final String portV = "V", dup_suffix = "_dup", portM = "M", portT = "T", modelFF = "DFFx";
+	private static final String model1 = "DFFx", model2 = "DFFx2";
+
+	private static final String portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
 
 	private HashMap<String, FlipFlop> defsFF;
 
@@ -172,7 +174,7 @@ public class Transformer {
 
 				graph.addConnection(vNet, s, portV);
 
-				s.subtype = modelFF;
+				s.subtype = model1;
 
 			}
 
@@ -231,7 +233,7 @@ public class Transformer {
 
 									graph.addConnection(adapterInput, h2x_adapter, "I");
 
-									s.subtype = modelFF;
+									s.subtype = model1;
 
 									xNets.put(s, h2x_adapter);
 
@@ -269,7 +271,7 @@ public class Transformer {
 
 								graph.addConnection(s, dupMap.get(v), port);
 
-								s.subtype = modelFF;
+								s.subtype = model1;
 
 								// System.out
 								// .println("just added connection to port "
@@ -362,7 +364,7 @@ public class Transformer {
 		// if DFFx flop has an m pin connection (it can propagate metastability)
 		// then it must also have an r2 bit
 
-		HashSet<Vertex> DFFxs = graph.getModulesByType(modelFF);
+		HashSet<Vertex> DFFxs = graph.getModulesByType(model1);
 		/*
 		 * graph.addPort("r"); // add port first
 		 *
@@ -401,7 +403,7 @@ public class Transformer {
 
 			if (graph.getNet(flop, portV) == null) {
 
-				flop.subtype = "DFFx2";
+				flop.subtype = model2;
 
 			}
 

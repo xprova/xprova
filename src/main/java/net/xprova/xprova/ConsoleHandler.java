@@ -2,6 +2,7 @@ package net.xprova.xprova;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
@@ -478,6 +480,98 @@ public class ConsoleHandler {
 		for (String p : paths) {
 
 			out.println(p);
+
+		}
+
+	}
+
+	@Command(aliases = { "rename_modules" })
+	public void renameModules(String args[]) throws ParseException {
+
+		// rename modules
+
+		final String modStr = "%s%d";
+
+		// parse input
+
+		Option optIgnore = Option.builder().desc("list of nets to ignore").hasArg().argName("IGNORE_NETS")
+				.required(false).longOpt("ignore").build();
+
+		Options options = new Options();
+
+		options.addOption(optIgnore);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line = parser.parse(options, args);
+
+		String ignoreStr = line.getOptionValue("ignore", "");
+
+		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
+
+		HashMap<String, Integer> modCounts = new HashMap<String, Integer>();
+
+		for (Vertex v : graph.getModules()) {
+
+			if (!ignored.contains(v.name)) {
+
+				String lowerMod = v.subtype.toLowerCase();
+
+				Integer c = modCounts.get(lowerMod);
+
+				c = (c == null) ? 1 : c + 1;
+
+				v.name = String.format(modStr, lowerMod, c);
+
+				modCounts.put(lowerMod, c);
+
+			}
+
+		}
+
+	}
+
+	@Command(aliases = { "rename_nets" })
+	public void renameNets(String args[]) throws ParseException {
+
+		// renames internal (i.e. non-port) nets
+
+		final String netStr = "n%d";
+
+		// parse input
+
+		Option optIgnore = Option.builder().desc("list of nets to ignore").hasArg().argName("IGNORE_NETS")
+				.required(false).longOpt("ignore").build();
+
+		Options options = new Options();
+
+		options.addOption(optIgnore);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line = parser.parse(options, args);
+
+		String ignoreStr = line.getOptionValue("ignore", "");
+
+		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
+
+		// rename nets
+
+		int netCount = 0;
+
+		HashSet<Vertex> nonIO = graph.getNets();
+
+		nonIO.removeAll(graph.getIONets());
+
+		for (Vertex n : nonIO) {
+
+			if (!ignored.contains(n.name)) {
+
+				netCount += 1;
+
+				n.name = String.format(netStr, netCount);
+
+			}
 
 		}
 
