@@ -42,25 +42,7 @@ public class Main {
 
 		try {
 
-			String cmds[] = { "ll examples/gate_library_mini.v",
-
-					"def_ff QDFFRSBX1 CK RS D", "def_ff DFF CK RS D", "def_ff DFFx CK RS D",
-
-					"read_verilog tests/synth.v",
-
-					// "augment_netlist",
-
-					"rename_nets --ignore=clk,rst", "rename_modules", "write_verilog tests/synth_renamed.v",
-
-					"write_verilog output/synth_renamed.v",
-
-					"export_dot " + "--ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst "
-							+ "--type=n " + "--combine=unit2_add_91_U1,unit2_counter_reg,unit2_AC_reg,unit1_data_reg "
-							+ "output/netlist.dot",
-
-					"! dot -Tpdf output/netlist.dot -o output/netlist.pdf",
-
-					};
+			String cmds[] = { ":source tests/go.xp" };
 
 			for (String cmd : cmds) {
 

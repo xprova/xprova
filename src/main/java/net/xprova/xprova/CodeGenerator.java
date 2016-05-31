@@ -117,6 +117,8 @@ public class CodeGenerator {
 
 		Collections.reverse(assigns);
 
+		HashSet<Vertex> stateBits = new HashSet<Vertex>();
+
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
 			Vertex qNet = graph.getNet(v, "Q");
@@ -125,13 +127,31 @@ public class CodeGenerator {
 
 			assigns.add(String.format("%s = %s;", qNet, dNet));
 
+			stateBits.add(qNet);
+
 		}
+
+		HashSet<Vertex> inNets2 = new HashSet<Vertex>(inNets);
+
+		inNets2.removeAll(stateBits);
+
+		for (Vertex ff : graph.getModulesByType("DFF")) {
+
+			inNets2.remove(graph.getNet(ff, "CK"));
+			inNets2.remove(graph.getNet(ff, "RS"));
+
+		}
+
+		// print out
 
 		for (String line : assigns)
 			out.println(line);
 
-		for (Vertex v : inNets)
+		for (Vertex v : stateBits)
 			out.println("// state bit : " + v);
+
+		for (Vertex v : inNets2)
+			out.println("// input bit : " + v);
 
 	}
 }
