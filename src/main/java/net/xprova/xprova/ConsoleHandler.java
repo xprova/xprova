@@ -151,21 +151,6 @@ public class ConsoleHandler {
 		Generator.generateFile(graph, outputVerilogFile);
 	}
 
-	@Command(aliases = { "info" })
-	public void printNetlistInfo() {
-
-		if (graph == null) {
-
-			out.println("No design is currently loaded");
-
-		} else {
-
-			graph.printStats();
-
-		}
-
-	}
-
 	@Command(aliases = { "export_dot" })
 	public void exportDotFile(String[] args) throws Exception {
 
