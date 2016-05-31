@@ -25,45 +25,62 @@ public class CodeGenerator {
 
 	public void generate() throws Exception {
 
-		// outNets are flip-flop input nets (next state)
-		// and output ports
+		// flip-flop q output nets:
+		HashSet<Vertex> qNets = new HashSet<Vertex>();
 
-		// inNets are flip-flop output nets (current state)
-		// and input ports
+		// flip-flop d input nets:
+		HashSet<Vertex> dNets = new HashSet<Vertex>();
 
-		// outNets must be computed based on inNets
+		// netlist inputs:
+		HashSet<Vertex> inpNets = new HashSet<Vertex>();
 
-		HashSet<Vertex> outNets = new HashSet<Vertex>();
+		// netlist outputs:
+		HashSet<Vertex> outpNets = new HashSet<Vertex>();
 
+		// nets that are not input, q or ignored:
+		HashSet<Vertex> internalNets = new HashSet<Vertex>();
+
+		// clk and rst:
+		HashSet<Vertex> ignoreNets = new HashSet<Vertex>();
+
+		// inNets = qNets + inputs:
 		HashSet<Vertex> inNets = new HashSet<Vertex>();
+
+		// populating the above sets
 
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
-			outNets.add(graph.getNet(v, "D"));
+			qNets.add(graph.getNet(v, "Q"));
 
-			inNets.add(graph.getNet(v, "Q"));
+			dNets.add(graph.getNet(v, "D"));
 
-		}
+			ignoreNets.add(graph.getNet(v, "CK"));
 
-		for (Vertex n : graph.getIONets()) {
-
-			if ("input".equals(n.subtype)) {
-
-				inNets.add(n);
-
-			} else if ("output".equals(n.subtype)) {
-
-				outNets.add(n);
-
-			}
+			ignoreNets.add(graph.getNet(v, "RS"));
 
 		}
 
-		outNets.removeAll(inNets);
+		inpNets = graph.getInputs();
+
+		inpNets.removeAll(ignoreNets);
+
+		outpNets = graph.getOutputs();
+
+		internalNets.addAll(graph.getNets());
+		internalNets.removeAll(inpNets);
+		internalNets.removeAll(qNets);
+		internalNets.removeAll(ignoreNets);
+
+		inNets.addAll(qNets);
+		inNets.addAll(graph.getInputs());
+
+		// graph traversal:
 
 		Graph<Vertex> netGraph = graph.reduce(graph.getNets());
 
-		HashSet<Vertex> toVisit = new HashSet<Vertex>(outNets);
+		HashSet<Vertex> toVisit = new HashSet<Vertex>();
+		toVisit.addAll(dNets);
+		toVisit.addAll(outpNets);
 
 		HashSet<Vertex> visited = new HashSet<Vertex>();
 
@@ -79,21 +96,28 @@ public class CodeGenerator {
 
 				String line = "// ??";
 
+				if ("DFF".equals(driver.subtype))
+					continue;
+
 				if ("AND".equals(driver.subtype)) {
 
-					line = String.format("%s = %s & %s;", n.name, inputs.get(0).name, inputs.get(1).name);
+					String in1 = inNets.contains(inputs.get(0)) ? inputs.get(0).name + "[i-1]" : inputs.get(0).name;
+					String in2 = inNets.contains(inputs.get(1)) ? inputs.get(1).name + "[i-1]" : inputs.get(1).name;
+
+					line = String.format("%s = %s & %s;", n.name, in1, in2);
 
 				} else if ("OR".equals(driver.subtype)) {
 
-					line = String.format("%s = %s | %s;", n.name, inputs.get(0).name, inputs.get(1).name);
+					String in1 = inNets.contains(inputs.get(0)) ? inputs.get(0).name + "[i-1]" : inputs.get(0).name;
+					String in2 = inNets.contains(inputs.get(1)) ? inputs.get(1).name + "[i-1]" : inputs.get(1).name;
+
+					line = String.format("%s = %s | %s;", n.name, in1, in2);
 
 				} else if ("NOT".equals(driver.subtype)) {
 
-					line = String.format("%s = !%s;", n.name, inputs.get(0).name);
+					String in1 = inNets.contains(inputs.get(0)) ? inputs.get(0).name + "[i-1]" : inputs.get(0).name;
 
-				} else if ("DFF".equals(driver.subtype)) {
-
-					line = String.format("%s = %s;", n.name, driver.name);
+					line = String.format("%s = !%s;", n.name, in1);
 
 				} else {
 
@@ -117,41 +141,45 @@ public class CodeGenerator {
 
 		Collections.reverse(assigns);
 
-		HashSet<Vertex> stateBits = new HashSet<Vertex>();
-
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
 			Vertex qNet = graph.getNet(v, "Q");
 
 			Vertex dNet = graph.getNet(v, "D");
 
-			assigns.add(String.format("%s = %s;", qNet, dNet));
-
-			stateBits.add(qNet);
-
-		}
-
-		HashSet<Vertex> inNets2 = new HashSet<Vertex>(inNets);
-
-		inNets2.removeAll(stateBits);
-
-		for (Vertex ff : graph.getModulesByType("DFF")) {
-
-			inNets2.remove(graph.getNet(ff, "CK"));
-			inNets2.remove(graph.getNet(ff, "RS"));
+			assigns.add(String.format("%s[i] = %s;", qNet, dNet));
 
 		}
 
 		// print out
 
+		ArrayList<String> list1 = new ArrayList<String>();
+
+		for (Vertex v : inpNets)
+			list1.add("boolean[] " + v.name);
+
+		for (Vertex v : qNets)
+			list1.add("boolean[] " + v.name);
+
+		Collections.sort(list1);
+
+		String inputList = String.join(", ", list1);
+
+		out.printf("private void simulate(%s, int cycles) {\n\n", inputList);
+
+		for (Vertex v : internalNets)
+			out.printf("\tboolean %s;\n", v);
+
+		out.println();
+
+		out.println("\tfor (int i=1; i<=cycles; i++) {\n");
+
 		for (String line : assigns)
-			out.println(line);
+			out.printf("\t\t%s\n", line);
 
-		for (Vertex v : stateBits)
-			out.println("// state bit : " + v);
+		out.println("\n\t}");
 
-		for (Vertex v : inNets2)
-			out.println("// input bit : " + v);
+		out.println("}");
 
 	}
 }
