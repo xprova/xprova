@@ -604,4 +604,29 @@ public class ConsoleHandler {
 
 	}
 
+	@Command
+	public void ungroupNets(String netNameFormat) {
+
+		for (Vertex v : graph.getNets()) {
+
+			int k1 = v.name.indexOf("[");
+			int k2 = v.name.indexOf("]");
+
+			String name = v.name;
+
+			int bit = 0;
+
+			if (k1 != -1 && k2 != -1) {
+
+				name = v.name.substring(0, k1);
+
+				bit = Integer.valueOf(v.name.substring(k1 + 1, k2));
+
+				v.name  = String.format(netNameFormat, name, bit);
+			}
+
+		}
+
+	}
+
 }
