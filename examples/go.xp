@@ -1,0 +1,34 @@
+ll examples/gate_library_mini.v
+
+print
+
+def_ff QDFFRSBX1 CK RS D
+def_ff DFF CK RS D
+def_ff DFFx CK RS D
+
+print
+
+read_verilog tests/synth.v
+
+# augment_netlist
+
+rename_nets --ignore=clk,rst
+
+rename_modules
+
+# write_verilog output/synth_renamed.v
+
+ungroupNets %s_%d_
+
+print
+
+#genCode
+
+print
+
+testCode
+
+#export_dot --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst --type=n output/netlist.dot
+
+#! dot -Tpdf output/netlist.dot -o output/netlist.pdf
+

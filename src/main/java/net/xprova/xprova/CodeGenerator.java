@@ -2,8 +2,9 @@ package net.xprova.xprova;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Stack;
+import java.util.TreeSet;
 
 import net.xprova.graph.Graph;
 import net.xprova.netlistgraph.NetlistGraph;
@@ -26,19 +27,19 @@ public class CodeGenerator {
 	public void generate() throws Exception {
 
 		// flip-flop q output nets:
-		HashSet<Vertex> qNets = new HashSet<Vertex>();
+		TreeSet<Vertex> qNets = new TreeSet<Vertex>();
 
 		// flip-flop d input nets:
 		HashSet<Vertex> dNets = new HashSet<Vertex>();
 
 		// netlist inputs:
-		HashSet<Vertex> inpNets = new HashSet<Vertex>();
+		TreeSet<Vertex> inpNets = new TreeSet<Vertex>();
 
 		// netlist outputs:
 		HashSet<Vertex> outpNets = new HashSet<Vertex>();
 
 		// nets that are not input, q or ignored:
-		HashSet<Vertex> internalNets = new HashSet<Vertex>();
+		TreeSet<Vertex> internalNets = new TreeSet<Vertex>();
 
 		// clk and rst:
 		HashSet<Vertex> ignoreNets = new HashSet<Vertex>();
@@ -60,7 +61,7 @@ public class CodeGenerator {
 
 		}
 
-		inpNets = graph.getInputs();
+		inpNets = new TreeSet<Vertex>(graph.getInputs());
 
 		inpNets.removeAll(ignoreNets);
 
@@ -84,7 +85,7 @@ public class CodeGenerator {
 
 		HashSet<Vertex> visited = new HashSet<Vertex>();
 
-		ArrayList<String> assigns = new ArrayList<String>();
+		Stack<String> assigns = new Stack<String>();
 
 		while (!toVisit.isEmpty()) {
 
@@ -101,23 +102,15 @@ public class CodeGenerator {
 
 				if ("AND".equals(driver.subtype)) {
 
-					String in1 = inNets.contains(inputs.get(0)) ? inputs.get(0).name + "[i-1]" : inputs.get(0).name;
-					String in2 = inNets.contains(inputs.get(1)) ? inputs.get(1).name + "[i-1]" : inputs.get(1).name;
-
-					line = String.format("%s = %s & %s;", n.name, in1, in2);
+					line = String.format("%s[i] = %s[i] & %s[i];", n, inputs.get(0), inputs.get(1));
 
 				} else if ("OR".equals(driver.subtype)) {
 
-					String in1 = inNets.contains(inputs.get(0)) ? inputs.get(0).name + "[i-1]" : inputs.get(0).name;
-					String in2 = inNets.contains(inputs.get(1)) ? inputs.get(1).name + "[i-1]" : inputs.get(1).name;
-
-					line = String.format("%s = %s | %s;", n.name, in1, in2);
+					line = String.format("%s[i] = %s[i] | %s[i];", n, inputs.get(0), inputs.get(1));
 
 				} else if ("NOT".equals(driver.subtype)) {
 
-					String in1 = inNets.contains(inputs.get(0)) ? inputs.get(0).name + "[i-1]" : inputs.get(0).name;
-
-					line = String.format("%s = !%s;", n.name, in1);
+					line = String.format("%s[i] = ~%s[i];", n, inputs.get(0));
 
 				} else {
 
@@ -139,7 +132,7 @@ public class CodeGenerator {
 
 		}
 
-		Collections.reverse(assigns);
+		ArrayList<String> flopAssigns = new ArrayList<String>();
 
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
@@ -147,39 +140,120 @@ public class CodeGenerator {
 
 			Vertex dNet = graph.getNet(v, "D");
 
-			assigns.add(String.format("%s[i] = %s;", qNet, dNet));
+			flopAssigns.add(String.format("%s[i+1] = %s[i];", qNet, dNet));
 
 		}
 
 		// print out
 
-		ArrayList<String> list1 = new ArrayList<String>();
+		String strHeader = "public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {\n";
 
-		for (Vertex v : inpNets)
-			list1.add("boolean[] " + v.name);
+		out.println(strHeader);
 
 		for (Vertex v : qNets)
-			list1.add("boolean[] " + v.name);
-
-		Collections.sort(list1);
-
-		String inputList = String.join(", ", list1);
-
-		out.printf("private void simulate(%s, int cycles) {\n\n", inputList);
-
-		for (Vertex v : internalNets)
-			out.printf("\tboolean %s;\n", v);
+			out.printf("\tint[] %s = new int[cycles];\n", v);
 
 		out.println();
 
-		out.println("\tfor (int i=1; i<=cycles; i++) {\n");
+		for (Vertex v : qNets)
+			out.printf("\t%s[0] = initial[%d];\n", v, qNets.headSet(v).size());
 
-		for (String line : assigns)
-			out.printf("\t\t%s\n", line);
+		out.println();
 
-		out.println("\n\t}");
+		for (Vertex v : inpNets)
+			out.printf("\tint %s[] = inputs.get(%d);\n", v, inpNets.headSet(v).size());
+
+		out.println();
+
+		for (Vertex v : internalNets)
+			out.printf("\tint[] %s = new int[cycles];\n", v);
+
+		out.println();
+
+		out.println("\tfor (int i=0; i<cycles; i++) {\n");
+
+		while (!assigns.isEmpty())
+			out.printf("\t\t%s\n", assigns.pop());
+
+		out.println();
+
+		out.println("\t\tif (i < cycles-1) {\n");
+
+		for (String line : flopAssigns)
+			out.printf("\t\t\t%s\n", line);
+
+		out.println("\t\t}\n");
+
+		out.println("\t}\n");
+
+		out.println("\tArrayList<int[]> waveforms = new ArrayList<int[]>();\n");
+
+		for (Vertex v : qNets)
+			out.printf("\twaveforms.add(%s);\n", v);
+
+		out.println();
+
+		for (Vertex v : inpNets)
+			out.printf("\twaveforms.add(%s);\n", v);
+
+		out.println();
+
+		for (Vertex v : internalNets)
+			out.printf("\twaveforms.add(%s);\n", v);
+
+		out.println();
+
+		out.println("\treturn waveforms;");
+
+		out.println("}");
+
+		//
+
+		out.println();
+
+		out.println("public ArrayList<String> getSignalNames() {\n");
+
+		out.println("\tArrayList<String> result = new ArrayList<String>();\n");
+
+		for (Vertex v : qNets)
+			out.printf("\tresult.add(\"%s\");\n", v);
+
+		out.println();
+
+		for (Vertex v : inpNets)
+			out.printf("\tresult.add(\"%s\");\n", v);
+
+		out.println();
+
+		for (Vertex v : internalNets)
+			out.printf("\tresult.add(\"%s\");\n", v);
+
+		out.println();
+
+		out.println("\treturn result;");
+
+		out.println("}");
+
+		//
+
+		out.println();
+
+		out.println("public int getStateBitCount() {\n");
+
+		out.printf("\treturn %d;\n", qNets.size());
+
+		out.println("}");
+
+		//
+
+		out.println();
+
+		out.println("public int getInputBitCount() {\n");
+
+		out.printf("\treturn %d;\n", inpNets.size());
 
 		out.println("}");
 
 	}
+
 }

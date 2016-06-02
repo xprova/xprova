@@ -42,7 +42,7 @@ public class Main {
 
 		try {
 
-			String cmds[] = { ":source tests/go.xp" };
+			String cmds[] = { ":source examples/go.xp" };
 
 			for (String cmd : cmds) {
 

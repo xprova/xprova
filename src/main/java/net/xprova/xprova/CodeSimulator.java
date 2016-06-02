@@ -1,51 +1,52 @@
 package net.xprova.xprova;
 
+import java.util.ArrayList;
+
 public class CodeSimulator {
-
-	private void simulate1(boolean[] count_0_, boolean[] count_1_, boolean[] ena, int cycles) {
-
-		boolean n4;
-		boolean n1;
-		boolean n8;
-		boolean n6;
-		boolean n5;
-		boolean n3;
-		boolean n2;
-		boolean n7;
-
-		for (int i = 1; i <= cycles; i++) {
-
-			n7 = !count_1_[i - 1];
-			n5 = !ena[i - 1];
-			n6 = n5 & count_0_[i - 1];
-			n8 = ena[i - 1] & n7;
-			n4 = ena[i - 1] & count_0_[i - 1];
-			n3 = n5 & count_1_[i - 1];
-			n1 = n8 | n6;
-			n2 = n3 | n4;
-			count_0_[i] = n1;
-			count_1_[i] = n2;
-
-		}
-	}
 
 	public void simulate() {
 
-		boolean[] count_0_ = new boolean[20];
-		boolean[] count_1_ = new boolean[20];
-		boolean[] ena = { false, false, true, false, false, true, false, true, false, false };
+		GrayCounter gray1 = new GrayCounter();
+
+		int[] initial = { 0, 0 };
+
+		ArrayList<String> sigNames = gray1.getSignalNames();
+
+		int[] ena = { -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0 };
+
+		ArrayList<int[]> inputs = new ArrayList<int[]>();
+
+		inputs.add(ena);
 
 		int cycles = ena.length;
 
-		simulate1(count_0_, count_1_, ena, cycles);
+		ArrayList<int[]> results = gray1.simulate(initial, inputs, cycles);
 
-		for (int i = 0; i < cycles; i++) {
+		System.out.printf("%10s : ", "Cycle");
 
-			String enaStr = ena[i] ? "1" : "0";
-			String c0Str = count_0_[i] ? "1" : "0";
-			String c1Str = count_1_[i] ? "1" : "0";
+		for (int i = 0; i < cycles; i++)
+			System.out.printf("%d", i % 10);
 
-			System.out.println("tick " + i + ", count = " + c0Str + c1Str + ", ena = " + enaStr);
+		System.out.println();
+
+		System.out.println();
+
+		for (int j = 0; j < results.size(); j++) {
+
+			if (j == gray1.getStateBitCount())
+				System.out.println();
+
+			int[] sig = results.get(j);
+
+			System.out.printf("%10s : ", sigNames.get(j));
+
+			for (int i = 0; i < cycles; i++) {
+
+				System.out.printf((sig[i] == -1) ? "1" : "0");
+
+			}
+
+			System.out.println();
 
 		}
 
