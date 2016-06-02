@@ -8,7 +8,7 @@ def_ff DFFx CK RS D
 
 print
 
-read_verilog tests/synth.v
+read_verilog examples/gray_synth.v
 
 # augment_netlist
 
