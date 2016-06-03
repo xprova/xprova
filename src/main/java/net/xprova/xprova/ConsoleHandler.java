@@ -608,7 +608,7 @@ public class ConsoleHandler {
 	@Command
 	public void testCode() throws Exception {
 
-		(new CodeSimulator()).exploreSpace();
+		(new CodeSimulator()).simulate();
 
 	}
 

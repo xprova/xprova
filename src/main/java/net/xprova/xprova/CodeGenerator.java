@@ -82,14 +82,19 @@ public class CodeGenerator {
 		HashSet<Vertex> toVisit = new HashSet<Vertex>();
 		toVisit.addAll(dNets);
 		toVisit.addAll(outpNets);
+		toVisit.removeAll(graph.getInputs());
 
 		HashSet<Vertex> visited = new HashSet<Vertex>();
 
 		Stack<String> assigns = new Stack<String>();
 
+		HashSet<Vertex> graphInputs = graph.getInputs();
+
 		while (!toVisit.isEmpty()) {
 
 			for (Vertex n : toVisit) {
+
+				System.out.println(n);
 
 				Vertex driver = graph.getSourceModule(n);
 
@@ -129,6 +134,8 @@ public class CodeGenerator {
 			toVisit.removeAll(inNets);
 
 			toVisit.removeAll(visited);
+
+			toVisit.removeAll(graphInputs);
 
 		}
 

@@ -1,8 +1,10 @@
-module top (clk, rst, ena, count);
+module top (clk, rst, ena, count, valid);
 
 	input clk, rst, ena;
 	
 	output [3:0] count;
+	
+	output valid;
 	
 	reg [3:0] count;
 	
@@ -20,43 +22,18 @@ module top (clk, rst, ena, count);
 	
 	end
 	
-	assertion1 u1 (clk, rst, count, ena, valid);
+	// assertion logic
 	
-endmodule
-
-
-
-module assertion1 (clk, rst, count, ena, valid);
-
-	// assert property (ena |=> (count<5));
-
-	input [3:0] count;
+	reg ena_old;
 	
-	input clk, rst, ena;
-	
-	output valid;
-	
-	wire ena_old;
-	
-	myflop u1 (.CK(clk), .RS(rst), .D(ena), .Q(ena_old));
+	always @(posedge clk or posedge rst) begin
+		if (rst) begin
+			ena_old <= 0;
+		end else begin
+			ena_old <= ena;
+		end
+	end
 	
 	assign valid = (ena_old == 1) && (count<5);
 	
-endmodule
-
-
-
-module myflop (CK, RS, D, Q);
-
-	input CK, RS, D;
-	output Q;
-	
-	always @(posedge CK or posedge RS) begin
-		if (RS) begin
-			Q <= 0;
-		end else begin
-			Q <= D;
-		end
-	end
-
 endmodule

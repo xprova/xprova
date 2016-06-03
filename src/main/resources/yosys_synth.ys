@@ -25,4 +25,4 @@ clean
 write_verilog %SYNTH_FILE%
 
 # remove log file
-!rm abc.history
+#!rm abc.history

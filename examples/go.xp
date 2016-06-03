@@ -8,9 +8,9 @@ def_ff DFFx CK RS D
 
 print
 
-synth_verilog examples/graycounter.v output/synth.v
+synth_verilog examples/assertion-test.v output/synth.v
 
-read_verilog output/synth.v
+read_verilog -m top output/synth.v
 
 # augment_netlist
 
@@ -18,7 +18,7 @@ rename_nets --ignore=clk,rst
 
 rename_modules
 
-# write_verilog output/synth_renamed.v
+write_verilog output/synth_renamed.v
 
 ungroupNets %s_%d_
 
@@ -30,9 +30,9 @@ print
 
 testCode
 
-#export_dot --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst --type=n output/netlist.dot
+export_dot --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst --type=n output/netlist.dot
 
-#! dot -Tpdf output/netlist.dot -o output/netlist.pdf
+! dot -Tpdf output/netlist.dot -o output/netlist.pdf
 
-! dot -Tpdf output/state.dot -o output/state.pdf
+#! dot -Tpdf output/state.dot -o output/state.pdf
 
