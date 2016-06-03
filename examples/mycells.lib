@@ -1,0 +1,38 @@
+library(demo) {
+  cell(NOT) {
+    area: 3;
+    pin(y) { direction: output;
+              function: "a'"; }
+    pin(a) { direction: input; }
+  }
+  cell(AND) {
+    area: 4;
+    pin(y) { direction: output;
+             function: "(a*b)"; }
+    pin(a) { direction: input; }
+    pin(b) { direction: input; }
+
+  }
+  cell(OR) {
+    area: 4;
+    pin(y) { direction: output;
+             function: "(a+b)"; }
+    pin(a) { direction: input; }
+    pin(b) { direction: input; }
+
+  }
+  cell(DFF) {
+    area: 18;
+    ff(IQ, IQN) { clocked_on: CK;
+                  next_state: D;
+                  clear : RS ;
+                   }
+    pin(RS) { direction: input;
+                 }
+    pin(CK) { direction: input;
+                 clock: true; }
+    pin(D) { direction: input; }
+    pin(Q) { direction: output;
+              function: "IQ"; }
+  }
+}
