@@ -8,7 +8,9 @@ def_ff DFFx CK RS D
 
 print
 
-read_verilog examples/graycounter2_synth.v
+synth_verilog examples/graycounter.v output/synth.v
+
+read_verilog output/synth.v
 
 # augment_netlist
 

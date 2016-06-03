@@ -1,8 +1,8 @@
 # read design
-read_verilog graycounter2.v
+read_verilog %BEHAV_FILE%
 
 # elaborate design hierarchy
-hierarchy -check -top graycounter2
+hierarchy -check %TOP%
 
 # the high-level stuff
 proc; opt; fsm; opt; memory; opt
@@ -10,17 +10,17 @@ proc; opt; fsm; opt; memory; opt
 # mapping to internal cell library
 techmap; opt
 
-# mapping flip-flops to mycells.lib
-dfflibmap -liberty mycells.lib
+# mapping flip-flops
+dfflibmap -liberty %CELL_LIB%
 
-# mapping logic to mycells.lib
-abc -liberty mycells.lib
+# mapping logic
+abc -liberty %CELL_LIB%
 
 # cleanup
 clean
 
 # write synthesized design
-write_verilog graycounter2_synth.v
+write_verilog %SYNTH_FILE%
 
 # remove log file
 !rm abc.history
