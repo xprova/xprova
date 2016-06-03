@@ -7,6 +7,8 @@ hierarchy -check %TOP%
 # the high-level stuff
 proc; opt; fsm; opt; memory; opt
 
+flatten
+
 # mapping to internal cell library
 techmap; opt
 
