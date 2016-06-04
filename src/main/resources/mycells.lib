@@ -13,6 +13,14 @@ library(demo) {
     pin(b) { direction: input; }
 
   }
+  cell(NAND) {
+    area: 4;
+    pin(y) { direction: output;
+             function: "(a*b)'"; }
+    pin(a) { direction: input; }
+    pin(b) { direction: input; }
+
+  }  
   cell(OR) {
     area: 4;
     pin(y) { direction: output;
@@ -21,6 +29,22 @@ library(demo) {
     pin(b) { direction: input; }
 
   }
+  cell(NOR) {
+    area: 4;
+    pin(y) { direction: output;
+             function: "(a+b)'"; }
+    pin(a) { direction: input; }
+    pin(b) { direction: input; }
+
+  }  
+  cell(XOR) {
+    area: 4;
+    pin(y) { direction: output;
+             function: "(a^b)"; }
+    pin(a) { direction: input; }
+    pin(b) { direction: input; }
+
+  }    
   cell(DFF) {
     area: 18;
     ff(IQ, IQN) { clocked_on: CK;

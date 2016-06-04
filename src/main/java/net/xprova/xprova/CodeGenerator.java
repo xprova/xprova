@@ -109,13 +109,25 @@ public class CodeGenerator {
 
 					line = String.format("%s[i] = %s[i] & %s[i];", n, inputs.get(0), inputs.get(1));
 
+				} else if ("NAND".equals(driver.subtype)) {
+
+					line = String.format("%s[i] = ~(%s[i] & %s[i]);", n, inputs.get(0), inputs.get(1));
+
 				} else if ("OR".equals(driver.subtype)) {
 
 					line = String.format("%s[i] = %s[i] | %s[i];", n, inputs.get(0), inputs.get(1));
 
+				} else if ("NOR".equals(driver.subtype)) {
+
+					line = String.format("%s[i] = ~(%s[i] | %s[i]);", n, inputs.get(0), inputs.get(1));
+
 				} else if ("NOT".equals(driver.subtype)) {
 
 					line = String.format("%s[i] = ~%s[i];", n, inputs.get(0));
+
+				} else if ("XOR".equals(driver.subtype)) {
+
+					line = String.format("%s[i] = (%s[i] ^ %s[i]);", n, inputs.get(0), inputs.get(1));
 
 				} else {
 

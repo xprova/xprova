@@ -107,7 +107,7 @@ public class CodeSimulator {
 
 		ArrayList<String> sigNames = gray1.getSignalNames();
 
-		int[] ena = { -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0 };
+		int[] ena = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0 };
 
 		ArrayList<int[]> inputs = new ArrayList<int[]>();
 

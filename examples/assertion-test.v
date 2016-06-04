@@ -34,6 +34,8 @@ module top (clk, rst, ena, count, valid);
 		end
 	end
 	
-	assign valid = (ena_old == 1) && (count<5);
+	// (x -> y) == (~x V y)
+	
+	assign valid = (ena_old == 0) || (count<5);
 	
 endmodule
