@@ -11,12 +11,14 @@ public class CodeSimulator {
 
 	public void exploreSpace() throws Exception {
 
+		// int {STATE_BIT} = 0;
 		int count_0_ = 0;
 		int count_1_ = 0;
 		int count_2_ = 0;
 		int count_3_ = 0;
 		int n15 = 0;
 
+		// int {NON_STATE_BIT};
 		int n1;
 		int n2;
 		int n3;
@@ -43,6 +45,7 @@ public class CodeSimulator {
 
 			for (Integer state : toVisit) {
 
+				// {STATE_BIT} = (state >> {STATE_BIT_INDEX}) & 1;
 				count_0_ = (state >> 0) & 1;
 				count_1_ = (state >> 1) & 1;
 				count_2_ = (state >> 2) & 1;
@@ -53,8 +56,10 @@ public class CodeSimulator {
 
 				stateGraph.addVertex(s1);
 
+				// for (int {INPUT_BIT} : vals) {
 				for (int ena : vals) {
 
+					// {NON_STATE_EQNS}
 					n12 = count_1_ | count_0_;
 					n13 = count_2_ & n12;
 					n5 = ~ena;
@@ -71,6 +76,7 @@ public class CodeSimulator {
 					n4 = (count_3_ ^ n11);
 					valid = ~(n15 & n14);
 
+					// {STATE_EQNS}
 					int next_count_3_ = n4;
 					int next_count_1_ = n2;
 					int next_n15 = ena;

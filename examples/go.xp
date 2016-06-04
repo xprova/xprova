@@ -24,11 +24,11 @@ ungroupNets %s_%d_
 
 print
 
-# genCode
+genCode
 
 print
 
-testCode
+#testCode
 
 export_dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
