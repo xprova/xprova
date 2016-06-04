@@ -30,8 +30,8 @@ print
 
 testCode
 
-export_dot --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst --type=fn output/netlist.dot
+export_dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
 ! dot -Tpdf output/netlist.dot -o output/netlist.pdf
 
-#! dot -Tpdf output/state.dot -o output/state.pdf
+! dot -Tpdf output/state.dot -o output/state.pdf

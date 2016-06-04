@@ -13,6 +13,109 @@ public class CodeSimulator {
 
 		int count_0_ = 0;
 		int count_1_ = 0;
+		int count_2_ = 0;
+		int count_3_ = 0;
+		int n15 = 0;
+
+		int n1;
+		int n2;
+		int n3;
+		int n4;
+		int n5;
+		int n6;
+		int n7;
+		int n8;
+		int n9, n10, n11, n12, n13, n14, valid;
+
+		int[] vals = { 0, -1 };
+
+		Graph<String> stateGraph = new Graph<String>();
+
+		HashSet<Integer> toVisit = new HashSet<Integer>();
+
+		HashSet<Integer> visited = new HashSet<Integer>();
+
+		toVisit.add(0);
+
+		while (!toVisit.isEmpty()) {
+
+			HashSet<Integer> toVisitNext = new HashSet<Integer>();
+
+			for (Integer state : toVisit) {
+
+				count_0_ = (state >> 0) & 1;
+				count_1_ = (state >> 1) & 1;
+				count_2_ = (state >> 2) & 1;
+				count_3_ = (state >> 3) & 1;
+				n15 = (state >> 4) & 1;
+
+				String s1 = String.format("%5s", Integer.toBinaryString(state)).replace(' ', '0');
+
+				stateGraph.addVertex(s1);
+
+				for (int ena : vals) {
+
+					n12 = count_1_ | count_0_;
+					n13 = count_2_ & n12;
+					n5 = ~ena;
+					n6 = (count_1_ ^ count_0_);
+					n9 = ~(count_1_ & count_0_);
+					n7 = ~(n6 | n5);
+					n10 = ~(n9 | n5);
+					n11 = count_2_ & n10;
+					n14 = count_3_ | n13;
+					n8 = ~(count_1_ | ena);
+					n1 = (count_0_ ^ ena);
+					n3 = (count_2_ ^ n10);
+					n2 = ~(n8 | n7);
+					n4 = (count_3_ ^ n11);
+					valid = ~(n15 & n14);
+
+					int next_count_3_ = n4;
+					int next_count_1_ = n2;
+					int next_n15 = ena;
+					int next_count_2_ = n3;
+					int next_count_0_ = n1;
+
+					int next_state = 0;
+					next_state += (next_count_0_ & 1) << 0;
+					next_state += (next_count_1_ & 1) << 1;
+					next_state += (next_count_2_ & 1) << 2;
+					next_state += (next_count_3_ & 1) << 3;
+					next_state += (next_n15 & 1) << 4;
+
+					toVisitNext.add(next_state);
+
+					String s2 = String.format("%5s", Integer.toBinaryString(next_state)).replace(' ', '0');
+
+					System.out.printf("discovered %s (valid = %d) -> %s  by ena = %d\n", s1, valid == -1 ? 1 : 0, s2,
+							ena == -1 ? 1 : 0);
+
+					stateGraph.addVertex(s2);
+
+					stateGraph.addConnection(s1, s2);
+
+				}
+
+			}
+
+			visited.addAll(toVisit);
+
+			toVisitNext.removeAll(visited);
+
+			toVisit = toVisitNext;
+
+		}
+
+		GraphDotPrinter.printGraph("output/state.dot", stateGraph, new GraphDotFormatter<String>(),
+				stateGraph.getVertices());
+
+	}
+
+	public void exploreSpace2() throws Exception {
+
+		int count_0_ = 0;
+		int count_1_ = 0;
 
 		// int ena;
 
