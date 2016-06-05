@@ -1,17 +1,22 @@
 public void exploreSpace() throws Exception {
 
+	//@formatter:off
 	// int stateBitCount = {STATE_BIT_COUNT};
 	int stateBitCount = 5; // {EXPANDED}
 	// int inputBitCount = {INPUT_BIT_COUNT};
 	int inputBitCount = 2; // {EXPANDED}
+	//@formatter:on
 
+	//@formatter:off
 	// int {STATE_BIT} = 0;
 	int count_0_ = 0; // {EXPANDED}
 	int count_1_ = 0; // {EXPANDED}
 	int count_2_ = 0; // {EXPANDED}
 	int count_3_ = 0; // {EXPANDED}
 	int n26 = 0; // {EXPANDED}
+	//@formatter:on
 
+	//@formatter:off
 	// int {NON_STATE_BIT};
 	int n1; // {EXPANDED}
 	int n10; // {EXPANDED}
@@ -39,6 +44,7 @@ public void exploreSpace() throws Exception {
 	int n8; // {EXPANDED}
 	int n9; // {EXPANDED}
 	int valid; // {EXPANDED}
+	//@formatter:on
 
 	Graph<Integer> stateGraph = new Graph<Integer>();
 
@@ -66,12 +72,14 @@ public void exploreSpace() throws Exception {
 
 		for (Integer state : toVisit) {
 
+			//@formatter:off
 			// {STATE_BIT} = (state >> {STATE_BIT_INDEX} & 1) * -1;
 			count_0_ = (state >> 0 & 1) * -1; // {EXPANDED}
 			count_1_ = (state >> 1 & 1) * -1; // {EXPANDED}
 			count_2_ = (state >> 2 & 1) * -1; // {EXPANDED}
 			count_3_ = (state >> 3 & 1) * -1; // {EXPANDED}
 			n26 = (state >> 4 & 1) * -1; // {EXPANDED}
+			//@formatter:on
 
 			String stateBin = getBinary(state, stateBitCount);
 
@@ -81,8 +89,13 @@ public void exploreSpace() throws Exception {
 
 			for (int in = 0; in < inputPermutes; in++) {
 
+				//@formatter:off
 				// int {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
+				int ena1 = -(in >> 0 & 1); // {EXPANDED}
+				int ena2 = -(in >> 1 & 1); // {EXPANDED}
+				//@formatter:on
 
+				//@formatter:off
 				// {COMB_ASSIGN}
 				n19 = ~(count_0_ & count_1_); // {EXPANDED}
 				n6 = ~(count_3_ | count_1_); // {EXPANDED}
@@ -110,28 +123,35 @@ public void exploreSpace() throws Exception {
 				n2 = ~(n18 & n15); // {EXPANDED}
 				n4 = ~(n25 & n21); // {EXPANDED}
 				n3 = (n20 ^ count_2_); // {EXPANDED}
+				//@formatter:on
 
+				//@formatter:off
 				// {STATE_ASSIGN} {PREFIX1=int next_}
 				int next_count_0_ = n1; // {EXPANDED}
 				int next_count_1_ = n2; // {EXPANDED}
 				int next_count_2_ = n3; // {EXPANDED}
 				int next_count_3_ = n4; // {EXPANDED}
 				int next_n26 = ena1; // {EXPANDED}
+				//@formatter:on
 
 				int nxState = 0;
 
+				//@formatter:off
 				// nxState += (next_{STATE_BIT} & 1) << {STATE_BIT_INDEX};
 				nxState += (next_count_0_ & 1) << 0; // {EXPANDED}
 				nxState += (next_count_1_ & 1) << 1; // {EXPANDED}
 				nxState += (next_count_2_ & 1) << 2; // {EXPANDED}
 				nxState += (next_count_3_ & 1) << 3; // {EXPANDED}
 				nxState += (next_n26 & 1) << 4; // {EXPANDED}
+				//@formatter:on
 
 				int inputVector = 0;
 
+				//@formatter:off
 				// inputVector += ({INPUT_BIT} & 1) << {INPUT_BIT_INDEX};
 				inputVector += (ena1 & 1) << 0; // {EXPANDED}
 				inputVector += (ena2 & 1) << 1; // {EXPANDED}
+				//@formatter:on
 
 				toVisitNext.add(nxState);
 
