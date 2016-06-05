@@ -43,6 +43,8 @@ public class CodeGenerator {
 
 		populateStructures();
 
+		String expandComment = " // {EXPANDED}";
+
 		String[] arr = templateCode.split("(\r)?(\n)");
 
 		ArrayList<String> lines = new ArrayList<String>();
@@ -52,6 +54,8 @@ public class CodeGenerator {
 			boolean isComment = s.trim().startsWith("//");
 
 			if (isComment) {
+
+				lines.add(s);
 
 				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}")) {
 
@@ -66,6 +70,8 @@ public class CodeGenerator {
 						si = si.replace("{STATE_BIT}", v.toString());
 
 						si = si.replace("{STATE_BIT_INDEX}", Integer.toString(ind));
+
+						si += expandComment;
 
 						lines.add(si);
 
@@ -87,6 +93,8 @@ public class CodeGenerator {
 
 						si = si.replace("{NON_STATE_BIT_INDEX}", Integer.toString(ind));
 
+						si += expandComment;
+
 						lines.add(si);
 
 						ind = ind + 1;
@@ -107,6 +115,8 @@ public class CodeGenerator {
 
 						si = si.replace("{INPUT_BIT_INDEX}", Integer.toString(ind));
 
+						si += expandComment;
+
 						lines.add(si);
 
 						ind = ind + 1;
@@ -120,14 +130,17 @@ public class CodeGenerator {
 					String regexPos1 = "\\{POSTFIX1=([^\\}.]+)\\}";
 					String regexPos2 = "\\{POSTFIX2=([^\\}.]+)\\}";
 					String regexPre1 = "\\{PREFIX1=([^\\}.]+)\\}";
+					String regexPre2 = "\\{PREFIX2=([^\\}.]+)\\}";
 
 					Matcher m1 = Pattern.compile(regexPos1).matcher(s);
 					Matcher m2 = Pattern.compile(regexPos2).matcher(s);
 					Matcher m3 = Pattern.compile(regexPre1).matcher(s);
+					Matcher m4 = Pattern.compile(regexPre2).matcher(s);
 
 					String postfix1 = m1.find() ? m1.group(1) : "";
 					String postfix2 = m2.find() ? m2.group(1) : "";
 					String prefix1 = m3.find() ? m3.group(1) : "";
+					String prefix2 = m4.find() ? m4.group(1) : "";
 
 					for (String a : assigns) {
 
@@ -136,6 +149,9 @@ public class CodeGenerator {
 						si = si.replace("{POSTFIX1}", postfix1);
 						si = si.replace("{POSTFIX2}", postfix2);
 						si = si.replace("{PREFIX1}", prefix1);
+						si = si.replace("{PREFIX2}", prefix2);
+
+						si += expandComment;
 
 						lines.add(si);
 
@@ -147,15 +163,18 @@ public class CodeGenerator {
 
 					String regexPos1 = "\\{POSTFIX1=([^\\}.]+)\\}";
 					String regexPos2 = "\\{POSTFIX2=([^\\}.]+)\\}";
-					String regexPre = "\\{PREFIX1=([^\\}.]+)\\}";
+					String regexPre1 = "\\{PREFIX1=([^\\}.]+)\\}";
+					String regexPre2 = "\\{PREFIX2=([^\\}.]+)\\}";
 
 					Matcher m1 = Pattern.compile(regexPos1).matcher(s);
 					Matcher m2 = Pattern.compile(regexPos2).matcher(s);
-					Matcher m3 = Pattern.compile(regexPre).matcher(s);
+					Matcher m3 = Pattern.compile(regexPre1).matcher(s);
+					Matcher m4 = Pattern.compile(regexPre2).matcher(s);
 
 					String postfix1 = m1.find() ? m1.group(1) : "";
 					String postfix2 = m2.find() ? m2.group(1) : "";
 					String prefix1 = m3.find() ? m3.group(1) : "";
+					String prefix2 = m4.find() ? m4.group(1) : "";
 
 					for (String a : flopAssigns) {
 
@@ -164,36 +183,40 @@ public class CodeGenerator {
 						si = si.replace("{POSTFIX1}", postfix1);
 						si = si.replace("{POSTFIX2}", postfix2);
 						si = si.replace("{PREFIX1}", prefix1);
+						si = si.replace("{PREFIX2}", prefix2);
+
+						si += expandComment;
 
 						lines.add(si);
 
 					}
 
-				} else {
+				} else if (s.contains("{STATE_BIT_COUNT}")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					s = s.replace("{STATE_BIT_COUNT}", "" + qNets.size());
+
+					s += expandComment;
+
+					lines.add(s);
+
+				} else if (s.contains("{INPUT_BIT_COUNT}")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					s = s.replace("{INPUT_BIT_COUNT}", "" + inpNets.size());
+
+					s += expandComment;
 
 					lines.add(s);
 
 				}
 
-			} else if (s.contains("{STATE_BIT_COUNT}")) {
-
-				s = s.replaceFirst("//( )+", "");
-
-				s = s.replace("{STATE_BIT_COUNT}", "" + qNets.size());
-
-				lines.add(s);
-
-			} else if (s.contains("{INPUT_BIT_COUNT}")) {
-
-				s = s.replaceFirst("//( )+", "");
-
-				s = s.replace("{INPUT_BIT_COUNT}", "" + inpNets.size());
-
-				lines.add(s);
-
 			} else {
 
-				lines.add(s);
+				if (!s.contains(expandComment))
+					lines.add(s);
 			}
 
 		}
@@ -283,7 +306,7 @@ public class CodeGenerator {
 
 			for (Vertex n : toVisit) {
 
-//				out.println(n);
+				// out.println(n);
 
 				Vertex driver = graph.getSourceModule(n);
 
@@ -304,32 +327,32 @@ public class CodeGenerator {
 
 				if ("AND".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = %s{POSTFIX2} & %s{POSTFIX2};", n, inputs.get(0),
-							inputs.get(1));
+					line = String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2};", n,
+							inputs.get(0), inputs.get(1));
 
 				} else if ("NAND".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ~(%s{POSTFIX2} & %s{POSTFIX2});", n, inputs.get(0),
-							inputs.get(1));
+					line = String.format("{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});", n,
+							inputs.get(0), inputs.get(1));
 
 				} else if ("OR".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = %s{POSTFIX2} | %s{POSTFIX2};", n, inputs.get(0),
-							inputs.get(1));
+					line = String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2};", n,
+							inputs.get(0), inputs.get(1));
 
 				} else if ("NOR".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ~(%s{POSTFIX2} | %s{POSTFIX2});", n, inputs.get(0),
-							inputs.get(1));
+					line = String.format("{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2});", n,
+							inputs.get(0), inputs.get(1));
 
 				} else if ("NOT".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ~%s{POSTFIX2};", n, inputs.get(0));
+					line = String.format("{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};", n, inputs.get(0));
 
 				} else if ("XOR".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = (%s{POSTFIX2} ^ %s{POSTFIX2});", n, inputs.get(0),
-							inputs.get(1));
+					line = String.format("{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});", n,
+							inputs.get(0), inputs.get(1));
 
 				} else {
 
@@ -339,31 +362,27 @@ public class CodeGenerator {
 
 				assigns.add(line);
 
-//				out.println("+++" + line);
-
 				processed.add(n);
 
 				toVisitNext.addAll(netGraph.getDestinations(n));
 
 			}
 
+			// visited.addAll(toVisit);
 
+			// toVisit = netGraph.bfs(toVisit, 1, true);
 
-//			visited.addAll(toVisit);
-
-//			toVisit = netGraph.bfs(toVisit, 1, true);
-
-//			toVisit.removeAll(inNets);
+			// toVisit.removeAll(inNets);
 
 			toVisitNext.removeAll(processed);
 
 			toVisit = toVisitNext;
 
-//			toVisit.removeAll(graphInputs);
+			// toVisit.removeAll(graphInputs);
 
 		}
 
-//		Collections.reverse(assigns);
+		// Collections.reverse(assigns);
 
 		flopAssigns = new ArrayList<String>();
 
@@ -373,7 +392,7 @@ public class CodeGenerator {
 
 			Vertex dNet = graph.getNet(v, "D");
 
-			flopAssigns.add(String.format("{PREFIX1}%s{POSTFIX1} = %s{POSTFIX2};", qNet, dNet));
+			flopAssigns.add(String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};", qNet, dNet));
 
 		}
 

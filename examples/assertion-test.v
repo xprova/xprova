@@ -1,6 +1,6 @@
-module top (clk, rst, ena, count, valid);
+module top (clk, rst, ena1, ena2, count, valid);
 
-	input clk, rst, ena;
+	input clk, rst, ena1, ena2;
 	
 	output [3:0] count;
 	
@@ -8,13 +8,18 @@ module top (clk, rst, ena, count, valid);
 	
 	reg [3:0] count;
 	
+	wire a1, a2;
+	
+	assign a1 = ena1 && (count<2);
+	assign a2 = ena2 && (count>=2); 
+	
 	always @(posedge clk or posedge rst) begin
 	
 		if (rst) begin
 		
 			count <= 0;
 			
-		end else if (ena) begin
+		end else if (a1 | a2) begin
 		
 			count <= count + 1;
 			
@@ -24,18 +29,18 @@ module top (clk, rst, ena, count, valid);
 	
 	// assertion logic
 	
-	reg ena_old;
+	reg ena1_old;
 	
 	always @(posedge clk or posedge rst) begin
 		if (rst) begin
-			ena_old <= 0;
+			ena1_old <= 0;
 		end else begin
-			ena_old <= ena;
+			ena1_old <= ena1;
 		end
 	end
 	
 	// (x -> y) == (~x V y)
 	
-	assign valid = (ena_old == 0) || (count<5);
+	assign valid = (ena1_old == 0) || (count<5);
 	
 endmodule
