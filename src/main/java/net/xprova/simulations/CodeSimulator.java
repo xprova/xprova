@@ -1,15 +1,201 @@
-package net.xprova.xprova;
+package net.xprova.simulations;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import net.xprova.dot.GraphDotFormatter;
 import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
+import net.xprova.xprova.AssertionTest;
 
 public class CodeSimulator {
 
 	public void exploreSpace() throws Exception {
+
+		int count_0_ = 0;
+		int count_1_ = 0;
+		int count_2_ = 0;
+		int count_3_ = 0;
+		int n15 = 0;
+
+		int n1;
+		int n10;
+		int n11;
+		int n12;
+		int n13;
+		int n14;
+		int n2;
+		int n3;
+		int n4;
+		int n5;
+		int n6;
+		int n7;
+		int n8;
+		int n9;
+		int valid;
+
+		int[] vals = { 0, -1 };
+
+		Graph<Integer> stateGraph = new Graph<Integer>();
+
+		HashSet<Integer> toVisit = new HashSet<Integer>();
+
+		HashSet<Integer> visited = new HashSet<Integer>();
+
+		HashMap<Integer, Integer> distanceFromInitial = new HashMap<Integer, Integer>();
+
+		distanceFromInitial.put(0, 0);
+
+		int distance = 1;
+
+		toVisit.add(0);
+
+		Integer violationState = null;
+
+		loop1: while (!toVisit.isEmpty()) {
+
+			HashSet<Integer> toVisitNext = new HashSet<Integer>();
+
+			for (Integer state : toVisit) {
+
+				count_0_ = (state >> 0 & 1) * -1;
+				count_1_ = (state >> 1 & 1) * -1;
+				count_2_ = (state >> 2 & 1) * -1;
+				count_3_ = (state >> 3 & 1) * -1;
+				n15 = (state >> 4 & 1) * -1;
+
+				String s1 = String.format("%5s", Integer.toBinaryString(state)).replace(' ', '0');
+
+				stateGraph.addVertex(state);
+
+				for (int ena : vals) {
+
+					n6 = (count_1_ ^ count_0_);
+					n8 = ~(count_1_ | ena);
+					n1 = (count_0_ ^ ena);
+					n5 = ~ena;
+					n12 = count_1_ | count_0_;
+					n9 = ~(count_1_ & count_0_);
+					n13 = count_2_ & n12;
+					n10 = ~(n5 | n9);
+					n7 = ~(n6 | n5);
+					n2 = ~(n8 | n7);
+					n14 = n13 | count_3_;
+					n11 = n10 & count_2_;
+					n3 = (n10 ^ count_2_);
+					valid = ~(n14 & n15);
+					n4 = (n11 ^ count_3_);
+
+					int next_count_0_ = -n1;
+					int next_count_1_ = -n2;
+					int next_count_2_ = -n3;
+					int next_count_3_ = -n4;
+					int next_n15 = -ena;
+
+					int next_state = 0;
+
+					next_state += (next_count_0_ & 1) << 0;
+					next_state += (next_count_1_ & 1) << 1;
+					next_state += (next_count_2_ & 1) << 2;
+					next_state += (next_count_3_ & 1) << 3;
+					next_state += (next_n15 & 1) << 4;
+
+					toVisitNext.add(next_state);
+
+					distanceFromInitial.put(next_state, distance);
+
+					String s2 = String.format("%5s", Integer.toBinaryString(next_state)).replace(' ', '0');
+
+					System.out.printf("discovered %s -> %s (distance = %d)\n", s1, s2, distance);
+					System.out.printf("valid = %d\n", valid);
+
+					stateGraph.addVertex(next_state);
+
+					stateGraph.addConnection(state, next_state);
+
+					if (valid == 0) {
+
+						violationState = next_state;
+
+						break loop1;
+
+					}
+
+				} // closing bracket for ena
+
+			}
+
+			visited.addAll(toVisit);
+
+			toVisitNext.removeAll(visited);
+
+			toVisit = toVisitNext;
+
+			distance = distance + 1;
+
+		}
+
+		if (violationState != null) {
+
+			System.out.println("Counter-example found!");
+
+			// now back track to find shortest path from violationState to
+			// initial state
+
+			ArrayList<Integer> counterExample = new ArrayList<Integer>();
+
+			HashSet<Integer> visitedStates = new HashSet<Integer>();
+
+			HashSet<Integer> prevStates = new HashSet<Integer>();
+
+			Integer current = violationState;
+
+			prevStates.add(current);
+
+			visitedStates.add(current);
+
+			int shortestDistance = distance + 1;
+
+			while (current != 0) {
+
+				counterExample.add(current);
+
+				prevStates = stateGraph.bfs(prevStates, 1, true);
+
+				prevStates.removeAll(visitedStates);
+
+				for (Integer previousState : prevStates) {
+
+					int d = distanceFromInitial.get(previousState);
+
+					if (d < shortestDistance)
+						current = previousState;
+
+				}
+
+				visitedStates.addAll(prevStates);
+
+			}
+
+			counterExample.add(0);
+
+			Collections.reverse(counterExample);
+
+			for (Integer state : counterExample) {
+
+				String s2 = String.format("%5s", Integer.toBinaryString(state)).replace(' ', '0');
+
+				System.out.println(s2);
+
+			}
+
+		}
+
+	}
+
+	public void exploreSpace_old() throws Exception {
 
 		// int {STATE_BIT} = 0;
 		int count_0_ = 0;

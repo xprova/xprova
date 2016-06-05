@@ -1,8 +1,8 @@
-package net.xprova.xprova;
+package net.xprova.simulations;
 
 import java.util.ArrayList;
 
-public class GrayCounter2 {
+public class GrayCounter {
 
 	public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
 
@@ -12,16 +12,9 @@ public class GrayCounter2 {
 		count_0_[0] = initial[0];
 		count_1_[0] = initial[1];
 
-		int ena1[] = inputs.get(0);
-		int ena2[] = inputs.get(1);
+		int ena[] = inputs.get(0);
 
 		int[] n1 = new int[cycles];
-		int[] n10 = new int[cycles];
-		int[] n11 = new int[cycles];
-		int[] n12 = new int[cycles];
-		int[] n13 = new int[cycles];
-		int[] n14 = new int[cycles];
-		int[] n15 = new int[cycles];
 		int[] n2 = new int[cycles];
 		int[] n3 = new int[cycles];
 		int[] n4 = new int[cycles];
@@ -29,25 +22,17 @@ public class GrayCounter2 {
 		int[] n6 = new int[cycles];
 		int[] n7 = new int[cycles];
 		int[] n8 = new int[cycles];
-		int[] n9 = new int[cycles];
 
 		for (int i = 0; i < cycles; i++) {
 
-			n15[i] = ~ena1[i];
-			n13[i] = ~ena2[i];
-			n7[i] = ena2[i] & n15[i];
-			n8[i] = n13[i] & ena1[i];
-			n3[i] = ena2[i] | n15[i];
-			n14[i] = n13[i] | ena1[i];
-			n4[i] = n3[i] & n14[i];
-			n6[i] = ~count_1_[i];
-			n9[i] = n8[i] | n7[i];
-			n11[i] = count_1_[i] & n4[i];
-			n5[i] = count_0_[i] & n4[i];
-			n10[i] = n9[i] & n6[i];
-			n12[i] = n9[i] & count_0_[i];
-			n2[i] = n12[i] | n11[i];
-			n1[i] = n10[i] | n5[i];
+			n7[i] = ~count_1_[i];
+			n5[i] = ~ena[i];
+			n6[i] = n5[i] & count_0_[i];
+			n8[i] = ena[i] & n7[i];
+			n4[i] = ena[i] & count_0_[i];
+			n3[i] = n5[i] & count_1_[i];
+			n1[i] = n8[i] | n6[i];
+			n2[i] = n3[i] | n4[i];
 
 			if (i < cycles - 1) {
 
@@ -62,16 +47,9 @@ public class GrayCounter2 {
 		waveforms.add(count_0_);
 		waveforms.add(count_1_);
 
-		waveforms.add(ena1);
-		waveforms.add(ena2);
+		waveforms.add(ena);
 
 		waveforms.add(n1);
-		waveforms.add(n10);
-		waveforms.add(n11);
-		waveforms.add(n12);
-		waveforms.add(n13);
-		waveforms.add(n14);
-		waveforms.add(n15);
 		waveforms.add(n2);
 		waveforms.add(n3);
 		waveforms.add(n4);
@@ -79,7 +57,6 @@ public class GrayCounter2 {
 		waveforms.add(n6);
 		waveforms.add(n7);
 		waveforms.add(n8);
-		waveforms.add(n9);
 
 		return waveforms;
 	}
@@ -91,16 +68,9 @@ public class GrayCounter2 {
 		result.add("count_0_");
 		result.add("count_1_");
 
-		result.add("ena1");
-		result.add("ena2");
+		result.add("ena");
 
 		result.add("n1");
-		result.add("n10");
-		result.add("n11");
-		result.add("n12");
-		result.add("n13");
-		result.add("n14");
-		result.add("n15");
 		result.add("n2");
 		result.add("n3");
 		result.add("n4");
@@ -108,7 +78,6 @@ public class GrayCounter2 {
 		result.add("n6");
 		result.add("n7");
 		result.add("n8");
-		result.add("n9");
 
 		return result;
 	}
@@ -120,7 +89,7 @@ public class GrayCounter2 {
 
 	public int getInputBitCount() {
 
-		return 2;
+		return 1;
 	}
 
 }
