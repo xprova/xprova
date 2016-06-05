@@ -99,7 +99,7 @@ public class CodeSimulator {
 
 				stateGraph.addVertex(state);
 
-				int inputPermutes = 2 ^ 5;
+				int inputPermutes = 1 << (inputBitCount);
 
 				for (int in = 0; in < inputPermutes; in++) {
 
