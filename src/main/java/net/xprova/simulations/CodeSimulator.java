@@ -8,11 +8,13 @@ import java.util.HashSet;
 import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
 import net.xprova.graph.MultiMap;
-import net.xprova.xprova.AssertionTest;
 
 public class CodeSimulator {
 
-	public void exploreSpace() throws Exception {
+	public static final int L = 0;
+	public static final int H = -1;
+
+	public ArrayList<int[]> exploreSpace(int initial[]) throws Exception {
 
 		//@formatter:off
 		// int stateBitCount = {STATE_BIT_COUNT};
@@ -22,12 +24,12 @@ public class CodeSimulator {
 		//@formatter:on
 
 		//@formatter:off
-		// int {STATE_BIT} = 0;
-		int count_0_ = 0; // {EXPANDED}
-		int count_1_ = 0; // {EXPANDED}
-		int count_2_ = 0; // {EXPANDED}
-		int count_3_ = 0; // {EXPANDED}
-		int n26 = 0; // {EXPANDED}
+		// int {STATE_BIT} = initial[{STATE_BIT_INDEX}];
+		int count_0_ = initial[0]; // {EXPANDED}
+		int count_1_ = initial[1]; // {EXPANDED}
+		int count_2_ = initial[2]; // {EXPANDED}
+		int count_3_ = initial[3]; // {EXPANDED}
+		int n26 = initial[4]; // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
@@ -76,6 +78,20 @@ public class CodeSimulator {
 
 		int distance = 1;
 
+		Integer in = null; // input vector
+
+		int initialState = 0;
+
+		//@formatter:off
+		// initialState += ({STATE_BIT} & 1) << {STATE_BIT_INDEX};
+		initialState += (count_0_ & 1) << 0; // {EXPANDED}
+		initialState += (count_1_ & 1) << 1; // {EXPANDED}
+		initialState += (count_2_ & 1) << 2; // {EXPANDED}
+		initialState += (count_3_ & 1) << 3; // {EXPANDED}
+		initialState += (n26 & 1) << 4; // {EXPANDED}
+		initialState += (count_0_ & 1) << 0;
+		//@formatter:on
+
 		toVisit.add(0);
 
 		Integer violationState = null;
@@ -99,9 +115,9 @@ public class CodeSimulator {
 
 				stateGraph.addVertex(state);
 
-				int inputPermutes = 1 << (inputBitCount);
+				int inputPermutes = 2 ^ 5;
 
-				for (int in = 0; in < inputPermutes; in++) {
+				for (in = 0; in < inputPermutes; in++) {
 
 					//@formatter:off
 					// int {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
@@ -188,7 +204,7 @@ public class CodeSimulator {
 
 					if (valid == 0) {
 
-						violationState = nxState;
+						violationState = state;
 
 						break loop1;
 
@@ -227,16 +243,9 @@ public class CodeSimulator {
 
 			int shortestDistance = distance + 1;
 
-			Integer lastCurrent = current;
-
 			while (current != 0) {
 
 				counterExampleState.add(current);
-
-				if (current != lastCurrent)
-					counterExampleInputVectors.add(iVectors.get(current, lastCurrent));
-
-				lastCurrent = current;
 
 				HashSet<Integer> prevStates = stateGraph.bfs(current, 1, true);
 
@@ -267,46 +276,75 @@ public class CodeSimulator {
 
 			Collections.reverse(counterExampleState);
 
-			for (Integer state : counterExampleState) {
+			int nCounter = counterExampleState.size();
 
-				System.out.println(getBinary(state, stateBitCount));
-
-			}
-
-			System.out.println("input vectors :");
-
-			for (int i = 0; i < counterExampleState.size() - 1; i++) {
+			for (int i = 0; i < nCounter - 1; i++) {
 
 				int s1 = counterExampleState.get(i);
 				int s2 = counterExampleState.get(i + 1);
 
-				Integer inpVec = iVectors.get(s1, s2);
-
-				System.out.println(getBinary(inpVec, inputBitCount));
+				counterExampleInputVectors.add(iVectors.get(s1, s2));
 
 			}
+
+			counterExampleInputVectors.add(in);
+
+			for (int i = 0; i < nCounter; i++) {
+
+				Integer inpVec = counterExampleInputVectors.get(i);
+
+				int state = counterExampleState.get(i);
+
+				System.out.printf("state: %s, input vector %s\n", getBinary(state, stateBitCount),
+						getBinary(inpVec, inputBitCount));
+
+			}
+
+			//@formatter:off
+			// int[] counterExample_{INPUT_BIT} = new int[nCounter];
+			int[] counterExample_ena1 = new int[nCounter]; // {EXPANDED}
+			int[] counterExample_ena2 = new int[nCounter]; // {EXPANDED}
+			//@formatter:on
+
+			for (int i = 0; i < nCounter; i++) {
+
+				Integer inpVec = counterExampleInputVectors.get(i);
+
+				//@formatter:off
+				// counterExample_{INPUT_BIT}[i] = -(inpVec >> {INPUT_BIT_INDEX} & 1);
+				counterExample_ena1[i] = -(inpVec >> 0 & 1); // {EXPANDED}
+				counterExample_ena2[i] = -(inpVec >> 1 & 1); // {EXPANDED}
+				//@formatter:on
+
+			}
+
+			ArrayList<int[]> counterExampleInputs = new ArrayList<int[]>();
+
+			//@formatter:off
+			// counterExampleInputs.add(counterExample_{INPUT_BIT});
+			counterExampleInputs.add(counterExample_ena1); // {EXPANDED}
+			counterExampleInputs.add(counterExample_ena2); // {EXPANDED}
+			//@formatter:on
+
+			return counterExampleInputs;
+
+		} else {
+
+			// no counter-example found
+
+			return null;
 
 		}
 
 	}
 
-	public void runSim() {
+	public void runSim2(int[] initial, ArrayList<int[]> inputs) {
 
-		AssertionTest gray1 = new AssertionTest();
+		ArrayList<String> sigNames = getSignalNames();
 
-		int[] initial = { 0, 0, 0, 0, 0 };
+		int cycles = inputs.get(0).length;
 
-		ArrayList<String> sigNames = gray1.getSignalNames();
-
-		int[] ena = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0 };
-
-		ArrayList<int[]> inputs = new ArrayList<int[]>();
-
-		inputs.add(ena);
-
-		int cycles = ena.length;
-
-		ArrayList<int[]> results = gray1.simulate(initial, inputs, cycles);
+		ArrayList<int[]> results = simulate(initial, inputs, cycles);
 
 		System.out.printf("%10s : ", "Cycle");
 
@@ -319,7 +357,7 @@ public class CodeSimulator {
 
 		for (int j = 0; j < results.size(); j++) {
 
-			if (j == gray1.getStateBitCount())
+			if (j == getStateBitCount())
 				System.out.println();
 
 			int[] sig = results.get(j);
@@ -328,7 +366,7 @@ public class CodeSimulator {
 
 			for (int i = 0; i < cycles; i++) {
 
-				System.out.printf((sig[i] == -1) ? "1" : "0");
+				System.out.printf((sig[i] == H) ? "1" : "0");
 
 			}
 
@@ -336,6 +374,13 @@ public class CodeSimulator {
 
 		}
 
+	}
+
+	private String getBinary(int num, int digits) {
+
+		String bitFmt = String.format("%%%ds", digits);
+
+		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
 	}
 
 	public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
@@ -418,7 +463,6 @@ public class CodeSimulator {
 			n3[i] = (n20[i] ^ count_2_[i]); // {EXPANDED}
 			n2[i] = ~(n15[i] & n18[i]); // {EXPANDED}
 			n4[i] = ~(n25[i] & n21[i]); // {EXPANDED}
-
 
 			if (i < cycles-1) {
 
@@ -542,13 +586,6 @@ public class CodeSimulator {
 		// return {INPUT_BIT_COUNT};
 		return 2; // {EXPANDED}
 		//@formatter:on
-	}
-
-	private String getBinary(int num, int digits) {
-
-		String bitFmt = String.format("%%%ds", digits);
-
-		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
 	}
 
 }

@@ -607,7 +607,24 @@ public class ConsoleHandler {
 	@Command
 	public void testCode() throws Exception {
 
-		(new CodeSimulator()).exploreSpace();
+		int [] initial = {0,0,0,0,0};
+
+		CodeSimulator sim1 = new CodeSimulator();
+
+		ArrayList<int[]> counterExample = sim1.exploreSpace(initial);
+
+//		int[] ena1 = {-1, -1, 0, 0, -1, 0};
+//		int[] ena2 = {0, 0, -1, -1, -1, -1};
+
+//		ArrayList<int[]> counterExample = new ArrayList<int[]>();
+
+//		counterExample.clear();
+//		counterExample.add(ena1);
+//		counterExample.add(ena2);
+
+		sim1.runSim2(initial, counterExample);
+
+//		(new CodeSimulator()).runSim2();
 
 	}
 

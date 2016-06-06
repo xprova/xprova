@@ -1,4 +1,4 @@
-public void exploreSpace() throws Exception {
+public ArrayList<int[]> exploreSpace(int initial[]) throws Exception {
 
 	//@formatter:off
 	// int stateBitCount = {STATE_BIT_COUNT};
@@ -8,12 +8,12 @@ public void exploreSpace() throws Exception {
 	//@formatter:on
 
 	//@formatter:off
-	// int {STATE_BIT} = 0;
-	int count_0_ = 0; // {EXPANDED}
-	int count_1_ = 0; // {EXPANDED}
-	int count_2_ = 0; // {EXPANDED}
-	int count_3_ = 0; // {EXPANDED}
-	int n26 = 0; // {EXPANDED}
+	// int {STATE_BIT} = initial[{STATE_BIT_INDEX}];
+	int count_0_ = initial[0]; // {EXPANDED}
+	int count_1_ = initial[1]; // {EXPANDED}
+	int count_2_ = initial[2]; // {EXPANDED}
+	int count_3_ = initial[3]; // {EXPANDED}
+	int n26 = initial[4]; // {EXPANDED}
 	//@formatter:on
 
 	//@formatter:off
@@ -62,6 +62,20 @@ public void exploreSpace() throws Exception {
 
 	int distance = 1;
 
+	Integer in = null; // input vector
+
+	int initialState = 0;
+
+	//@formatter:off
+	// initialState += ({STATE_BIT} & 1) << {STATE_BIT_INDEX};
+	initialState += (count_0_ & 1) << 0; // {EXPANDED}
+	initialState += (count_1_ & 1) << 1; // {EXPANDED}
+	initialState += (count_2_ & 1) << 2; // {EXPANDED}
+	initialState += (count_3_ & 1) << 3; // {EXPANDED}
+	initialState += (n26 & 1) << 4; // {EXPANDED}
+	initialState += (count_0_ & 1) << 0;
+	//@formatter:on
+
 	toVisit.add(0);
 
 	Integer violationState = null;
@@ -87,7 +101,7 @@ public void exploreSpace() throws Exception {
 
 			int inputPermutes = 2 ^ 5;
 
-			for (int in = 0; in < inputPermutes; in++) {
+			for (in = 0; in < inputPermutes; in++) {
 
 				//@formatter:off
 				// int {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
@@ -97,32 +111,32 @@ public void exploreSpace() throws Exception {
 
 				//@formatter:off
 				// {COMB_ASSIGN}
-				n19 = ~(count_0_ & count_1_); // {EXPANDED}
-				n6 = ~(count_3_ | count_1_); // {EXPANDED}
+				n8 = count_3_ | count_2_; // {EXPANDED}
+				n12 = ~ena2; // {EXPANDED}
+				n22 = ~count_2_; // {EXPANDED}
 				n5 = ~count_0_; // {EXPANDED}
 				n17 = (count_0_ ^ count_1_); // {EXPANDED}
-				n8 = count_3_ | count_2_; // {EXPANDED}
-				n22 = ~count_2_; // {EXPANDED}
-				n12 = ~ena2; // {EXPANDED}
-				n10 = ~(n8 | count_1_); // {EXPANDED}
-				n7 = ~(n6 & n5); // {EXPANDED}
+				n19 = ~(count_0_ & count_1_); // {EXPANDED}
+				n6 = ~(count_3_ | count_1_); // {EXPANDED}
+				n9 = n26 & n8; // {EXPANDED}
+				n10 = ~(count_1_ | n8); // {EXPANDED}
+				n23 = ~(n19 | n22); // {EXPANDED}
+				n13 = ~(n12 | n10); // {EXPANDED}
 				n11 = ena1 & n10; // {EXPANDED}
-				n9 = n8 & n26; // {EXPANDED}
-				n13 = ~(n10 | n12); // {EXPANDED}
-				n23 = ~(n22 | n19); // {EXPANDED}
-				n16 = n11 | n13; // {EXPANDED}
-				n24 = (count_3_ ^ n23); // {EXPANDED}
-				n14 = ~(n11 | n13); // {EXPANDED}
+				n7 = ~(n6 & n5); // {EXPANDED}
 				valid = ~(n7 & n9); // {EXPANDED}
+				n24 = (n23 ^ count_3_); // {EXPANDED}
+				n14 = ~(n13 | n11); // {EXPANDED}
+				n16 = n13 | n11; // {EXPANDED}
+				n1 = (n14 ^ n5); // {EXPANDED}
+				n20 = ~(n14 | n19); // {EXPANDED}
 				n25 = ~(n24 & n16); // {EXPANDED}
 				n21 = ~(count_3_ & n14); // {EXPANDED}
-				n20 = ~(n19 | n14); // {EXPANDED}
+				n15 = ~(count_1_ & n14); // {EXPANDED}
 				n18 = ~(n17 & n16); // {EXPANDED}
-				n1 = (n14 ^ n5); // {EXPANDED}
-				n15 = ~(n14 & count_1_); // {EXPANDED}
-				n2 = ~(n18 & n15); // {EXPANDED}
-				n4 = ~(n25 & n21); // {EXPANDED}
 				n3 = (n20 ^ count_2_); // {EXPANDED}
+				n2 = ~(n15 & n18); // {EXPANDED}
+				n4 = ~(n25 & n21); // {EXPANDED}
 				//@formatter:on
 
 				//@formatter:off
@@ -213,16 +227,9 @@ public void exploreSpace() throws Exception {
 
 		int shortestDistance = distance + 1;
 
-		Integer lastCurrent = current;
-
 		while (current != 0) {
 
 			counterExampleState.add(current);
-
-			if (current != lastCurrent)
-				counterExampleInputVectors.add(iVectors.get(current, lastCurrent));
-
-			lastCurrent = current;
 
 			HashSet<Integer> prevStates = stateGraph.bfs(current, 1, true);
 
@@ -253,24 +260,72 @@ public void exploreSpace() throws Exception {
 
 		Collections.reverse(counterExampleState);
 
-		for (Integer state : counterExampleState) {
+		int nCounter = counterExampleState.size();
 
-			System.out.println(getBinary(state, stateBitCount));
-
-		}
-
-		System.out.println("input vectors :");
-
-		for (int i = 0; i < counterExampleState.size() - 1; i++) {
+		for (int i = 0; i < nCounter - 1; i++) {
 
 			int s1 = counterExampleState.get(i);
 			int s2 = counterExampleState.get(i + 1);
 
-			Integer inpVec = iVectors.get(s1, s2);
-
-			System.out.println(getBinary(inpVec, inputBitCount));
+			counterExampleInputVectors.add(iVectors.get(s1, s2));
 
 		}
+
+		counterExampleInputVectors.add(in);
+
+		for (int i = 0; i < nCounter; i++) {
+
+			Integer inpVec = counterExampleInputVectors.get(i);
+
+			int state = counterExampleState.get(i);
+
+			System.out.printf("state: %s, input vector %s\n", getBinary(state, stateBitCount),
+					getBinary(inpVec, inputBitCount));
+
+		}
+
+		//formatter:off
+		// int[] counterExample_{INPUT_BIT} = new int[nCounter];
+		int[] counterExample_count_0_ = new int[nCounter]; // {EXPANDED}
+		int[] counterExample_count_1_ = new int[nCounter]; // {EXPANDED}
+		int[] counterExample_count_2_ = new int[nCounter]; // {EXPANDED}
+		int[] counterExample_count_3_ = new int[nCounter]; // {EXPANDED}
+		int[] counterExample_n26 = new int[nCounter]; // {EXPANDED}
+		//formatter:on
+
+		for (int i = 0; i < nCounter; i++) {
+
+			Integer inpVec = counterExampleInputVectors.get(i);
+
+			//formatter:off
+			// counterExample_{INPUT_BIT}[i] = -(inpVec >> {INPUT_BIT_INDEX} & 1);
+			counterExample_count_0_[i] = inpVec >> 0 & 1; // {EXPANDED}
+			counterExample_count_1_[i] = inpVec >> 1 & 1; // {EXPANDED}
+			counterExample_count_2_[i] = inpVec >> 2 & 1; // {EXPANDED}
+			counterExample_count_3_[i] = inpVec >> 3 & 1; // {EXPANDED}
+			counterExample_n26[i] = inpVec >> 4 & 1; // {EXPANDED}
+			//formatter:on
+
+		}
+
+		ArrayList<int[]> counterExampleInputs = new ArrayList<int[]>();
+
+		//formatter:off
+		// counterExampleInputs.add(counterExample_{INPUT_BIT});
+		counterExampleInputs.add(counterExample_count_0_); // {EXPANDED}
+		counterExampleInputs.add(counterExample_count_1_); // {EXPANDED}
+		counterExampleInputs.add(counterExample_count_2_); // {EXPANDED}
+		counterExampleInputs.add(counterExample_count_3_); // {EXPANDED}
+		counterExampleInputs.add(counterExample_n26); // {EXPANDED}
+		//formatter:on
+
+		return counterExampleInputs;
+
+	} else {
+
+		// no counter-example found
+
+		return null;
 
 	}
 
