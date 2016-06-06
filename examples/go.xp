@@ -10,7 +10,7 @@ rename_modules
 
 ungroupNets %s_%d_
 
-#genCode template2.j
+#genCode template1.j
 
 #! dot -Tpdf output/state.dot -o output/state.pdf
 

@@ -300,31 +300,31 @@ public class CodeSimulator {
 
 			}
 
-			//@formatter:off
+			//formatter:off
 			// int[] counterExample_{INPUT_BIT} = new int[nCounter];
 			int[] counterExample_ena1 = new int[nCounter]; // {EXPANDED}
 			int[] counterExample_ena2 = new int[nCounter]; // {EXPANDED}
-			//@formatter:on
+			//formatter:on
 
 			for (int i = 0; i < nCounter; i++) {
 
 				Integer inpVec = counterExampleInputVectors.get(i);
 
-				//@formatter:off
+				//formatter:off
 				// counterExample_{INPUT_BIT}[i] = -(inpVec >> {INPUT_BIT_INDEX} & 1);
 				counterExample_ena1[i] = -(inpVec >> 0 & 1); // {EXPANDED}
 				counterExample_ena2[i] = -(inpVec >> 1 & 1); // {EXPANDED}
-				//@formatter:on
+				//formatter:on
 
 			}
 
 			ArrayList<int[]> counterExampleInputs = new ArrayList<int[]>();
 
-			//@formatter:off
+			//formatter:off
 			// counterExampleInputs.add(counterExample_{INPUT_BIT});
 			counterExampleInputs.add(counterExample_ena1); // {EXPANDED}
 			counterExampleInputs.add(counterExample_ena2); // {EXPANDED}
-			//@formatter:on
+			//formatter:on
 
 			return counterExampleInputs;
 
@@ -336,51 +336,6 @@ public class CodeSimulator {
 
 		}
 
-	}
-
-	public void runSim2(int[] initial, ArrayList<int[]> inputs) {
-
-		ArrayList<String> sigNames = getSignalNames();
-
-		int cycles = inputs.get(0).length;
-
-		ArrayList<int[]> results = simulate(initial, inputs, cycles);
-
-		System.out.printf("%10s : ", "Cycle");
-
-		for (int i = 0; i < cycles; i++)
-			System.out.printf("%d", i % 10);
-
-		System.out.println();
-
-		System.out.println();
-
-		for (int j = 0; j < results.size(); j++) {
-
-			if (j == getStateBitCount())
-				System.out.println();
-
-			int[] sig = results.get(j);
-
-			System.out.printf("%10s : ", sigNames.get(j));
-
-			for (int i = 0; i < cycles; i++) {
-
-				System.out.printf((sig[i] == H) ? "1" : "0");
-
-			}
-
-			System.out.println();
-
-		}
-
-	}
-
-	private String getBinary(int num, int digits) {
-
-		String bitFmt = String.format("%%%ds", digits);
-
-		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
 	}
 
 	public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
@@ -433,7 +388,7 @@ public class CodeSimulator {
 		int[] valid = new int[cycles]; // {EXPANDED}
 		//@formatter:on
 
-		for (int i = 0; i < cycles; i++) {
+		for (int i=0; i<cycles; i++) {
 
 			//@formatter:off
 			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
@@ -588,4 +543,50 @@ public class CodeSimulator {
 		//@formatter:on
 	}
 
+	private String getBinary(int num, int digits) {
+
+		String bitFmt = String.format("%%%ds", digits);
+
+		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
+	}
+
+	public void runSim2(int[] initial, ArrayList<int[]> inputs) {
+
+		ArrayList<String> sigNames = getSignalNames();
+
+		int cycles = inputs.get(0).length;
+
+		ArrayList<int[]> results = simulate(initial, inputs, cycles);
+
+		System.out.printf("%10s : ", "Cycle");
+
+		for (int i = 0; i < cycles; i++)
+			System.out.printf("%d", i % 10);
+
+		System.out.println();
+
+		System.out.println();
+
+		for (int j = 0; j < results.size(); j++) {
+
+			if (j == getStateBitCount())
+				System.out.println();
+
+			int[] sig = results.get(j);
+
+			System.out.printf("%10s : ", sigNames.get(j));
+
+			for (int i = 0; i < cycles; i++) {
+
+				System.out.printf((sig[i] == H) ? "1" : "0");
+
+			}
+
+			System.out.println();
+
+		}
+
+	}
+
 }
+
