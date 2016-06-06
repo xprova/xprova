@@ -1,55 +1,67 @@
-public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
+	public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
 
-	// int[] {STATE_BIT} = new int[cycles];
+		//@formatter:off
+		// int[] {STATE_BIT} = new int[cycles];
 
-	// {STATE_BIT}[0] = initial[{STATE_BIT_INDEX}];
+		// {STATE_BIT}[0] = initial[{STATE_BIT_INDEX}];
 
-	// int {INPUT_BIT}[] = inputs.get({INPUT_BIT_INDEX});
+		// int {INPUT_BIT}[] = inputs.get({INPUT_BIT_INDEX});
 
-	// int[] {NON_STATE_BIT} = new int[cycles];
+		// int[] {NON_STATE_BIT} = new int[cycles];
+		//@formatter:on
 
-	for (int i=0; i<cycles; i++) {
-	
-		// {COMB_ASSIGN}
+		for (int i=0; i<cycles; i++) {
 
-		if (i < cycles-1) {
-		
-			// {STATE_ASSIGN} {POSTFIX1=[i+1]} {POSTFIX2=[i]} 
+			//@formatter:off
+			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
+
+			if (i < cycles-1) {
+
+				// {STATE_ASSIGN} {POSTFIX1=[i+1]} {POSTFIX2=[i]}
+
+			}
+			//@formatter:on
 
 		}
 
+		ArrayList<int[]> waveforms = new ArrayList<int[]>();
+
+		//@formatter:off
+		// waveforms.add({STATE_BIT});
+
+		// waveforms.add({INPUT_BIT});
+
+		// waveforms.add({NON_STATE_BIT});
+		//@formatter:on
+
+		return waveforms;
 	}
 
-	ArrayList<int[]> waveforms = new ArrayList<int[]>();
+	public ArrayList<String> getSignalNames() {
 
-	// waveforms.add({STATE_BIT});
+		ArrayList<String> result = new ArrayList<String>();
 
-	// waveforms.add({INPUT_BIT});
-	
-	// waveforms.add({NON_STATE_BIT});
+		//@formatter:off
+		// result.add("{STATE_BIT}");
 
-	return waveforms;
-}
+		// result.add("{INPUT_BIT}");
 
-public ArrayList<String> getSignalNames() {
+		// result.add("{NON_STATE_BIT}");
+		//@formatter:on
 
-	ArrayList<String> result = new ArrayList<String>();
+		return result;
+	}
 
-	// result.add("{STATE_BIT}");
+	public int getStateBitCount() {
 
-	// result.add("{INPUT_BIT}");
-	
-	// result.add("{NON_STATE_BIT}");
+		//@formatter:off
+		// return {STATE_BIT_COUNT};
+		//@formatter:on
+	}
 
-	return result;
-}
+	public int getInputBitCount() {
 
-public int getStateBitCount() {
-
-	return {STATE_BIT_COUNT};
-}
-
-public int getInputBitCount() {
-
-	return {INPUT_BIT_COUNT};
-}
+		//@formatter:off
+		// return {INPUT_BIT_COUNT};
+		//@formatter:on
+	}

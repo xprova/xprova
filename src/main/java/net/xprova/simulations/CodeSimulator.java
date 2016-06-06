@@ -290,7 +290,7 @@ public class CodeSimulator {
 
 	}
 
-	public void simulate() {
+	public void runSim() {
 
 		AssertionTest gray1 = new AssertionTest();
 
@@ -336,6 +336,212 @@ public class CodeSimulator {
 
 		}
 
+	}
+
+	public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
+
+		//@formatter:off
+		// int[] {STATE_BIT} = new int[cycles];
+		int[] count_0_ = new int[cycles]; // {EXPANDED}
+		int[] count_1_ = new int[cycles]; // {EXPANDED}
+		int[] count_2_ = new int[cycles]; // {EXPANDED}
+		int[] count_3_ = new int[cycles]; // {EXPANDED}
+		int[] n26 = new int[cycles]; // {EXPANDED}
+
+		// {STATE_BIT}[0] = initial[{STATE_BIT_INDEX}];
+		count_0_[0] = initial[0]; // {EXPANDED}
+		count_1_[0] = initial[1]; // {EXPANDED}
+		count_2_[0] = initial[2]; // {EXPANDED}
+		count_3_[0] = initial[3]; // {EXPANDED}
+		n26[0] = initial[4]; // {EXPANDED}
+
+		// int {INPUT_BIT}[] = inputs.get({INPUT_BIT_INDEX});
+		int ena1[] = inputs.get(0); // {EXPANDED}
+		int ena2[] = inputs.get(1); // {EXPANDED}
+
+		// int[] {NON_STATE_BIT} = new int[cycles];
+		int[] n1 = new int[cycles]; // {EXPANDED}
+		int[] n10 = new int[cycles]; // {EXPANDED}
+		int[] n11 = new int[cycles]; // {EXPANDED}
+		int[] n12 = new int[cycles]; // {EXPANDED}
+		int[] n13 = new int[cycles]; // {EXPANDED}
+		int[] n14 = new int[cycles]; // {EXPANDED}
+		int[] n15 = new int[cycles]; // {EXPANDED}
+		int[] n16 = new int[cycles]; // {EXPANDED}
+		int[] n17 = new int[cycles]; // {EXPANDED}
+		int[] n18 = new int[cycles]; // {EXPANDED}
+		int[] n19 = new int[cycles]; // {EXPANDED}
+		int[] n2 = new int[cycles]; // {EXPANDED}
+		int[] n20 = new int[cycles]; // {EXPANDED}
+		int[] n21 = new int[cycles]; // {EXPANDED}
+		int[] n22 = new int[cycles]; // {EXPANDED}
+		int[] n23 = new int[cycles]; // {EXPANDED}
+		int[] n24 = new int[cycles]; // {EXPANDED}
+		int[] n25 = new int[cycles]; // {EXPANDED}
+		int[] n3 = new int[cycles]; // {EXPANDED}
+		int[] n4 = new int[cycles]; // {EXPANDED}
+		int[] n5 = new int[cycles]; // {EXPANDED}
+		int[] n6 = new int[cycles]; // {EXPANDED}
+		int[] n7 = new int[cycles]; // {EXPANDED}
+		int[] n8 = new int[cycles]; // {EXPANDED}
+		int[] n9 = new int[cycles]; // {EXPANDED}
+		int[] valid = new int[cycles]; // {EXPANDED}
+		//@formatter:on
+
+		for (int i = 0; i < cycles; i++) {
+
+			//@formatter:off
+			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
+			n8[i] = count_3_[i] | count_2_[i]; // {EXPANDED}
+			n12[i] = ~ena2[i]; // {EXPANDED}
+			n22[i] = ~count_2_[i]; // {EXPANDED}
+			n5[i] = ~count_0_[i]; // {EXPANDED}
+			n17[i] = (count_0_[i] ^ count_1_[i]); // {EXPANDED}
+			n19[i] = ~(count_0_[i] & count_1_[i]); // {EXPANDED}
+			n6[i] = ~(count_3_[i] | count_1_[i]); // {EXPANDED}
+			n9[i] = n26[i] & n8[i]; // {EXPANDED}
+			n10[i] = ~(count_1_[i] | n8[i]); // {EXPANDED}
+			n23[i] = ~(n19[i] | n22[i]); // {EXPANDED}
+			n13[i] = ~(n12[i] | n10[i]); // {EXPANDED}
+			n11[i] = ena1[i] & n10[i]; // {EXPANDED}
+			n7[i] = ~(n6[i] & n5[i]); // {EXPANDED}
+			valid[i] = ~(n7[i] & n9[i]); // {EXPANDED}
+			n24[i] = (n23[i] ^ count_3_[i]); // {EXPANDED}
+			n14[i] = ~(n13[i] | n11[i]); // {EXPANDED}
+			n16[i] = n13[i] | n11[i]; // {EXPANDED}
+			n1[i] = (n14[i] ^ n5[i]); // {EXPANDED}
+			n20[i] = ~(n14[i] | n19[i]); // {EXPANDED}
+			n25[i] = ~(n24[i] & n16[i]); // {EXPANDED}
+			n21[i] = ~(count_3_[i] & n14[i]); // {EXPANDED}
+			n15[i] = ~(count_1_[i] & n14[i]); // {EXPANDED}
+			n18[i] = ~(n17[i] & n16[i]); // {EXPANDED}
+			n3[i] = (n20[i] ^ count_2_[i]); // {EXPANDED}
+			n2[i] = ~(n15[i] & n18[i]); // {EXPANDED}
+			n4[i] = ~(n25[i] & n21[i]); // {EXPANDED}
+
+
+			if (i < cycles-1) {
+
+				// {STATE_ASSIGN} {POSTFIX1=[i+1]} {POSTFIX2=[i]}
+				count_0_[i+1] = n1[i]; // {EXPANDED}
+				count_1_[i+1] = n2[i]; // {EXPANDED}
+				count_2_[i+1] = n3[i]; // {EXPANDED}
+				count_3_[i+1] = n4[i]; // {EXPANDED}
+				n26[i+1] = ena1[i]; // {EXPANDED}
+
+			}
+			//@formatter:on
+
+		}
+
+		ArrayList<int[]> waveforms = new ArrayList<int[]>();
+
+		//@formatter:off
+		// waveforms.add({STATE_BIT});
+		waveforms.add(count_0_); // {EXPANDED}
+		waveforms.add(count_1_); // {EXPANDED}
+		waveforms.add(count_2_); // {EXPANDED}
+		waveforms.add(count_3_); // {EXPANDED}
+		waveforms.add(n26); // {EXPANDED}
+
+		// waveforms.add({INPUT_BIT});
+		waveforms.add(ena1); // {EXPANDED}
+		waveforms.add(ena2); // {EXPANDED}
+
+		// waveforms.add({NON_STATE_BIT});
+		waveforms.add(n1); // {EXPANDED}
+		waveforms.add(n10); // {EXPANDED}
+		waveforms.add(n11); // {EXPANDED}
+		waveforms.add(n12); // {EXPANDED}
+		waveforms.add(n13); // {EXPANDED}
+		waveforms.add(n14); // {EXPANDED}
+		waveforms.add(n15); // {EXPANDED}
+		waveforms.add(n16); // {EXPANDED}
+		waveforms.add(n17); // {EXPANDED}
+		waveforms.add(n18); // {EXPANDED}
+		waveforms.add(n19); // {EXPANDED}
+		waveforms.add(n2); // {EXPANDED}
+		waveforms.add(n20); // {EXPANDED}
+		waveforms.add(n21); // {EXPANDED}
+		waveforms.add(n22); // {EXPANDED}
+		waveforms.add(n23); // {EXPANDED}
+		waveforms.add(n24); // {EXPANDED}
+		waveforms.add(n25); // {EXPANDED}
+		waveforms.add(n3); // {EXPANDED}
+		waveforms.add(n4); // {EXPANDED}
+		waveforms.add(n5); // {EXPANDED}
+		waveforms.add(n6); // {EXPANDED}
+		waveforms.add(n7); // {EXPANDED}
+		waveforms.add(n8); // {EXPANDED}
+		waveforms.add(n9); // {EXPANDED}
+		waveforms.add(valid); // {EXPANDED}
+		//@formatter:on
+
+		return waveforms;
+	}
+
+	public ArrayList<String> getSignalNames() {
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		//@formatter:off
+		// result.add("{STATE_BIT}");
+		result.add("count_0_"); // {EXPANDED}
+		result.add("count_1_"); // {EXPANDED}
+		result.add("count_2_"); // {EXPANDED}
+		result.add("count_3_"); // {EXPANDED}
+		result.add("n26"); // {EXPANDED}
+
+		// result.add("{INPUT_BIT}");
+		result.add("ena1"); // {EXPANDED}
+		result.add("ena2"); // {EXPANDED}
+
+		// result.add("{NON_STATE_BIT}");
+		result.add("n1"); // {EXPANDED}
+		result.add("n10"); // {EXPANDED}
+		result.add("n11"); // {EXPANDED}
+		result.add("n12"); // {EXPANDED}
+		result.add("n13"); // {EXPANDED}
+		result.add("n14"); // {EXPANDED}
+		result.add("n15"); // {EXPANDED}
+		result.add("n16"); // {EXPANDED}
+		result.add("n17"); // {EXPANDED}
+		result.add("n18"); // {EXPANDED}
+		result.add("n19"); // {EXPANDED}
+		result.add("n2"); // {EXPANDED}
+		result.add("n20"); // {EXPANDED}
+		result.add("n21"); // {EXPANDED}
+		result.add("n22"); // {EXPANDED}
+		result.add("n23"); // {EXPANDED}
+		result.add("n24"); // {EXPANDED}
+		result.add("n25"); // {EXPANDED}
+		result.add("n3"); // {EXPANDED}
+		result.add("n4"); // {EXPANDED}
+		result.add("n5"); // {EXPANDED}
+		result.add("n6"); // {EXPANDED}
+		result.add("n7"); // {EXPANDED}
+		result.add("n8"); // {EXPANDED}
+		result.add("n9"); // {EXPANDED}
+		result.add("valid"); // {EXPANDED}
+		//@formatter:on
+
+		return result;
+	}
+
+	public int getStateBitCount() {
+
+		//@formatter:off
+		// return {STATE_BIT_COUNT};
+		return 5; // {EXPANDED}
+		//@formatter:on
+	}
+
+	public int getInputBitCount() {
+
+		//@formatter:off
+		// return {INPUT_BIT_COUNT};
+		return 2; // {EXPANDED}
+		//@formatter:on
 	}
 
 	private String getBinary(int num, int digits) {
