@@ -607,13 +607,13 @@ public class ConsoleHandler {
 	@Command
 	public void testCode() throws Exception {
 
-		int [] initial = {0,0,0,0,0};
+		int [] initial = new int[100];
 
 		CodeSimulator sim1 = new CodeSimulator();
 
 		ArrayList<int[]> counterExample = sim1.exploreSpace(initial);
 
-		sim1.runSim2(initial, counterExample);
+//		sim1.runSim2(initial, counterExample);
 
 	}
 

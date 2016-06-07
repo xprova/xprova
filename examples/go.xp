@@ -1,4 +1,8 @@
-synth_verilog examples/assertion-test.v output/synth.v
+testCode
+:q
+
+
+synth_verilog examples/assertion-test2.v output/synth.v
 
 ll examples/gate_library_mini.v
 
@@ -10,11 +14,9 @@ rename_modules
 
 ungroupNets %s_%d_
 
-#genCode template1.j
+genCode template1.j
 
 #! dot -Tpdf output/state.dot -o output/state.pdf
-
-testCode
 
 :quit
 
