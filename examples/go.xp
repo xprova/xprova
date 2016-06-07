@@ -1,7 +1,6 @@
 testCode
 :q
 
-
 synth_verilog examples/assertion-test2.v output/synth.v
 
 ll examples/gate_library_mini.v
@@ -16,10 +15,11 @@ ungroupNets %s_%d_
 
 genCode template1.j
 
-#! dot -Tpdf output/state.dot -o output/state.pdf
+export_dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
+
+! dot -Tpdf output/netlist.dot -o output/netlist.pdf
 
 :quit
-
 
 ll examples/gate_library_mini.v
 
@@ -53,8 +53,6 @@ print
 
 #testCode
 
-export_dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
-! dot -Tpdf output/netlist.dot -o output/netlist.pdf
 
-! dot -Tpdf output/state.dot -o output/state.pdf
+

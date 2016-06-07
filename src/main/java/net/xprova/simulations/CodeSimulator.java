@@ -2,10 +2,7 @@ package net.xprova.simulations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-
-import net.xprova.graph.Graph;
-import net.xprova.graph.MultiMap;
+import java.util.Stack;
 
 public class CodeSimulator {
 
@@ -22,31 +19,31 @@ public class CodeSimulator {
 		//@formatter:on
 
 		//@formatter:off
-		// int {STATE_BIT} = initial[{STATE_BIT_INDEX}];
-		int count_0_ = initial >> 0 & 1; // {EXPANDED}
-		int count_10_ = initial >> 1 & 1; // {EXPANDED}
-		int count_11_ = initial >> 2 & 1; // {EXPANDED}
-		int count_1_ = initial >> 3 & 1; // {EXPANDED}
-		int count_2_ = initial >> 4 & 1; // {EXPANDED}
-		int count_3_ = initial >> 5 & 1; // {EXPANDED}
-		int count_4_ = initial >> 6 & 1; // {EXPANDED}
-		int count_5_ = initial >> 7 & 1; // {EXPANDED}
-		int count_6_ = initial >> 8 & 1; // {EXPANDED}
-		int count_7_ = initial >> 9 & 1; // {EXPANDED}
-		int count_8_ = initial >> 10 & 1; // {EXPANDED}
-		int count_9_ = initial >> 11 & 1; // {EXPANDED}
-		int n78 = initial >> 12 & 1; // {EXPANDED}
-		int n79 = initial >> 13 & 1; // {EXPANDED}
-		int n80 = initial >> 14 & 1; // {EXPANDED}
-		int n81 = initial >> 15 & 1; // {EXPANDED}
-		int n82 = initial >> 16 & 1; // {EXPANDED}
-		int n83 = initial >> 17 & 1; // {EXPANDED}
-		int n84 = initial >> 18 & 1; // {EXPANDED}
-		int n85 = initial >> 19 & 1; // {EXPANDED}
-		int n86 = initial >> 20 & 1; // {EXPANDED}
-		int n87 = initial >> 21 & 1; // {EXPANDED}
-		int n88 = initial >> 22 & 1; // {EXPANDED}
-		int n89 = initial >> 23 & 1; // {EXPANDED}
+		// int {STATE_BIT} = -(initial >> {STATE_BIT_INDEX} & 1);
+		int count_0_ = -(initial >> 0 & 1); // {EXPANDED}
+		int count_10_ = -(initial >> 1 & 1); // {EXPANDED}
+		int count_11_ = -(initial >> 2 & 1); // {EXPANDED}
+		int count_1_ = -(initial >> 3 & 1); // {EXPANDED}
+		int count_2_ = -(initial >> 4 & 1); // {EXPANDED}
+		int count_3_ = -(initial >> 5 & 1); // {EXPANDED}
+		int count_4_ = -(initial >> 6 & 1); // {EXPANDED}
+		int count_5_ = -(initial >> 7 & 1); // {EXPANDED}
+		int count_6_ = -(initial >> 8 & 1); // {EXPANDED}
+		int count_7_ = -(initial >> 9 & 1); // {EXPANDED}
+		int count_8_ = -(initial >> 10 & 1); // {EXPANDED}
+		int count_9_ = -(initial >> 11 & 1); // {EXPANDED}
+		int n78 = -(initial >> 12 & 1); // {EXPANDED}
+		int n79 = -(initial >> 13 & 1); // {EXPANDED}
+		int n80 = -(initial >> 14 & 1); // {EXPANDED}
+		int n81 = -(initial >> 15 & 1); // {EXPANDED}
+		int n82 = -(initial >> 16 & 1); // {EXPANDED}
+		int n83 = -(initial >> 17 & 1); // {EXPANDED}
+		int n84 = -(initial >> 18 & 1); // {EXPANDED}
+		int n85 = -(initial >> 19 & 1); // {EXPANDED}
+		int n86 = -(initial >> 20 & 1); // {EXPANDED}
+		int n87 = -(initial >> 21 & 1); // {EXPANDED}
+		int n88 = -(initial >> 22 & 1); // {EXPANDED}
+		int n89 = -(initial >> 23 & 1); // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
@@ -131,53 +128,12 @@ public class CodeSimulator {
 		int valid; // {EXPANDED}
 		//@formatter:on
 
-		Graph<Integer> stateGraph = new Graph<Integer>();
-
 		int[] toVisitArr = new int[1];
 		int toVisitArrOccupied = 1;
-
-		HashMap<Integer, Integer> distanceFromInitial = new HashMap<Integer, Integer>();
-
-		// key: (state, next_state)
-		// value: input vector
-		MultiMap<Integer, Integer, Integer> iVectors = new MultiMap<Integer, Integer, Integer>();
-
-		distanceFromInitial.put(0, 0);
 
 		int distance = 1;
 
 		Integer in = null; // input vector
-
-		int initialState = 0;
-
-		//@formatter:off
-		// initialState += ({STATE_BIT} & 1) << {STATE_BIT_INDEX};
-		initialState += (count_0_ & 1) << 0; // {EXPANDED}
-		initialState += (count_10_ & 1) << 1; // {EXPANDED}
-		initialState += (count_11_ & 1) << 2; // {EXPANDED}
-		initialState += (count_1_ & 1) << 3; // {EXPANDED}
-		initialState += (count_2_ & 1) << 4; // {EXPANDED}
-		initialState += (count_3_ & 1) << 5; // {EXPANDED}
-		initialState += (count_4_ & 1) << 6; // {EXPANDED}
-		initialState += (count_5_ & 1) << 7; // {EXPANDED}
-		initialState += (count_6_ & 1) << 8; // {EXPANDED}
-		initialState += (count_7_ & 1) << 9; // {EXPANDED}
-		initialState += (count_8_ & 1) << 10; // {EXPANDED}
-		initialState += (count_9_ & 1) << 11; // {EXPANDED}
-		initialState += (n78 & 1) << 12; // {EXPANDED}
-		initialState += (n79 & 1) << 13; // {EXPANDED}
-		initialState += (n80 & 1) << 14; // {EXPANDED}
-		initialState += (n81 & 1) << 15; // {EXPANDED}
-		initialState += (n82 & 1) << 16; // {EXPANDED}
-		initialState += (n83 & 1) << 17; // {EXPANDED}
-		initialState += (n84 & 1) << 18; // {EXPANDED}
-		initialState += (n85 & 1) << 19; // {EXPANDED}
-		initialState += (n86 & 1) << 20; // {EXPANDED}
-		initialState += (n87 & 1) << 21; // {EXPANDED}
-		initialState += (n88 & 1) << 22; // {EXPANDED}
-		initialState += (n89 & 1) << 23; // {EXPANDED}
-		initialState += (count_0_ & 1) << 0;
-		//@formatter:on
 
 		final int UNDISCOVERED = 0x55555555;
 
@@ -192,7 +148,7 @@ public class CodeSimulator {
 
 		// note: an actual state of Integer.
 
-		parentState[initialState] = -1;
+		parentState[initial] = -1;
 
 		long statesDiscovered = 0;
 
@@ -256,7 +212,7 @@ public class CodeSimulator {
 				n89 = -(state >> 23 & 1); // {EXPANDED}
 				//@formatter:on
 
-				int inputPermutes = 1 << 2;
+				int inputPermutes = 1 << inputBitCount;
 
 				for (in = 0; in < inputPermutes; in++) {
 
@@ -446,9 +402,7 @@ public class CodeSimulator {
 
 		System.out.printf("maxToVisitSize = %d\n", maxToVisitSize);
 
-		int[] result = new int[distance];
-
-		int i = 0;
+		Stack<Integer> rList = new Stack<Integer>();
 
 		if (violationState != null) {
 
@@ -456,21 +410,24 @@ public class CodeSimulator {
 
 			int currentState = violationState;
 
-			while (currentState != initialState) {
+			while (currentState != initial) {
 
-//				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
-//						+ ", reached from parent using input vector "
-//						+ getBinary(inputVector[currentState], inputBitCount));
+				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
+						+ ", reached from parent using input vector "
+						+ getBinary(inputVector[currentState], inputBitCount));
 
-				result[i] = inputVector[currentState];
+				rList.push(inputVector[currentState]);
 
 				currentState = parentState[currentState];
-
-				i += 1;
 
 			}
 
 			System.out.println("currentState = " + getBinary(currentState, stateBitCount));
+
+			int[] result = new int[distance];
+
+			for (int j = 0; j < distance-1; j++)
+				result[j] = rList.pop();
 
 			return result;
 
@@ -517,31 +474,31 @@ public class CodeSimulator {
 		int[] ena1 = new int[cycles]; // {EXPANDED}
 		int[] ena2 = new int[cycles]; // {EXPANDED}
 
-		// {STATE_BIT}[0] = initial >> {STATE_BIT_INDEX} & 1;
-		count_0_[0] = initial >> 0 & 1; // {EXPANDED}
-		count_10_[0] = initial >> 1 & 1; // {EXPANDED}
-		count_11_[0] = initial >> 2 & 1; // {EXPANDED}
-		count_1_[0] = initial >> 3 & 1; // {EXPANDED}
-		count_2_[0] = initial >> 4 & 1; // {EXPANDED}
-		count_3_[0] = initial >> 5 & 1; // {EXPANDED}
-		count_4_[0] = initial >> 6 & 1; // {EXPANDED}
-		count_5_[0] = initial >> 7 & 1; // {EXPANDED}
-		count_6_[0] = initial >> 8 & 1; // {EXPANDED}
-		count_7_[0] = initial >> 9 & 1; // {EXPANDED}
-		count_8_[0] = initial >> 10 & 1; // {EXPANDED}
-		count_9_[0] = initial >> 11 & 1; // {EXPANDED}
-		n78[0] = initial >> 12 & 1; // {EXPANDED}
-		n79[0] = initial >> 13 & 1; // {EXPANDED}
-		n80[0] = initial >> 14 & 1; // {EXPANDED}
-		n81[0] = initial >> 15 & 1; // {EXPANDED}
-		n82[0] = initial >> 16 & 1; // {EXPANDED}
-		n83[0] = initial >> 17 & 1; // {EXPANDED}
-		n84[0] = initial >> 18 & 1; // {EXPANDED}
-		n85[0] = initial >> 19 & 1; // {EXPANDED}
-		n86[0] = initial >> 20 & 1; // {EXPANDED}
-		n87[0] = initial >> 21 & 1; // {EXPANDED}
-		n88[0] = initial >> 22 & 1; // {EXPANDED}
-		n89[0] = initial >> 23 & 1; // {EXPANDED}
+		// {STATE_BIT}[0] = -(initial >> {STATE_BIT_INDEX} & 1);
+		count_0_[0] = -(initial >> 0 & 1); // {EXPANDED}
+		count_10_[0] = -(initial >> 1 & 1); // {EXPANDED}
+		count_11_[0] = -(initial >> 2 & 1); // {EXPANDED}
+		count_1_[0] = -(initial >> 3 & 1); // {EXPANDED}
+		count_2_[0] = -(initial >> 4 & 1); // {EXPANDED}
+		count_3_[0] = -(initial >> 5 & 1); // {EXPANDED}
+		count_4_[0] = -(initial >> 6 & 1); // {EXPANDED}
+		count_5_[0] = -(initial >> 7 & 1); // {EXPANDED}
+		count_6_[0] = -(initial >> 8 & 1); // {EXPANDED}
+		count_7_[0] = -(initial >> 9 & 1); // {EXPANDED}
+		count_8_[0] = -(initial >> 10 & 1); // {EXPANDED}
+		count_9_[0] = -(initial >> 11 & 1); // {EXPANDED}
+		n78[0] = -(initial >> 12 & 1); // {EXPANDED}
+		n79[0] = -(initial >> 13 & 1); // {EXPANDED}
+		n80[0] = -(initial >> 14 & 1); // {EXPANDED}
+		n81[0] = -(initial >> 15 & 1); // {EXPANDED}
+		n82[0] = -(initial >> 16 & 1); // {EXPANDED}
+		n83[0] = -(initial >> 17 & 1); // {EXPANDED}
+		n84[0] = -(initial >> 18 & 1); // {EXPANDED}
+		n85[0] = -(initial >> 19 & 1); // {EXPANDED}
+		n86[0] = -(initial >> 20 & 1); // {EXPANDED}
+		n87[0] = -(initial >> 21 & 1); // {EXPANDED}
+		n88[0] = -(initial >> 22 & 1); // {EXPANDED}
+		n89[0] = -(initial >> 23 & 1); // {EXPANDED}
 
 		// int[] {NON_STATE_BIT} = new int[cycles];
 		int[] n1 = new int[cycles]; // {EXPANDED}
@@ -1042,3 +999,4 @@ public class CodeSimulator {
 	}
 
 }
+

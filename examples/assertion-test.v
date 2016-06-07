@@ -19,7 +19,7 @@ module top (clk, rst, ena1, ena2, count, valid);
 		
 			count <= 0;
 			
-		end else if (a1 | a2) begin
+		end else if (ena1) begin
 		
 			count <= count + 1;
 			
