@@ -2,9 +2,7 @@ package net.xprova.simulations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import net.xprova.graph.Graph;
 import net.xprova.graph.MultiMap;
@@ -14,7 +12,7 @@ public class CodeSimulator {
 	public static final int L = 0;
 	public static final int H = -1;
 
-	public ArrayList<int[]> exploreSpace(int initial[]) throws Exception {
+	public int[] exploreSpace(int initial) throws Exception {
 
 		//@formatter:off
 		// int stateBitCount = {STATE_BIT_COUNT};
@@ -25,30 +23,30 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// int {STATE_BIT} = initial[{STATE_BIT_INDEX}];
-		int count_0_ = initial[0]; // {EXPANDED}
-		int count_10_ = initial[1]; // {EXPANDED}
-		int count_11_ = initial[2]; // {EXPANDED}
-		int count_1_ = initial[3]; // {EXPANDED}
-		int count_2_ = initial[4]; // {EXPANDED}
-		int count_3_ = initial[5]; // {EXPANDED}
-		int count_4_ = initial[6]; // {EXPANDED}
-		int count_5_ = initial[7]; // {EXPANDED}
-		int count_6_ = initial[8]; // {EXPANDED}
-		int count_7_ = initial[9]; // {EXPANDED}
-		int count_8_ = initial[10]; // {EXPANDED}
-		int count_9_ = initial[11]; // {EXPANDED}
-		int n78 = initial[12]; // {EXPANDED}
-		int n79 = initial[13]; // {EXPANDED}
-		int n80 = initial[14]; // {EXPANDED}
-		int n81 = initial[15]; // {EXPANDED}
-		int n82 = initial[16]; // {EXPANDED}
-		int n83 = initial[17]; // {EXPANDED}
-		int n84 = initial[18]; // {EXPANDED}
-		int n85 = initial[19]; // {EXPANDED}
-		int n86 = initial[20]; // {EXPANDED}
-		int n87 = initial[21]; // {EXPANDED}
-		int n88 = initial[22]; // {EXPANDED}
-		int n89 = initial[23]; // {EXPANDED}
+		int count_0_ = initial >> 0 & 1; // {EXPANDED}
+		int count_10_ = initial >> 1 & 1; // {EXPANDED}
+		int count_11_ = initial >> 2 & 1; // {EXPANDED}
+		int count_1_ = initial >> 3 & 1; // {EXPANDED}
+		int count_2_ = initial >> 4 & 1; // {EXPANDED}
+		int count_3_ = initial >> 5 & 1; // {EXPANDED}
+		int count_4_ = initial >> 6 & 1; // {EXPANDED}
+		int count_5_ = initial >> 7 & 1; // {EXPANDED}
+		int count_6_ = initial >> 8 & 1; // {EXPANDED}
+		int count_7_ = initial >> 9 & 1; // {EXPANDED}
+		int count_8_ = initial >> 10 & 1; // {EXPANDED}
+		int count_9_ = initial >> 11 & 1; // {EXPANDED}
+		int n78 = initial >> 12 & 1; // {EXPANDED}
+		int n79 = initial >> 13 & 1; // {EXPANDED}
+		int n80 = initial >> 14 & 1; // {EXPANDED}
+		int n81 = initial >> 15 & 1; // {EXPANDED}
+		int n82 = initial >> 16 & 1; // {EXPANDED}
+		int n83 = initial >> 17 & 1; // {EXPANDED}
+		int n84 = initial >> 18 & 1; // {EXPANDED}
+		int n85 = initial >> 19 & 1; // {EXPANDED}
+		int n86 = initial >> 20 & 1; // {EXPANDED}
+		int n87 = initial >> 21 & 1; // {EXPANDED}
+		int n88 = initial >> 22 & 1; // {EXPANDED}
+		int n89 = initial >> 23 & 1; // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
@@ -448,6 +446,10 @@ public class CodeSimulator {
 
 		System.out.printf("maxToVisitSize = %d\n", maxToVisitSize);
 
+		int[] result = new int[distance];
+
+		int i = 0;
+
 		if (violationState != null) {
 
 			System.out.printf("Counter-example found (distance = %d)!\n", distance);
@@ -456,126 +458,25 @@ public class CodeSimulator {
 
 			while (currentState != initialState) {
 
-				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
-						+ ", reached from parent using input vector "
-						+ getBinary(inputVector[currentState], inputBitCount));
+//				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
+//						+ ", reached from parent using input vector "
+//						+ getBinary(inputVector[currentState], inputBitCount));
+
+				result[i] = inputVector[currentState];
 
 				currentState = parentState[currentState];
+
+				i += 1;
 
 			}
 
 			System.out.println("currentState = " + getBinary(currentState, stateBitCount));
 
-		}
-
-		// GraphDotPrinter.printGraph("output/state.dot", stateGraph);
-
-		if (violationState != null) {
-
-			System.out.printf("Counter-example found (distance = %d)!\n", distance);
-
-			// now back track to find shortest path from violationState to
-			// initial state
-
-			ArrayList<Integer> counterExampleState = new ArrayList<Integer>();
-
-			ArrayList<Integer> counterExampleInputVectors = new ArrayList<Integer>();
-
-			HashSet<Integer> visitedStates = new HashSet<Integer>();
-
-			Integer current = violationState;
-
-			int shortestDistance = distance + 1;
-
-			while (current != 0) {
-
-				counterExampleState.add(current);
-
-				HashSet<Integer> prevStates = stateGraph.bfs(current, 1, true);
-
-				prevStates.removeAll(visitedStates);
-
-				if (prevStates.isEmpty())
-					throw new Exception("could not generate counter example.");
-
-				for (Integer previousState : prevStates) {
-
-					int d = distanceFromInitial.get(previousState);
-
-					if ((d < shortestDistance) || (previousState == 0)) {
-
-						current = previousState;
-
-						shortestDistance = d;
-
-					}
-
-				}
-
-				visitedStates.addAll(prevStates);
-
-			}
-
-			counterExampleState.add(0);
-
-			Collections.reverse(counterExampleState);
-
-			int nCounter = counterExampleState.size();
-
-			for (int i = 0; i < nCounter - 1; i++) {
-
-				int s1 = counterExampleState.get(i);
-				int s2 = counterExampleState.get(i + 1);
-
-				counterExampleInputVectors.add(iVectors.get(s1, s2));
-
-			}
-
-			counterExampleInputVectors.add(in);
-
-			for (int i = 0; i < nCounter; i++) {
-
-				Integer inpVec = counterExampleInputVectors.get(i);
-
-				int state = counterExampleState.get(i);
-
-				System.out.printf("state: %s, input vector %s\n", getBinary(state, stateBitCount),
-						getBinary(inpVec, inputBitCount));
-
-			}
-
-			// formatter:off
-			// int[] counterExample_{INPUT_BIT} = new int[nCounter];
-			int[] counterExample_ena1 = new int[nCounter]; // {EXPANDED}
-			int[] counterExample_ena2 = new int[nCounter]; // {EXPANDED}
-			// formatter:on
-
-			for (int i = 0; i < nCounter; i++) {
-
-				Integer inpVec = counterExampleInputVectors.get(i);
-
-				// formatter:off
-				// counterExample_{INPUT_BIT}[i] = -(inpVec >> {INPUT_BIT_INDEX}
-				// & 1);
-				counterExample_ena1[i] = -(inpVec >> 0 & 1); // {EXPANDED}
-				counterExample_ena2[i] = -(inpVec >> 1 & 1); // {EXPANDED}
-				// formatter:on
-
-			}
-
-			ArrayList<int[]> counterExampleInputs = new ArrayList<int[]>();
-
-			// formatter:off
-			// counterExampleInputs.add(counterExample_{INPUT_BIT});
-			counterExampleInputs.add(counterExample_ena1); // {EXPANDED}
-			counterExampleInputs.add(counterExample_ena2); // {EXPANDED}
-			// formatter:on
-
-			return counterExampleInputs;
+			return result;
 
 		} else {
 
-			// no counter-example found
+			// no counter-example was found
 
 			return null;
 
@@ -583,7 +484,7 @@ public class CodeSimulator {
 
 	}
 
-	public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {
+	public ArrayList<int[]> simulate(int initial, int[] inputs, int cycles) {
 
 		//@formatter:off
 		// int[] {STATE_BIT} = new int[cycles];
@@ -612,35 +513,35 @@ public class CodeSimulator {
 		int[] n88 = new int[cycles]; // {EXPANDED}
 		int[] n89 = new int[cycles]; // {EXPANDED}
 
-		// {STATE_BIT}[0] = initial[{STATE_BIT_INDEX}];
-		count_0_[0] = initial[0]; // {EXPANDED}
-		count_10_[0] = initial[1]; // {EXPANDED}
-		count_11_[0] = initial[2]; // {EXPANDED}
-		count_1_[0] = initial[3]; // {EXPANDED}
-		count_2_[0] = initial[4]; // {EXPANDED}
-		count_3_[0] = initial[5]; // {EXPANDED}
-		count_4_[0] = initial[6]; // {EXPANDED}
-		count_5_[0] = initial[7]; // {EXPANDED}
-		count_6_[0] = initial[8]; // {EXPANDED}
-		count_7_[0] = initial[9]; // {EXPANDED}
-		count_8_[0] = initial[10]; // {EXPANDED}
-		count_9_[0] = initial[11]; // {EXPANDED}
-		n78[0] = initial[12]; // {EXPANDED}
-		n79[0] = initial[13]; // {EXPANDED}
-		n80[0] = initial[14]; // {EXPANDED}
-		n81[0] = initial[15]; // {EXPANDED}
-		n82[0] = initial[16]; // {EXPANDED}
-		n83[0] = initial[17]; // {EXPANDED}
-		n84[0] = initial[18]; // {EXPANDED}
-		n85[0] = initial[19]; // {EXPANDED}
-		n86[0] = initial[20]; // {EXPANDED}
-		n87[0] = initial[21]; // {EXPANDED}
-		n88[0] = initial[22]; // {EXPANDED}
-		n89[0] = initial[23]; // {EXPANDED}
+		// int[] {INPUT_BIT} = new int[cycles];
+		int[] ena1 = new int[cycles]; // {EXPANDED}
+		int[] ena2 = new int[cycles]; // {EXPANDED}
 
-		// int {INPUT_BIT}[] = inputs.get({INPUT_BIT_INDEX});
-		int ena1[] = inputs.get(0); // {EXPANDED}
-		int ena2[] = inputs.get(1); // {EXPANDED}
+		// {STATE_BIT}[0] = initial >> {STATE_BIT_INDEX} & 1;
+		count_0_[0] = initial >> 0 & 1; // {EXPANDED}
+		count_10_[0] = initial >> 1 & 1; // {EXPANDED}
+		count_11_[0] = initial >> 2 & 1; // {EXPANDED}
+		count_1_[0] = initial >> 3 & 1; // {EXPANDED}
+		count_2_[0] = initial >> 4 & 1; // {EXPANDED}
+		count_3_[0] = initial >> 5 & 1; // {EXPANDED}
+		count_4_[0] = initial >> 6 & 1; // {EXPANDED}
+		count_5_[0] = initial >> 7 & 1; // {EXPANDED}
+		count_6_[0] = initial >> 8 & 1; // {EXPANDED}
+		count_7_[0] = initial >> 9 & 1; // {EXPANDED}
+		count_8_[0] = initial >> 10 & 1; // {EXPANDED}
+		count_9_[0] = initial >> 11 & 1; // {EXPANDED}
+		n78[0] = initial >> 12 & 1; // {EXPANDED}
+		n79[0] = initial >> 13 & 1; // {EXPANDED}
+		n80[0] = initial >> 14 & 1; // {EXPANDED}
+		n81[0] = initial >> 15 & 1; // {EXPANDED}
+		n82[0] = initial >> 16 & 1; // {EXPANDED}
+		n83[0] = initial >> 17 & 1; // {EXPANDED}
+		n84[0] = initial >> 18 & 1; // {EXPANDED}
+		n85[0] = initial >> 19 & 1; // {EXPANDED}
+		n86[0] = initial >> 20 & 1; // {EXPANDED}
+		n87[0] = initial >> 21 & 1; // {EXPANDED}
+		n88[0] = initial >> 22 & 1; // {EXPANDED}
+		n89[0] = initial >> 23 & 1; // {EXPANDED}
 
 		// int[] {NON_STATE_BIT} = new int[cycles];
 		int[] n1 = new int[cycles]; // {EXPANDED}
@@ -726,6 +627,10 @@ public class CodeSimulator {
 		for (int i = 0; i < cycles; i++) {
 
 			//@formatter:off
+			// {INPUT_BIT}[i] = -(inputs[i] >> {INPUT_BIT_INDEX} & 1);
+			ena1[i] = -(inputs[i] >> 0 & 1); // {EXPANDED}
+			ena2[i] = -(inputs[i] >> 1 & 1); // {EXPANDED}
+
 			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
 			n1[i] = (n78[i] ^ ena2[i]); // {EXPANDED}
 			n48[i] = ~(n78[i] & n81[i]); // {EXPANDED}
@@ -1098,11 +1003,11 @@ public class CodeSimulator {
 		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
 	}
 
-	public void runSim2(int[] initial, ArrayList<int[]> inputs) {
+	public void runSim2(int initial, int[] inputs) {
 
 		ArrayList<String> sigNames = getSignalNames();
 
-		int cycles = inputs.get(0).length;
+		int cycles = inputs.length;
 
 		ArrayList<int[]> results = simulate(initial, inputs, cycles);
 
