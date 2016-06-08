@@ -11,6 +11,18 @@ public class CodeSimulator {
 
 	public int[] exploreSpace(int initial) throws Exception {
 
+		// method parameters:
+
+		final int STATE_BUF_SIZE = 20000000;
+
+		final int DISCOVERED_BUF_SIZE = 100000;
+
+		boolean printStateList = false;
+
+		final int UNDISCOVERED = 0x55555555;
+
+		// method body:
+
 		//@formatter:off
 		// int stateBitCount = {STATE_BIT_COUNT};
 		int stateBitCount = 24; // {EXPANDED}
@@ -133,12 +145,10 @@ public class CodeSimulator {
 
 		int distance = 1;
 
-		Integer in = null; // input vector
+		int in; // input vector
 
-		final int UNDISCOVERED = 0x55555555;
-
-		int[] parentState = new int[20000000];
-		int[] inputVector = new int[20000000];
+		int[] parentState = new int[STATE_BUF_SIZE];
+		int[] inputVector = new int[STATE_BUF_SIZE];
 
 		Arrays.fill(parentState, UNDISCOVERED);
 
@@ -148,20 +158,17 @@ public class CodeSimulator {
 
 		// note: an actual state of Integer.
 
-		parentState[initial] = -1;
+		parentState[initial] = -1; // marked parentState as visited
 
 		long statesDiscovered = 0;
 
-		Integer violationState = null;
+		int violationState = UNDISCOVERED;
 
-		long maxToVisitSize = 0;
-
-		int[][] buf = new int[2][100000];
+		int[][] buf = new int[2][DISCOVERED_BUF_SIZE];
 
 		int bufSelector = 0;
 
 		int state = initial;
-		int old_state = initial;
 
 		System.out.println("Starting search ...");
 
@@ -175,18 +182,11 @@ public class CodeSimulator {
 
 			int toVisitNextArrOccupied = 0;
 
-			if (toVisitArrOccupied > maxToVisitSize)
-				maxToVisitSize = toVisitArrOccupied;
-
 			for (int i1 = 0; i1 < toVisitArrOccupied; i1++) {
 
-				old_state = state;
 				state = toVisitArr[i1];
 
 				statesDiscovered += 1;
-
-//				if (statesDiscovered % 1e6 == 0)
-//					System.out.printf("Discovered %d states ...\n", statesDiscovered);
 
 				//@formatter:off
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
@@ -225,7 +225,6 @@ public class CodeSimulator {
 					int ena1 = -(in >> 0 & 1); // {EXPANDED}
 					int ena2 = -(in >> 1 & 1); // {EXPANDED}
 					//@formatter:on
-
 
 					//@formatter:off
 					// {COMB_ASSIGN}
@@ -309,12 +308,14 @@ public class CodeSimulator {
 					n14 = ~(n42 | n37); // {EXPANDED}
 					//@formatter:on
 
-
+					//@formatter:off
+					// {STATE_ASSIGN} {PREFIX1=int next_}
+					//@formatter:on
 
 					int nxState = 0;
 
 					//@formatter:off
-					// nxState += (next_{STATE_BIT} & 1) << {STATE_BIT_INDEX};
+					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 					nxState |= n13 & (1 << 0); // {EXPANDED}
 					nxState |= n14 & (1 << 1); // {EXPANDED}
 					nxState |= n15 & (1 << 2); // {EXPANDED}
@@ -377,13 +378,13 @@ public class CodeSimulator {
 
 		double searchTime = (endTime - startTime) / 1e9;
 
-		System.out.printf("completed search in %f seconds\n", searchTime);
+		System.out.printf("Completed search in %f seconds\n", searchTime);
 
-		System.out.printf("maxToVisitSize = %d\n", maxToVisitSize);
+		System.out.printf("States discovered = %d\n", statesDiscovered);
 
 		Stack<Integer> rList = new Stack<Integer>();
 
-		if (violationState != null) {
+		if (violationState != UNDISCOVERED) {
 
 			System.out.printf("Counter-example found (distance = %d)!\n", distance);
 
@@ -391,28 +392,26 @@ public class CodeSimulator {
 
 			while (currentState != initial) {
 
-//				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
-//						+ ", reached from parent using input vector "
-//						+ getBinary(inputVector[currentState], inputBitCount));
+				if (printStateList)
+					System.out.println("currentState = " + getBinary(currentState, stateBitCount)
+							+ ", reached from parent using input vector "
+							+ getBinary(inputVector[currentState], inputBitCount));
 
-				rList.push(inputVector[currentState]);
+				rList.add(inputVector[currentState]);
 
 				currentState = parentState[currentState];
-
 			}
-
-			System.out.println("currentState = " + getBinary(currentState, stateBitCount));
 
 			int[] result = new int[distance];
 
-			for (int j = 0; j < distance-1; j++)
+			for (int j = 0; j < distance - 1; j++)
 				result[j] = rList.pop();
 
 			return result;
 
 		} else {
 
-			// no counter-example was found
+			System.out.println("Assertion proven, no counter-examples were found.");
 
 			return null;
 
@@ -420,7 +419,182 @@ public class CodeSimulator {
 
 	}
 
-	public ArrayList<int[]> simulate(int initial, int[] inputs, int cycles) {
+	public ArrayList<String> getSignalNames() {
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		//@formatter:off
+		// result.add("{STATE_BIT}");
+		result.add("count_0_"); // {EXPANDED}
+		result.add("count_10_"); // {EXPANDED}
+		result.add("count_11_"); // {EXPANDED}
+		result.add("count_1_"); // {EXPANDED}
+		result.add("count_2_"); // {EXPANDED}
+		result.add("count_3_"); // {EXPANDED}
+		result.add("count_4_"); // {EXPANDED}
+		result.add("count_5_"); // {EXPANDED}
+		result.add("count_6_"); // {EXPANDED}
+		result.add("count_7_"); // {EXPANDED}
+		result.add("count_8_"); // {EXPANDED}
+		result.add("count_9_"); // {EXPANDED}
+		result.add("n78"); // {EXPANDED}
+		result.add("n79"); // {EXPANDED}
+		result.add("n80"); // {EXPANDED}
+		result.add("n81"); // {EXPANDED}
+		result.add("n82"); // {EXPANDED}
+		result.add("n83"); // {EXPANDED}
+		result.add("n84"); // {EXPANDED}
+		result.add("n85"); // {EXPANDED}
+		result.add("n86"); // {EXPANDED}
+		result.add("n87"); // {EXPANDED}
+		result.add("n88"); // {EXPANDED}
+		result.add("n89"); // {EXPANDED}
+
+		// result.add("{INPUT_BIT}");
+		result.add("ena1"); // {EXPANDED}
+		result.add("ena2"); // {EXPANDED}
+
+		// result.add("{NON_STATE_BIT}");
+		result.add("n1"); // {EXPANDED}
+		result.add("n10"); // {EXPANDED}
+		result.add("n11"); // {EXPANDED}
+		result.add("n12"); // {EXPANDED}
+		result.add("n13"); // {EXPANDED}
+		result.add("n14"); // {EXPANDED}
+		result.add("n15"); // {EXPANDED}
+		result.add("n16"); // {EXPANDED}
+		result.add("n17"); // {EXPANDED}
+		result.add("n18"); // {EXPANDED}
+		result.add("n19"); // {EXPANDED}
+		result.add("n2"); // {EXPANDED}
+		result.add("n20"); // {EXPANDED}
+		result.add("n21"); // {EXPANDED}
+		result.add("n22"); // {EXPANDED}
+		result.add("n23"); // {EXPANDED}
+		result.add("n24"); // {EXPANDED}
+		result.add("n25"); // {EXPANDED}
+		result.add("n26"); // {EXPANDED}
+		result.add("n27"); // {EXPANDED}
+		result.add("n28"); // {EXPANDED}
+		result.add("n29"); // {EXPANDED}
+		result.add("n3"); // {EXPANDED}
+		result.add("n30"); // {EXPANDED}
+		result.add("n31"); // {EXPANDED}
+		result.add("n32"); // {EXPANDED}
+		result.add("n33"); // {EXPANDED}
+		result.add("n34"); // {EXPANDED}
+		result.add("n35"); // {EXPANDED}
+		result.add("n36"); // {EXPANDED}
+		result.add("n37"); // {EXPANDED}
+		result.add("n38"); // {EXPANDED}
+		result.add("n39"); // {EXPANDED}
+		result.add("n4"); // {EXPANDED}
+		result.add("n40"); // {EXPANDED}
+		result.add("n41"); // {EXPANDED}
+		result.add("n42"); // {EXPANDED}
+		result.add("n43"); // {EXPANDED}
+		result.add("n44"); // {EXPANDED}
+		result.add("n45"); // {EXPANDED}
+		result.add("n46"); // {EXPANDED}
+		result.add("n47"); // {EXPANDED}
+		result.add("n48"); // {EXPANDED}
+		result.add("n49"); // {EXPANDED}
+		result.add("n5"); // {EXPANDED}
+		result.add("n50"); // {EXPANDED}
+		result.add("n51"); // {EXPANDED}
+		result.add("n52"); // {EXPANDED}
+		result.add("n53"); // {EXPANDED}
+		result.add("n54"); // {EXPANDED}
+		result.add("n55"); // {EXPANDED}
+		result.add("n56"); // {EXPANDED}
+		result.add("n57"); // {EXPANDED}
+		result.add("n58"); // {EXPANDED}
+		result.add("n59"); // {EXPANDED}
+		result.add("n6"); // {EXPANDED}
+		result.add("n60"); // {EXPANDED}
+		result.add("n61"); // {EXPANDED}
+		result.add("n62"); // {EXPANDED}
+		result.add("n63"); // {EXPANDED}
+		result.add("n64"); // {EXPANDED}
+		result.add("n65"); // {EXPANDED}
+		result.add("n66"); // {EXPANDED}
+		result.add("n67"); // {EXPANDED}
+		result.add("n68"); // {EXPANDED}
+		result.add("n69"); // {EXPANDED}
+		result.add("n7"); // {EXPANDED}
+		result.add("n70"); // {EXPANDED}
+		result.add("n71"); // {EXPANDED}
+		result.add("n72"); // {EXPANDED}
+		result.add("n73"); // {EXPANDED}
+		result.add("n74"); // {EXPANDED}
+		result.add("n75"); // {EXPANDED}
+		result.add("n76"); // {EXPANDED}
+		result.add("n77"); // {EXPANDED}
+		result.add("n8"); // {EXPANDED}
+		result.add("n9"); // {EXPANDED}
+		result.add("valid"); // {EXPANDED}
+		//@formatter:on
+
+		return result;
+	}
+
+	public int getStateBitCount() {
+
+		//@formatter:off
+		// return {STATE_BIT_COUNT};
+		return 24; // {EXPANDED}
+		//@formatter:on
+	}
+
+	public int getInputBitCount() {
+
+		//@formatter:off
+		// return {INPUT_BIT_COUNT};
+		return 2; // {EXPANDED}
+		//@formatter:on
+	}
+
+	public void simulate(int initial, int[] inputs) {
+
+		ArrayList<String> sigNames = getSignalNames();
+
+		int cycles = inputs.length;
+
+		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
+
+		System.out.printf("%10s : ", "Cycle");
+
+		for (int i = 0; i < cycles; i++)
+			System.out.printf("%d", i % 10);
+
+		System.out.println();
+
+		System.out.println();
+
+		for (int j = 0; j < waveforms.size(); j++) {
+
+			if (j == getStateBitCount())
+				System.out.println();
+
+			int[] sig = waveforms.get(j);
+
+			System.out.printf("%10s : ", sigNames.get(j));
+
+			for (int i = 0; i < cycles; i++) {
+
+				System.out.printf((sig[i] == H) ? "1" : "0");
+
+			}
+
+			System.out.println();
+
+		}
+
+	}
+
+	private ArrayList<int[]> simulate_internal(int initial, int[] inputs) {
+
+		int cycles = inputs.length;
 
 		//@formatter:off
 		// int[] {STATE_BIT} = new int[cycles];
@@ -650,30 +824,6 @@ public class CodeSimulator {
 			if (i < cycles-1) {
 
 				// {STATE_ASSIGN} {POSTFIX1=[i+1]} {POSTFIX2=[i]}
-				count_0_[i+1] = n13[i]; // {EXPANDED}
-				count_10_[i+1] = n14[i]; // {EXPANDED}
-				count_11_[i+1] = n15[i]; // {EXPANDED}
-				count_1_[i+1] = n16[i]; // {EXPANDED}
-				count_2_[i+1] = n17[i]; // {EXPANDED}
-				count_3_[i+1] = n18[i]; // {EXPANDED}
-				count_4_[i+1] = n19[i]; // {EXPANDED}
-				count_5_[i+1] = n20[i]; // {EXPANDED}
-				count_6_[i+1] = n21[i]; // {EXPANDED}
-				count_7_[i+1] = n22[i]; // {EXPANDED}
-				count_8_[i+1] = n23[i]; // {EXPANDED}
-				count_9_[i+1] = n24[i]; // {EXPANDED}
-				n78[i+1] = n1[i]; // {EXPANDED}
-				n79[i+1] = n2[i]; // {EXPANDED}
-				n80[i+1] = n3[i]; // {EXPANDED}
-				n81[i+1] = n4[i]; // {EXPANDED}
-				n82[i+1] = n5[i]; // {EXPANDED}
-				n83[i+1] = n6[i]; // {EXPANDED}
-				n84[i+1] = n7[i]; // {EXPANDED}
-				n85[i+1] = n8[i]; // {EXPANDED}
-				n86[i+1] = n9[i]; // {EXPANDED}
-				n87[i+1] = n10[i]; // {EXPANDED}
-				n88[i+1] = n11[i]; // {EXPANDED}
-				n89[i+1] = n12[i]; // {EXPANDED}
 
 			}
 			//@formatter:on
@@ -797,184 +947,11 @@ public class CodeSimulator {
 		return waveforms;
 	}
 
-	public ArrayList<String> getSignalNames() {
-
-		ArrayList<String> result = new ArrayList<String>();
-
-		//@formatter:off
-		// result.add("{STATE_BIT}");
-		result.add("count_0_"); // {EXPANDED}
-		result.add("count_10_"); // {EXPANDED}
-		result.add("count_11_"); // {EXPANDED}
-		result.add("count_1_"); // {EXPANDED}
-		result.add("count_2_"); // {EXPANDED}
-		result.add("count_3_"); // {EXPANDED}
-		result.add("count_4_"); // {EXPANDED}
-		result.add("count_5_"); // {EXPANDED}
-		result.add("count_6_"); // {EXPANDED}
-		result.add("count_7_"); // {EXPANDED}
-		result.add("count_8_"); // {EXPANDED}
-		result.add("count_9_"); // {EXPANDED}
-		result.add("n78"); // {EXPANDED}
-		result.add("n79"); // {EXPANDED}
-		result.add("n80"); // {EXPANDED}
-		result.add("n81"); // {EXPANDED}
-		result.add("n82"); // {EXPANDED}
-		result.add("n83"); // {EXPANDED}
-		result.add("n84"); // {EXPANDED}
-		result.add("n85"); // {EXPANDED}
-		result.add("n86"); // {EXPANDED}
-		result.add("n87"); // {EXPANDED}
-		result.add("n88"); // {EXPANDED}
-		result.add("n89"); // {EXPANDED}
-
-		// result.add("{INPUT_BIT}");
-		result.add("ena1"); // {EXPANDED}
-		result.add("ena2"); // {EXPANDED}
-
-		// result.add("{NON_STATE_BIT}");
-		result.add("n1"); // {EXPANDED}
-		result.add("n10"); // {EXPANDED}
-		result.add("n11"); // {EXPANDED}
-		result.add("n12"); // {EXPANDED}
-		result.add("n13"); // {EXPANDED}
-		result.add("n14"); // {EXPANDED}
-		result.add("n15"); // {EXPANDED}
-		result.add("n16"); // {EXPANDED}
-		result.add("n17"); // {EXPANDED}
-		result.add("n18"); // {EXPANDED}
-		result.add("n19"); // {EXPANDED}
-		result.add("n2"); // {EXPANDED}
-		result.add("n20"); // {EXPANDED}
-		result.add("n21"); // {EXPANDED}
-		result.add("n22"); // {EXPANDED}
-		result.add("n23"); // {EXPANDED}
-		result.add("n24"); // {EXPANDED}
-		result.add("n25"); // {EXPANDED}
-		result.add("n26"); // {EXPANDED}
-		result.add("n27"); // {EXPANDED}
-		result.add("n28"); // {EXPANDED}
-		result.add("n29"); // {EXPANDED}
-		result.add("n3"); // {EXPANDED}
-		result.add("n30"); // {EXPANDED}
-		result.add("n31"); // {EXPANDED}
-		result.add("n32"); // {EXPANDED}
-		result.add("n33"); // {EXPANDED}
-		result.add("n34"); // {EXPANDED}
-		result.add("n35"); // {EXPANDED}
-		result.add("n36"); // {EXPANDED}
-		result.add("n37"); // {EXPANDED}
-		result.add("n38"); // {EXPANDED}
-		result.add("n39"); // {EXPANDED}
-		result.add("n4"); // {EXPANDED}
-		result.add("n40"); // {EXPANDED}
-		result.add("n41"); // {EXPANDED}
-		result.add("n42"); // {EXPANDED}
-		result.add("n43"); // {EXPANDED}
-		result.add("n44"); // {EXPANDED}
-		result.add("n45"); // {EXPANDED}
-		result.add("n46"); // {EXPANDED}
-		result.add("n47"); // {EXPANDED}
-		result.add("n48"); // {EXPANDED}
-		result.add("n49"); // {EXPANDED}
-		result.add("n5"); // {EXPANDED}
-		result.add("n50"); // {EXPANDED}
-		result.add("n51"); // {EXPANDED}
-		result.add("n52"); // {EXPANDED}
-		result.add("n53"); // {EXPANDED}
-		result.add("n54"); // {EXPANDED}
-		result.add("n55"); // {EXPANDED}
-		result.add("n56"); // {EXPANDED}
-		result.add("n57"); // {EXPANDED}
-		result.add("n58"); // {EXPANDED}
-		result.add("n59"); // {EXPANDED}
-		result.add("n6"); // {EXPANDED}
-		result.add("n60"); // {EXPANDED}
-		result.add("n61"); // {EXPANDED}
-		result.add("n62"); // {EXPANDED}
-		result.add("n63"); // {EXPANDED}
-		result.add("n64"); // {EXPANDED}
-		result.add("n65"); // {EXPANDED}
-		result.add("n66"); // {EXPANDED}
-		result.add("n67"); // {EXPANDED}
-		result.add("n68"); // {EXPANDED}
-		result.add("n69"); // {EXPANDED}
-		result.add("n7"); // {EXPANDED}
-		result.add("n70"); // {EXPANDED}
-		result.add("n71"); // {EXPANDED}
-		result.add("n72"); // {EXPANDED}
-		result.add("n73"); // {EXPANDED}
-		result.add("n74"); // {EXPANDED}
-		result.add("n75"); // {EXPANDED}
-		result.add("n76"); // {EXPANDED}
-		result.add("n77"); // {EXPANDED}
-		result.add("n8"); // {EXPANDED}
-		result.add("n9"); // {EXPANDED}
-		result.add("valid"); // {EXPANDED}
-		//@formatter:on
-
-		return result;
-	}
-
-	public int getStateBitCount() {
-
-		//@formatter:off
-		// return {STATE_BIT_COUNT};
-		return 24; // {EXPANDED}
-		//@formatter:on
-	}
-
-	public int getInputBitCount() {
-
-		//@formatter:off
-		// return {INPUT_BIT_COUNT};
-		return 2; // {EXPANDED}
-		//@formatter:on
-	}
-
 	private String getBinary(int num, int digits) {
 
 		String bitFmt = String.format("%%%ds", digits);
 
 		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
-	}
-
-	public void runSim2(int initial, int[] inputs) {
-
-		ArrayList<String> sigNames = getSignalNames();
-
-		int cycles = inputs.length;
-
-		ArrayList<int[]> results = simulate(initial, inputs, cycles);
-
-		System.out.printf("%10s : ", "Cycle");
-
-		for (int i = 0; i < cycles; i++)
-			System.out.printf("%d", i % 10);
-
-		System.out.println();
-
-		System.out.println();
-
-		for (int j = 0; j < results.size(); j++) {
-
-			if (j == getStateBitCount())
-				System.out.println();
-
-			int[] sig = results.get(j);
-
-			System.out.printf("%10s : ", sigNames.get(j));
-
-			for (int i = 0; i < cycles; i++) {
-
-				System.out.printf((sig[i] == H) ? "1" : "0");
-
-			}
-
-			System.out.println();
-
-		}
-
 	}
 
 }

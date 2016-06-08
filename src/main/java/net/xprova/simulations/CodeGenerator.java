@@ -2,7 +2,7 @@ package net.xprova.simulations;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -27,7 +27,10 @@ public class CodeGenerator {
 	// nets that are not input, q or ignored:
 	TreeSet<Vertex> internalNets = new TreeSet<Vertex>();
 
-	private ArrayList<String> flopAssigns;
+	// map: flip-flop output (q) -> input (d) nets
+	HashMap<Vertex, Vertex> flopMap;
+
+//	private ArrayList<String> flopAssigns;
 
 	private ArrayList<String> assigns;
 
@@ -57,7 +60,7 @@ public class CodeGenerator {
 
 				lines.add(s);
 
-				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}")) {
+				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}") || s.contains("{NEXT_STATE_BIT}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -70,6 +73,8 @@ public class CodeGenerator {
 						si = si.replace("{STATE_BIT}", v.toString());
 
 						si = si.replace("{STATE_BIT_INDEX}", Integer.toString(ind));
+
+						si = si.replace("{NEXT_STATE_BIT}", flopMap.get(v).toString());
 
 						si += expandComment;
 
@@ -157,39 +162,39 @@ public class CodeGenerator {
 
 					}
 
-				} else if (s.contains("{STATE_ASSIGN}")) {
-
-					String s2 = s.replaceFirst("//(.)+", "");
-
-					String regexPos1 = "\\{POSTFIX1=([^\\}.]+)\\}";
-					String regexPos2 = "\\{POSTFIX2=([^\\}.]+)\\}";
-					String regexPre1 = "\\{PREFIX1=([^\\}.]+)\\}";
-					String regexPre2 = "\\{PREFIX2=([^\\}.]+)\\}";
-
-					Matcher m1 = Pattern.compile(regexPos1).matcher(s);
-					Matcher m2 = Pattern.compile(regexPos2).matcher(s);
-					Matcher m3 = Pattern.compile(regexPre1).matcher(s);
-					Matcher m4 = Pattern.compile(regexPre2).matcher(s);
-
-					String postfix1 = m1.find() ? m1.group(1) : "";
-					String postfix2 = m2.find() ? m2.group(1) : "";
-					String prefix1 = m3.find() ? m3.group(1) : "";
-					String prefix2 = m4.find() ? m4.group(1) : "";
-
-					for (String a : flopAssigns) {
-
-						String si = s2 + a;
-
-						si = si.replace("{POSTFIX1}", postfix1);
-						si = si.replace("{POSTFIX2}", postfix2);
-						si = si.replace("{PREFIX1}", prefix1);
-						si = si.replace("{PREFIX2}", prefix2);
-
-						si += expandComment;
-
-						lines.add(si);
-
-					}
+//				} else if (s.contains("{STATE_ASSIGN}")) {
+//
+//					String s2 = s.replaceFirst("//(.)+", "");
+//
+//					String regexPos1 = "\\{POSTFIX1=([^\\}.]+)\\}";
+//					String regexPos2 = "\\{POSTFIX2=([^\\}.]+)\\}";
+//					String regexPre1 = "\\{PREFIX1=([^\\}.]+)\\}";
+//					String regexPre2 = "\\{PREFIX2=([^\\}.]+)\\}";
+//
+//					Matcher m1 = Pattern.compile(regexPos1).matcher(s);
+//					Matcher m2 = Pattern.compile(regexPos2).matcher(s);
+//					Matcher m3 = Pattern.compile(regexPre1).matcher(s);
+//					Matcher m4 = Pattern.compile(regexPre2).matcher(s);
+//
+//					String postfix1 = m1.find() ? m1.group(1) : "";
+//					String postfix2 = m2.find() ? m2.group(1) : "";
+//					String prefix1 = m3.find() ? m3.group(1) : "";
+//					String prefix2 = m4.find() ? m4.group(1) : "";
+//
+//					for (String a : flopAssigns) {
+//
+//						String si = s2 + a;
+//
+//						si = si.replace("{POSTFIX1}", postfix1);
+//						si = si.replace("{POSTFIX2}", postfix2);
+//						si = si.replace("{PREFIX1}", prefix1);
+//						si = si.replace("{PREFIX2}", prefix2);
+//
+//						si += expandComment;
+//
+//						lines.add(si);
+//
+//					}
 
 				} else if (s.contains("{STATE_BIT_COUNT}")) {
 
@@ -242,6 +247,8 @@ public class CodeGenerator {
 		inpNets = new TreeSet<Vertex>();
 
 		internalNets = new TreeSet<Vertex>();
+
+		flopMap = new HashMap<Vertex, Vertex>();
 
 		// flip-flop d input nets:
 		HashSet<Vertex> dNets = new HashSet<Vertex>();
@@ -384,7 +391,7 @@ public class CodeGenerator {
 
 		// Collections.reverse(assigns);
 
-		flopAssigns = new ArrayList<String>();
+//		flopAssigns = new ArrayList<String>();
 
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
@@ -392,126 +399,15 @@ public class CodeGenerator {
 
 			Vertex dNet = graph.getNet(v, "D");
 
-			flopAssigns.add(String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};", qNet, dNet));
+			flopMap.put(qNet, dNet);
+
+//			flopAssigns.add(String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};", qNet, dNet));
 
 		}
 
-		Collections.sort(flopAssigns);
+//		Collections.sort(flopAssigns);
 
 	}
 
-	public void generate_old() throws Exception {
-
-		// print out
-
-		String strHeader = "public ArrayList<int[]> simulate(int[] initial, ArrayList<int[]> inputs, int cycles) {\n";
-
-		out.println(strHeader);
-
-		for (Vertex v : qNets)
-			out.printf("\tint[] %s = new int[cycles];\n", v);
-
-		out.println();
-
-		for (Vertex v : qNets)
-			out.printf("\t%s[0] = initial[%d];\n", v, qNets.headSet(v).size());
-
-		out.println();
-
-		for (Vertex v : inpNets)
-			out.printf("\tint %s[] = inputs.get(%d);\n", v, inpNets.headSet(v).size());
-
-		out.println();
-
-		for (Vertex v : internalNets)
-			out.printf("\tint[] %s = new int[cycles];\n", v);
-
-		out.println();
-
-		out.println("\tfor (int i=0; i<cycles; i++) {\n");
-
-		for (String s : assigns)
-			out.printf("\t\t%s\n", s);
-
-		out.println();
-
-		out.println("\t\tif (i < cycles-1) {\n");
-
-		for (String line : flopAssigns)
-			out.printf("\t\t\t%s\n", line);
-
-		out.println("\t\t}\n");
-
-		out.println("\t}\n");
-
-		out.println("\tArrayList<int[]> waveforms = new ArrayList<int[]>();\n");
-
-		for (Vertex v : qNets)
-			out.printf("\twaveforms.add(%s);\n", v);
-
-		out.println();
-
-		for (Vertex v : inpNets)
-			out.printf("\twaveforms.add(%s);\n", v);
-
-		out.println();
-
-		for (Vertex v : internalNets)
-			out.printf("\twaveforms.add(%s);\n", v);
-
-		out.println();
-
-		out.println("\treturn waveforms;");
-
-		out.println("}");
-
-		//
-
-		out.println();
-
-		out.println("public ArrayList<String> getSignalNames() {\n");
-
-		out.println("\tArrayList<String> result = new ArrayList<String>();\n");
-
-		for (Vertex v : qNets)
-			out.printf("\tresult.add(\"%s\");\n", v);
-
-		out.println();
-
-		for (Vertex v : inpNets)
-			out.printf("\tresult.add(\"%s\");\n", v);
-
-		out.println();
-
-		for (Vertex v : internalNets)
-			out.printf("\tresult.add(\"%s\");\n", v);
-
-		out.println();
-
-		out.println("\treturn result;");
-
-		out.println("}");
-
-		//
-
-		out.println();
-
-		out.println("public int getStateBitCount() {\n");
-
-		out.printf("\treturn %d;\n", qNets.size());
-
-		out.println("}");
-
-		//
-
-		out.println();
-
-		out.println("public int getInputBitCount() {\n");
-
-		out.printf("\treturn %d;\n", inpNets.size());
-
-		out.println("}");
-
-	}
 
 }
