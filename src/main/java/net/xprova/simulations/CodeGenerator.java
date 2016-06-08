@@ -30,8 +30,6 @@ public class CodeGenerator {
 	// map: flip-flop output (q) -> input (d) nets
 	HashMap<Vertex, Vertex> flopMap;
 
-//	private ArrayList<String> flopAssigns;
-
 	private ArrayList<String> assigns;
 
 	public CodeGenerator(NetlistGraph graph, PrintStream out) throws Exception {
@@ -253,9 +251,6 @@ public class CodeGenerator {
 		// flip-flop d input nets:
 		HashSet<Vertex> dNets = new HashSet<Vertex>();
 
-		// netlist outputs:
-		HashSet<Vertex> outpNets = new HashSet<Vertex>();
-
 		// clk and rst:
 		HashSet<Vertex> ignoreNets = new HashSet<Vertex>();
 
@@ -280,8 +275,6 @@ public class CodeGenerator {
 
 		inpNets.removeAll(ignoreNets);
 
-		outpNets = graph.getOutputs();
-
 		internalNets.addAll(graph.getNets());
 		internalNets.removeAll(inpNets);
 		internalNets.removeAll(qNets);
@@ -304,8 +297,6 @@ public class CodeGenerator {
 		processed.addAll(inpNets);
 
 		toVisit = netGraph.bfs(processed, 1, false);
-
-		HashSet<Vertex> graphInputs = graph.getInputs();
 
 		while (!toVisit.isEmpty()) {
 
@@ -375,23 +366,11 @@ public class CodeGenerator {
 
 			}
 
-			// visited.addAll(toVisit);
-
-			// toVisit = netGraph.bfs(toVisit, 1, true);
-
-			// toVisit.removeAll(inNets);
-
 			toVisitNext.removeAll(processed);
 
 			toVisit = toVisitNext;
 
-			// toVisit.removeAll(graphInputs);
-
 		}
-
-		// Collections.reverse(assigns);
-
-//		flopAssigns = new ArrayList<String>();
 
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
@@ -401,13 +380,8 @@ public class CodeGenerator {
 
 			flopMap.put(qNet, dNet);
 
-//			flopAssigns.add(String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};", qNet, dNet));
-
 		}
 
-//		Collections.sort(flopAssigns);
-
 	}
-
 
 }

@@ -1,4 +1,4 @@
-testCode
+testCode 0
 :q
 
 synth_verilog examples/assertion-test2.v output/synth.v

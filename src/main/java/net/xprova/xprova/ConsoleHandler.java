@@ -605,15 +605,23 @@ public class ConsoleHandler {
 	}
 
 	@Command
-	public void testCode() throws Exception {
+	public void testCode(int printCounterExample) throws Exception {
 
 		int initial = 0;
 
 		CodeSimulator sim1 = new CodeSimulator();
 
-		int[] counterExample = sim1.exploreSpace(initial);
+		if (printCounterExample == 1) {
 
-//		sim1.simulate(initial, counterExample);
+			int[] counterExample = sim1.exploreSpace(initial);
+
+			sim1.simulate(initial, counterExample);
+
+		} else {
+
+			sim1.exploreSpace(initial);
+
+		}
 
 	}
 
