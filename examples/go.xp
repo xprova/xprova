@@ -1,7 +1,7 @@
 testCode 0
 :q
 
-synth_verilog examples/assertion-test2.v output/synth.v
+synth_verilog examples/assertion-test3.v output/synth.v
 
 ll examples/gate_library_mini.v
 
@@ -13,7 +13,7 @@ rename_modules
 
 ungroupNets %s_%d_
 
-genCode template2.j
+genCode template1.j
 
 export_dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 

@@ -1,5 +1,16 @@
 // finding a state for which valid=0 in the design below takes 9.55 second on ifv:
 
+module assert1 (count, count2, valid);
+
+	input [11:0] count;
+	input [11:0] count2;
+	
+	output valid;
+
+	assign valid = (count != 12'hfff) | (count2 != 12'hfff);
+	
+endmodule
+
 module top (clk, rst, ena1, ena2, count, valid);
 
 	input clk, rst, ena1, ena2;
@@ -10,6 +21,8 @@ module top (clk, rst, ena1, ena2, count, valid);
 	
 	reg [11:0] count;
 	reg [11:0] count2;
+	
+	wire valid;
 	
 	always @(posedge clk or posedge rst) begin
 	
@@ -37,8 +50,9 @@ module top (clk, rst, ena1, ena2, count, valid);
 			
 		end
 	
-	end	
+	end
 	
-	assign valid = (count != 12'hfff) | (count2 != 12'hfff);
+	assert1 u1 (count, count2, valid);		
 	
 endmodule
+

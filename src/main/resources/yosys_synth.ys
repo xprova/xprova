@@ -19,7 +19,8 @@ dfflibmap -liberty %CELL_LIB%
 abc -liberty %CELL_LIB%
 
 # cleanup
-clean
+# purge switch removes unneeded assign statements
+opt_clean -purge
 
 # write synthesized design
 write_verilog %SYNTH_FILE%
