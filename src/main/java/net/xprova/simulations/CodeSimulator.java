@@ -160,6 +160,9 @@ public class CodeSimulator {
 
 		int bufSelector = 0;
 
+		int state = initial;
+		int old_state = initial;
+
 		System.out.println("Starting search ...");
 
 		long startTime = System.nanoTime();
@@ -177,12 +180,13 @@ public class CodeSimulator {
 
 			for (int i1 = 0; i1 < toVisitArrOccupied; i1++) {
 
-				int state = toVisitArr[i1];
+				old_state = state;
+				state = toVisitArr[i1];
 
 				statesDiscovered += 1;
 
-				if (statesDiscovered % 1e6 == 0)
-					System.out.printf("Discovered %d states ...\n", statesDiscovered);
+//				if (statesDiscovered % 1e6 == 0)
+//					System.out.printf("Discovered %d states ...\n", statesDiscovered);
 
 				//@formatter:off
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
@@ -212,7 +216,7 @@ public class CodeSimulator {
 				n89 = -(state >> 23 & 1); // {EXPANDED}
 				//@formatter:on
 
-				int inputPermutes = 1 << inputBitCount;
+				int inputPermutes = 1 << (inputBitCount);
 
 				for (in = 0; in < inputPermutes; in++) {
 
@@ -221,6 +225,7 @@ public class CodeSimulator {
 					int ena1 = -(in >> 0 & 1); // {EXPANDED}
 					int ena2 = -(in >> 1 & 1); // {EXPANDED}
 					//@formatter:on
+
 
 					//@formatter:off
 					// {COMB_ASSIGN}
@@ -304,62 +309,36 @@ public class CodeSimulator {
 					n14 = ~(n42 | n37); // {EXPANDED}
 					//@formatter:on
 
-					//@formatter:off
-					// {STATE_ASSIGN} {PREFIX1=int next_}
-					int next_count_0_ = n13; // {EXPANDED}
-					int next_count_10_ = n14; // {EXPANDED}
-					int next_count_11_ = n15; // {EXPANDED}
-					int next_count_1_ = n16; // {EXPANDED}
-					int next_count_2_ = n17; // {EXPANDED}
-					int next_count_3_ = n18; // {EXPANDED}
-					int next_count_4_ = n19; // {EXPANDED}
-					int next_count_5_ = n20; // {EXPANDED}
-					int next_count_6_ = n21; // {EXPANDED}
-					int next_count_7_ = n22; // {EXPANDED}
-					int next_count_8_ = n23; // {EXPANDED}
-					int next_count_9_ = n24; // {EXPANDED}
-					int next_n78 = n1; // {EXPANDED}
-					int next_n79 = n2; // {EXPANDED}
-					int next_n80 = n3; // {EXPANDED}
-					int next_n81 = n4; // {EXPANDED}
-					int next_n82 = n5; // {EXPANDED}
-					int next_n83 = n6; // {EXPANDED}
-					int next_n84 = n7; // {EXPANDED}
-					int next_n85 = n8; // {EXPANDED}
-					int next_n86 = n9; // {EXPANDED}
-					int next_n87 = n10; // {EXPANDED}
-					int next_n88 = n11; // {EXPANDED}
-					int next_n89 = n12; // {EXPANDED}
-					//@formatter:on
+
 
 					int nxState = 0;
 
 					//@formatter:off
 					// nxState += (next_{STATE_BIT} & 1) << {STATE_BIT_INDEX};
-					nxState += (next_count_0_ & 1) << 0; // {EXPANDED}
-					nxState += (next_count_10_ & 1) << 1; // {EXPANDED}
-					nxState += (next_count_11_ & 1) << 2; // {EXPANDED}
-					nxState += (next_count_1_ & 1) << 3; // {EXPANDED}
-					nxState += (next_count_2_ & 1) << 4; // {EXPANDED}
-					nxState += (next_count_3_ & 1) << 5; // {EXPANDED}
-					nxState += (next_count_4_ & 1) << 6; // {EXPANDED}
-					nxState += (next_count_5_ & 1) << 7; // {EXPANDED}
-					nxState += (next_count_6_ & 1) << 8; // {EXPANDED}
-					nxState += (next_count_7_ & 1) << 9; // {EXPANDED}
-					nxState += (next_count_8_ & 1) << 10; // {EXPANDED}
-					nxState += (next_count_9_ & 1) << 11; // {EXPANDED}
-					nxState += (next_n78 & 1) << 12; // {EXPANDED}
-					nxState += (next_n79 & 1) << 13; // {EXPANDED}
-					nxState += (next_n80 & 1) << 14; // {EXPANDED}
-					nxState += (next_n81 & 1) << 15; // {EXPANDED}
-					nxState += (next_n82 & 1) << 16; // {EXPANDED}
-					nxState += (next_n83 & 1) << 17; // {EXPANDED}
-					nxState += (next_n84 & 1) << 18; // {EXPANDED}
-					nxState += (next_n85 & 1) << 19; // {EXPANDED}
-					nxState += (next_n86 & 1) << 20; // {EXPANDED}
-					nxState += (next_n87 & 1) << 21; // {EXPANDED}
-					nxState += (next_n88 & 1) << 22; // {EXPANDED}
-					nxState += (next_n89 & 1) << 23; // {EXPANDED}
+					nxState |= n13 & (1 << 0); // {EXPANDED}
+					nxState |= n14 & (1 << 1); // {EXPANDED}
+					nxState |= n15 & (1 << 2); // {EXPANDED}
+					nxState |= n16 & (1 << 3); // {EXPANDED}
+					nxState |= n17 & (1 << 4); // {EXPANDED}
+					nxState |= n18 & (1 << 5); // {EXPANDED}
+					nxState |= n19 & (1 << 6); // {EXPANDED}
+					nxState |= n20 & (1 << 7); // {EXPANDED}
+					nxState |= n21 & (1 << 8); // {EXPANDED}
+					nxState |= n22 & (1 << 9); // {EXPANDED}
+					nxState |= n23 & (1 << 10); // {EXPANDED}
+					nxState |= n24 & (1 << 11); // {EXPANDED}
+					nxState |= n1 & (1 << 12); // {EXPANDED}
+					nxState |= n2 & (1 << 13); // {EXPANDED}
+					nxState |= n3 & (1 << 14); // {EXPANDED}
+					nxState |= n4 & (1 << 15); // {EXPANDED}
+					nxState |= n5 & (1 << 16); // {EXPANDED}
+					nxState |= n6 & (1 << 17); // {EXPANDED}
+					nxState |= n7 & (1 << 18); // {EXPANDED}
+					nxState |= n8 & (1 << 19); // {EXPANDED}
+					nxState |= n9 & (1 << 20); // {EXPANDED}
+					nxState |= n10 & (1 << 21); // {EXPANDED}
+					nxState |= n11 & (1 << 22); // {EXPANDED}
+					nxState |= n12 & (1 << 23); // {EXPANDED}
 					//@formatter:on
 
 					if (parentState[nxState] == UNDISCOVERED) {
@@ -412,9 +391,9 @@ public class CodeSimulator {
 
 			while (currentState != initial) {
 
-				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
-						+ ", reached from parent using input vector "
-						+ getBinary(inputVector[currentState], inputBitCount));
+//				System.out.println("currentState = " + getBinary(currentState, stateBitCount)
+//						+ ", reached from parent using input vector "
+//						+ getBinary(inputVector[currentState], inputBitCount));
 
 				rList.push(inputVector[currentState]);
 

@@ -613,7 +613,7 @@ public class ConsoleHandler {
 
 		int[] counterExample = sim1.exploreSpace(initial);
 
-		sim1.runSim2(initial, counterExample);
+//		sim1.runSim2(initial, counterExample);
 
 	}
 
