@@ -28,7 +28,15 @@ module XOR (y, a, b);
 	output y;
 endmodule
 
-module DFF (CK, RS, D, Q);
-	input CK, RS, D;
+module DFF (CK, RS, ST, D, Q);
+	input CK, RS, ST, D;
 	output Q;
+endmodule
+
+module TIE0(y);
+	output y;
+endmodule
+
+module TIE1(y);
+	output y;
 endmodule

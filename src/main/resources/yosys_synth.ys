@@ -22,6 +22,8 @@ abc -liberty %CELL_LIB%
 # purge switch removes unneeded assign statements
 opt_clean -purge
 
+hilomap -singleton -hicell TIE1 y -locell TIE0 y
+
 # write synthesized design
 write_verilog %SYNTH_FILE%
 

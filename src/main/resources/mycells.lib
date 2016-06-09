@@ -47,11 +47,14 @@ library(demo) {
   }    
   cell(DFF) {
     area: 18;
-    ff(IQ, IQN) { clocked_on: CK;
-                  next_state: D;
-                  clear : RS ;
+    ff(IQ, IQN) { clocked_on: "CK";
+                  next_state: "D";
+                  clear : "RS";
+                  preset : "ST";
                    }
     pin(RS) { direction: input;
+                 }
+    pin(ST) { direction: input;
                  }
     pin(CK) { direction: input;
                  clock: true; }
