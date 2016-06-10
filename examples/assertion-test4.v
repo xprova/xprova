@@ -34,7 +34,7 @@ module top (clk, rst, ena, valid);
 	
 	lfsr u1 (clk, rst, ena, state);
 	
-	assign valid = state == 8;
+	assign valid = state != 8;
 	
 endmodule
 

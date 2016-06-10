@@ -607,7 +607,7 @@ public class ConsoleHandler {
 	@Command
 	public void testCode(int printCounterExample) throws Exception {
 
-		int initial = 0;
+		int initial = 1;
 
 		CodeSimulator sim1 = new CodeSimulator();
 
@@ -615,7 +615,8 @@ public class ConsoleHandler {
 
 			int[] counterExample = sim1.exploreSpace(initial);
 
-			sim1.simulate(initial, counterExample);
+			if (counterExample != null)
+				sim1.simulate(initial, counterExample);
 
 		} else {
 

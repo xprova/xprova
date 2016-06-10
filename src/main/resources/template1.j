@@ -141,6 +141,7 @@ public class CodeSimulator {
 		//@formatter:on
 
 		int[] toVisitArr = new int[1];
+		toVisitArr[0] = initial;
 		int toVisitArrOccupied = 1;
 
 		int distance = 1;
