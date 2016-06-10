@@ -607,9 +607,9 @@ public class ConsoleHandler {
 	@Command
 	public void testCode(int printCounterExample) throws Exception {
 
-		int initial = 1;
-
 		CodeSimulator sim1 = new CodeSimulator();
+
+		int initial = sim1.getResetState();
 
 		if (printCounterExample == 1) {
 

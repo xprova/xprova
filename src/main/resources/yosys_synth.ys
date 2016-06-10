@@ -22,7 +22,10 @@ abc -liberty %CELL_LIB%
 # purge switch removes unneeded assign statements
 opt_clean -purge
 
+# add TIE1 and TIE0 cells
 hilomap -singleton -hicell TIE1 y -locell TIE0 y
+
+splitnets -format __
 
 # write synthesized design
 write_verilog %SYNTH_FILE%

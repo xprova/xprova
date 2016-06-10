@@ -32,6 +32,8 @@ public class CodeGenerator {
 
 	private ArrayList<String> assigns;
 
+	private int resetState;
+
 	public CodeGenerator(NetlistGraph graph, PrintStream out) throws Exception {
 
 		this.graph = graph;
@@ -160,39 +162,15 @@ public class CodeGenerator {
 
 					}
 
-//				} else if (s.contains("{STATE_ASSIGN}")) {
-//
-//					String s2 = s.replaceFirst("//(.)+", "");
-//
-//					String regexPos1 = "\\{POSTFIX1=([^\\}.]+)\\}";
-//					String regexPos2 = "\\{POSTFIX2=([^\\}.]+)\\}";
-//					String regexPre1 = "\\{PREFIX1=([^\\}.]+)\\}";
-//					String regexPre2 = "\\{PREFIX2=([^\\}.]+)\\}";
-//
-//					Matcher m1 = Pattern.compile(regexPos1).matcher(s);
-//					Matcher m2 = Pattern.compile(regexPos2).matcher(s);
-//					Matcher m3 = Pattern.compile(regexPre1).matcher(s);
-//					Matcher m4 = Pattern.compile(regexPre2).matcher(s);
-//
-//					String postfix1 = m1.find() ? m1.group(1) : "";
-//					String postfix2 = m2.find() ? m2.group(1) : "";
-//					String prefix1 = m3.find() ? m3.group(1) : "";
-//					String prefix2 = m4.find() ? m4.group(1) : "";
-//
-//					for (String a : flopAssigns) {
-//
-//						String si = s2 + a;
-//
-//						si = si.replace("{POSTFIX1}", postfix1);
-//						si = si.replace("{POSTFIX2}", postfix2);
-//						si = si.replace("{PREFIX1}", prefix1);
-//						si = si.replace("{PREFIX2}", prefix2);
-//
-//						si += expandComment;
-//
-//						lines.add(si);
-//
-//					}
+				} else if (s.contains("{RESET_STATE}")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					s = s.replace("{RESET_STATE}", String.format("0x%x", resetState));
+
+					s += expandComment;
+
+					lines.add(s);
 
 				} else if (s.contains("{STATE_BIT_COUNT}")) {
 
@@ -226,15 +204,6 @@ public class CodeGenerator {
 
 		for (String l : lines)
 			out.println(l);
-
-		// populateStructures();
-		//
-		// generate();
-		//
-		// pg("State bits:\n");
-		//
-		// for (Vertex s : qNets)
-		// pg("%s\n", s);
 
 	}
 
@@ -379,6 +348,39 @@ public class CodeGenerator {
 			Vertex dNet = graph.getNet(v, "D");
 
 			flopMap.put(qNet, dNet);
+
+		}
+
+		// finally, determine the design's resetState
+
+		HashSet<Vertex> ioNets = graph.getIONets();
+
+		for (Vertex q : qNets.descendingSet()) {
+
+			Vertex v = graph.getSourceModule(q);
+
+			Vertex rsNet = graph.getNet(v, "RS");
+			Vertex stNet = graph.getNet(v, "ST");
+
+			int bit;
+
+			if (ioNets.contains(rsNet) && !ioNets.contains(stNet)) {
+
+				bit = 0;
+
+			} else if (!ioNets.contains(rsNet) && ioNets.contains(stNet)) {
+
+				bit = 1;
+
+			} else {
+
+				String strE = String.format("could not determine initial state of FF <%s>", v);
+
+				throw new Exception(strE);
+
+			}
+
+			resetState = (resetState << 1) + bit;
 
 		}
 

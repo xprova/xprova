@@ -9,11 +9,19 @@ public class CodeSimulator {
 	public static final int L = 0;
 	public static final int H = -1;
 
+	public int getResetState() {
+
+		// return {RESET_STATE};
+
+	}
+
 	public int[] exploreSpace(int initial) throws Exception {
 
 		// method parameters:
 
-		final int STATE_BUF_SIZE = 20000000;
+		//@formatter:off
+		// final int STATE_BUF_SIZE = 1 << {STATE_BIT_COUNT};
+		//@formatter:on
 
 		final int DISCOVERED_BUF_SIZE = 100000;
 
