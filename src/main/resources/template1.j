@@ -308,15 +308,6 @@ public class CodeSimulator {
 					n14 = ~(n42 | n37); // {EXPANDED}
 					//@formatter:on
 
-					//@formatter:off
-					// {STATE_ASSIGN} {PREFIX1=int next_}
-					int next_count_0_ = n1; // {EXPANDED}
-					int next_count_1_ = n2; // {EXPANDED}
-					int next_count_2_ = n3; // {EXPANDED}
-					int next_count_3_ = n4; // {EXPANDED}
-					int next_n26 = ena1; // {EXPANDED}
-					//@formatter:on
-
 					int nxState = 0;
 
 					//@formatter:off
@@ -828,34 +819,11 @@ public class CodeSimulator {
 
 			if (i < cycles-1) {
 
-				// {STATE_ASSIGN} {POSTFIX1=[i+1]} {POSTFIX2=[i]}
-				count_0_[i+1] = n13[i]; // {EXPANDED}
-				count_10_[i+1] = n14[i]; // {EXPANDED}
-				count_11_[i+1] = n15[i]; // {EXPANDED}
-				count_1_[i+1] = n16[i]; // {EXPANDED}
-				count_2_[i+1] = n17[i]; // {EXPANDED}
-				count_3_[i+1] = n18[i]; // {EXPANDED}
-				count_4_[i+1] = n19[i]; // {EXPANDED}
-				count_5_[i+1] = n20[i]; // {EXPANDED}
-				count_6_[i+1] = n21[i]; // {EXPANDED}
-				count_7_[i+1] = n22[i]; // {EXPANDED}
-				count_8_[i+1] = n23[i]; // {EXPANDED}
-				count_9_[i+1] = n24[i]; // {EXPANDED}
-				n78[i+1] = n1[i]; // {EXPANDED}
-				n79[i+1] = n2[i]; // {EXPANDED}
-				n80[i+1] = n3[i]; // {EXPANDED}
-				n81[i+1] = n4[i]; // {EXPANDED}
-				n82[i+1] = n5[i]; // {EXPANDED}
-				n83[i+1] = n6[i]; // {EXPANDED}
-				n84[i+1] = n7[i]; // {EXPANDED}
-				n85[i+1] = n8[i]; // {EXPANDED}
-				n86[i+1] = n9[i]; // {EXPANDED}
-				n87[i+1] = n10[i]; // {EXPANDED}
-				n88[i+1] = n11[i]; // {EXPANDED}
-				n89[i+1] = n12[i]; // {EXPANDED}
+				//@formatter:off
+				// {STATE_BIT}[i+1] |= {NEXT_STATE_BIT}[i];
+				//@formatter:on				
 
 			}
-			//@formatter:on
 
 		}
 

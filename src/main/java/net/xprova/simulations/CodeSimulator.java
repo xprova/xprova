@@ -44,18 +44,18 @@ public class CodeSimulator {
 		int count_7_ = -(initial >> 9 & 1); // {EXPANDED}
 		int count_8_ = -(initial >> 10 & 1); // {EXPANDED}
 		int count_9_ = -(initial >> 11 & 1); // {EXPANDED}
-		int n78 = -(initial >> 12 & 1); // {EXPANDED}
-		int n79 = -(initial >> 13 & 1); // {EXPANDED}
-		int n80 = -(initial >> 14 & 1); // {EXPANDED}
-		int n81 = -(initial >> 15 & 1); // {EXPANDED}
-		int n82 = -(initial >> 16 & 1); // {EXPANDED}
-		int n83 = -(initial >> 17 & 1); // {EXPANDED}
-		int n84 = -(initial >> 18 & 1); // {EXPANDED}
-		int n85 = -(initial >> 19 & 1); // {EXPANDED}
-		int n86 = -(initial >> 20 & 1); // {EXPANDED}
-		int n87 = -(initial >> 21 & 1); // {EXPANDED}
-		int n88 = -(initial >> 22 & 1); // {EXPANDED}
-		int n89 = -(initial >> 23 & 1); // {EXPANDED}
+		int n79 = -(initial >> 12 & 1); // {EXPANDED}
+		int n80 = -(initial >> 13 & 1); // {EXPANDED}
+		int n81 = -(initial >> 14 & 1); // {EXPANDED}
+		int n82 = -(initial >> 15 & 1); // {EXPANDED}
+		int n83 = -(initial >> 16 & 1); // {EXPANDED}
+		int n84 = -(initial >> 17 & 1); // {EXPANDED}
+		int n85 = -(initial >> 18 & 1); // {EXPANDED}
+		int n86 = -(initial >> 19 & 1); // {EXPANDED}
+		int n87 = -(initial >> 20 & 1); // {EXPANDED}
+		int n88 = -(initial >> 21 & 1); // {EXPANDED}
+		int n89 = -(initial >> 22 & 1); // {EXPANDED}
+		int n90 = -(initial >> 23 & 1); // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
@@ -135,6 +135,7 @@ public class CodeSimulator {
 		int n75; // {EXPANDED}
 		int n76; // {EXPANDED}
 		int n77; // {EXPANDED}
+		int n78; // {EXPANDED}
 		int n8; // {EXPANDED}
 		int n9; // {EXPANDED}
 		int valid; // {EXPANDED}
@@ -202,18 +203,18 @@ public class CodeSimulator {
 				count_7_ = -(state >> 9 & 1); // {EXPANDED}
 				count_8_ = -(state >> 10 & 1); // {EXPANDED}
 				count_9_ = -(state >> 11 & 1); // {EXPANDED}
-				n78 = -(state >> 12 & 1); // {EXPANDED}
-				n79 = -(state >> 13 & 1); // {EXPANDED}
-				n80 = -(state >> 14 & 1); // {EXPANDED}
-				n81 = -(state >> 15 & 1); // {EXPANDED}
-				n82 = -(state >> 16 & 1); // {EXPANDED}
-				n83 = -(state >> 17 & 1); // {EXPANDED}
-				n84 = -(state >> 18 & 1); // {EXPANDED}
-				n85 = -(state >> 19 & 1); // {EXPANDED}
-				n86 = -(state >> 20 & 1); // {EXPANDED}
-				n87 = -(state >> 21 & 1); // {EXPANDED}
-				n88 = -(state >> 22 & 1); // {EXPANDED}
-				n89 = -(state >> 23 & 1); // {EXPANDED}
+				n79 = -(state >> 12 & 1); // {EXPANDED}
+				n80 = -(state >> 13 & 1); // {EXPANDED}
+				n81 = -(state >> 14 & 1); // {EXPANDED}
+				n82 = -(state >> 15 & 1); // {EXPANDED}
+				n83 = -(state >> 16 & 1); // {EXPANDED}
+				n84 = -(state >> 17 & 1); // {EXPANDED}
+				n85 = -(state >> 18 & 1); // {EXPANDED}
+				n86 = -(state >> 19 & 1); // {EXPANDED}
+				n87 = -(state >> 20 & 1); // {EXPANDED}
+				n88 = -(state >> 21 & 1); // {EXPANDED}
+				n89 = -(state >> 22 & 1); // {EXPANDED}
+				n90 = -(state >> 23 & 1); // {EXPANDED}
 				//@formatter:on
 
 				int inputPermutes = 1 << (inputBitCount);
@@ -229,87 +230,83 @@ public class CodeSimulator {
 					//@formatter:off
 					// {COMB_ASSIGN}
 					n33 = ~count_10_; // {EXPANDED}
-					n48 = ~(n78 & n81); // {EXPANDED}
-					n1 = (n78 ^ ena2); // {EXPANDED}
+					n59 = ~(n88 & n87); // {EXPANDED}
 					n73 = ~(count_1_ & count_0_); // {EXPANDED}
-					n46 = n78 & ena2; // {EXPANDED}
+					n48 = ~(n82 & n79); // {EXPANDED}
+					n46 = ena2 & n79; // {EXPANDED}
 					n26 = ~(count_5_ & count_4_); // {EXPANDED}
-					n13 = (count_0_ ^ ena1); // {EXPANDED}
+					n4 = (n82 ^ n46); // {EXPANDED}
+					n56 = ~(n85 & n86); // {EXPANDED}
 					n70 = count_0_ & ena1; // {EXPANDED}
 					n34 = ~(count_8_ & count_9_); // {EXPANDED}
-					n16 = (count_1_ ^ n70); // {EXPANDED}
-					n4 = (n81 ^ n46); // {EXPANDED}
-					n51 = ~(n82 & n83); // {EXPANDED}
-					n74 = ~(count_2_ & count_3_); // {EXPANDED}
-					n47 = ~ena2; // {EXPANDED}
-					n64 = ~(n88 & n89); // {EXPANDED}
-					n56 = ~(n85 & n84); // {EXPANDED}
-					n29 = ~(count_6_ & count_7_); // {EXPANDED}
-					n59 = ~(n87 & n86); // {EXPANDED}
-					n44 = ~(n80 & count_11_); // {EXPANDED}
+					n13 = (count_0_ ^ ena1); // {EXPANDED}
 					n71 = count_1_ & n70; // {EXPANDED}
+					n1 = (ena2 ^ n79); // {EXPANDED}
+					n47 = ~ena2; // {EXPANDED}
+					n74 = ~(count_2_ & count_3_); // {EXPANDED}
+					n64 = ~(n89 & n90); // {EXPANDED}
+					n44 = ~(n81 & count_11_); // {EXPANDED}
+					n29 = ~(count_6_ & count_7_); // {EXPANDED}
+					n51 = ~(n84 & n83); // {EXPANDED}
 					n38 = ~(n73 | n33); // {EXPANDED}
-					n35 = ~n34; // {EXPANDED}
-					n17 = (count_2_ ^ n71); // {EXPANDED}
+					n72 = n71 & count_2_; // {EXPANDED}
+					n75 = ~(n73 | n74); // {EXPANDED}
 					n60 = n56 | n59; // {EXPANDED}
+					n17 = (n71 ^ count_2_); // {EXPANDED}
 					n52 = n48 | n51; // {EXPANDED}
+					n16 = (count_1_ ^ n70); // {EXPANDED}
 					n39 = ~(n74 | n34); // {EXPANDED}
 					n30 = n29 | n26; // {EXPANDED}
-					n72 = count_2_ & n71; // {EXPANDED}
+					n53 = n52 | n47; // {EXPANDED}
+					n35 = ~n34; // {EXPANDED}
 					n49 = ~(n48 | n47); // {EXPANDED}
-					n75 = ~(n73 | n74); // {EXPANDED}
+					n61 = ~(n60 | n53); // {EXPANDED}
+					n5 = (n49 ^ n83); // {EXPANDED}
+					n18 = (n72 ^ count_3_); // {EXPANDED}
 					n40 = ~(n38 & n39); // {EXPANDED}
 					n63 = n60 | n52; // {EXPANDED}
-					n5 = (n82 ^ n49); // {EXPANDED}
-					n53 = n52 | n47; // {EXPANDED}
-					n18 = (n72 ^ count_3_); // {EXPANDED}
-					n41 = ~(n40 | n30); // {EXPANDED}
-					n50 = n82 & n49; // {EXPANDED}
-					n76 = ~(ena1 & n75); // {EXPANDED}
-					n61 = ~(n60 | n53); // {EXPANDED}
-					n31 = ~(n76 | n30); // {EXPANDED}
-					n6 = (n50 ^ n83); // {EXPANDED}
-					n27 = ~(n76 | n26); // {EXPANDED}
 					n57 = ~(n56 | n53); // {EXPANDED}
-					n77 = ~n76; // {EXPANDED}
-					n42 = n41 & ena1; // {EXPANDED}
-					n65 = ~(n63 | n64); // {EXPANDED}
+					n41 = ~(n40 | n30); // {EXPANDED}
+					n76 = ~(n75 & ena1); // {EXPANDED}
 					n54 = ~n53; // {EXPANDED}
-					n58 = n57 & n86; // {EXPANDED}
+					n50 = n49 & n83; // {EXPANDED}
+					n58 = n57 & n87; // {EXPANDED}
+					n55 = n85 & n54; // {EXPANDED}
+					n77 = ~n76; // {EXPANDED}
+					n31 = ~(n76 | n30); // {EXPANDED}
+					n6 = (n50 ^ n84); // {EXPANDED}
+					n62 = n61 & n89; // {EXPANDED}
+					n42 = n41 & ena1; // {EXPANDED}
+					n11 = (n61 ^ n89); // {EXPANDED}
+					n65 = ~(n63 | n64); // {EXPANDED}
+					n7 = (n85 ^ n54); // {EXPANDED}
+					n9 = (n57 ^ n87); // {EXPANDED}
+					n27 = ~(n76 | n26); // {EXPANDED}
+					n23 = (count_8_ ^ n31); // {EXPANDED}
+					n12 = (n62 ^ n90); // {EXPANDED}
 					n19 = (count_4_ ^ n77); // {EXPANDED}
-					n68 = ~(n65 & n79); // {EXPANDED}
-					n28 = n27 & count_6_; // {EXPANDED}
-					n11 = (n88 ^ n61); // {EXPANDED}
-					n55 = n54 & n84; // {EXPANDED}
-					n36 = ~(n31 & n35); // {EXPANDED}
-					n7 = (n54 ^ n84); // {EXPANDED}
-					n62 = n88 & n61; // {EXPANDED}
-					n9 = (n57 ^ n86); // {EXPANDED}
-					n23 = (n31 ^ count_8_); // {EXPANDED}
+					n10 = (n88 ^ n58); // {EXPANDED}
+					n21 = (count_6_ ^ n27); // {EXPANDED}
+					n36 = ~(n35 & n31); // {EXPANDED}
+					n68 = ~(n65 & n80); // {EXPANDED}
+					n8 = (n55 ^ n86); // {EXPANDED}
+					n28 = count_6_ & n27; // {EXPANDED}
 					n66 = n65 & ena2; // {EXPANDED}
-					n32 = n31 & count_8_; // {EXPANDED}
 					n25 = count_4_ & n77; // {EXPANDED}
-					n21 = (n27 ^ count_6_); // {EXPANDED}
+					n32 = count_8_ & n31; // {EXPANDED}
 					n37 = n36 & n33; // {EXPANDED}
-					n24 = (n32 ^ count_9_); // {EXPANDED}
 					n43 = ~(n36 | n33); // {EXPANDED}
 					n69 = ~(n68 | n47); // {EXPANDED}
-					n20 = (count_5_ ^ n25); // {EXPANDED}
+					n24 = (n32 ^ count_9_); // {EXPANDED}
 					n22 = (n28 ^ count_7_); // {EXPANDED}
-					n67 = ~(n66 | n79); // {EXPANDED}
-					n12 = (n62 ^ n89); // {EXPANDED}
-					n45 = ~(n44 | n68); // {EXPANDED}
-					n8 = (n85 ^ n55); // {EXPANDED}
-					n10 = (n58 ^ n87); // {EXPANDED}
+					n45 = ~(n68 | n44); // {EXPANDED}
+					n67 = ~(n66 | n80); // {EXPANDED}
+					n20 = (count_5_ ^ n25); // {EXPANDED}
 					n14 = ~(n37 | n42); // {EXPANDED}
 					n15 = (n43 ^ count_11_); // {EXPANDED}
 					n2 = ~(n69 | n67); // {EXPANDED}
 					valid = ~(n41 & n45); // {EXPANDED}
-					n3 = (n69 ^ n80); // {EXPANDED}
-					//@formatter:on
-
-					//@formatter:off
-					// {STATE_ASSIGN} {PREFIX1=int next_}
+					n3 = (n81 ^ n69); // {EXPANDED}
 					//@formatter:on
 
 					int nxState = 0;
@@ -437,7 +434,6 @@ public class CodeSimulator {
 		result.add("count_7_"); // {EXPANDED}
 		result.add("count_8_"); // {EXPANDED}
 		result.add("count_9_"); // {EXPANDED}
-		result.add("n78"); // {EXPANDED}
 		result.add("n79"); // {EXPANDED}
 		result.add("n80"); // {EXPANDED}
 		result.add("n81"); // {EXPANDED}
@@ -449,6 +445,7 @@ public class CodeSimulator {
 		result.add("n87"); // {EXPANDED}
 		result.add("n88"); // {EXPANDED}
 		result.add("n89"); // {EXPANDED}
+		result.add("n90"); // {EXPANDED}
 
 		// result.add("{INPUT_BIT}");
 		result.add("ena1"); // {EXPANDED}
@@ -530,6 +527,7 @@ public class CodeSimulator {
 		result.add("n75"); // {EXPANDED}
 		result.add("n76"); // {EXPANDED}
 		result.add("n77"); // {EXPANDED}
+		result.add("n78"); // {EXPANDED}
 		result.add("n8"); // {EXPANDED}
 		result.add("n9"); // {EXPANDED}
 		result.add("valid"); // {EXPANDED}
@@ -610,7 +608,6 @@ public class CodeSimulator {
 		int[] count_7_ = new int[cycles]; // {EXPANDED}
 		int[] count_8_ = new int[cycles]; // {EXPANDED}
 		int[] count_9_ = new int[cycles]; // {EXPANDED}
-		int[] n78 = new int[cycles]; // {EXPANDED}
 		int[] n79 = new int[cycles]; // {EXPANDED}
 		int[] n80 = new int[cycles]; // {EXPANDED}
 		int[] n81 = new int[cycles]; // {EXPANDED}
@@ -622,6 +619,7 @@ public class CodeSimulator {
 		int[] n87 = new int[cycles]; // {EXPANDED}
 		int[] n88 = new int[cycles]; // {EXPANDED}
 		int[] n89 = new int[cycles]; // {EXPANDED}
+		int[] n90 = new int[cycles]; // {EXPANDED}
 
 		// int[] {INPUT_BIT} = new int[cycles];
 		int[] ena1 = new int[cycles]; // {EXPANDED}
@@ -640,18 +638,18 @@ public class CodeSimulator {
 		count_7_[0] = -(initial >> 9 & 1); // {EXPANDED}
 		count_8_[0] = -(initial >> 10 & 1); // {EXPANDED}
 		count_9_[0] = -(initial >> 11 & 1); // {EXPANDED}
-		n78[0] = -(initial >> 12 & 1); // {EXPANDED}
-		n79[0] = -(initial >> 13 & 1); // {EXPANDED}
-		n80[0] = -(initial >> 14 & 1); // {EXPANDED}
-		n81[0] = -(initial >> 15 & 1); // {EXPANDED}
-		n82[0] = -(initial >> 16 & 1); // {EXPANDED}
-		n83[0] = -(initial >> 17 & 1); // {EXPANDED}
-		n84[0] = -(initial >> 18 & 1); // {EXPANDED}
-		n85[0] = -(initial >> 19 & 1); // {EXPANDED}
-		n86[0] = -(initial >> 20 & 1); // {EXPANDED}
-		n87[0] = -(initial >> 21 & 1); // {EXPANDED}
-		n88[0] = -(initial >> 22 & 1); // {EXPANDED}
-		n89[0] = -(initial >> 23 & 1); // {EXPANDED}
+		n79[0] = -(initial >> 12 & 1); // {EXPANDED}
+		n80[0] = -(initial >> 13 & 1); // {EXPANDED}
+		n81[0] = -(initial >> 14 & 1); // {EXPANDED}
+		n82[0] = -(initial >> 15 & 1); // {EXPANDED}
+		n83[0] = -(initial >> 16 & 1); // {EXPANDED}
+		n84[0] = -(initial >> 17 & 1); // {EXPANDED}
+		n85[0] = -(initial >> 18 & 1); // {EXPANDED}
+		n86[0] = -(initial >> 19 & 1); // {EXPANDED}
+		n87[0] = -(initial >> 20 & 1); // {EXPANDED}
+		n88[0] = -(initial >> 21 & 1); // {EXPANDED}
+		n89[0] = -(initial >> 22 & 1); // {EXPANDED}
+		n90[0] = -(initial >> 23 & 1); // {EXPANDED}
 
 		// int[] {NON_STATE_BIT} = new int[cycles];
 		int[] n1 = new int[cycles]; // {EXPANDED}
@@ -729,6 +727,7 @@ public class CodeSimulator {
 		int[] n75 = new int[cycles]; // {EXPANDED}
 		int[] n76 = new int[cycles]; // {EXPANDED}
 		int[] n77 = new int[cycles]; // {EXPANDED}
+		int[] n78 = new int[cycles]; // {EXPANDED}
 		int[] n8 = new int[cycles]; // {EXPANDED}
 		int[] n9 = new int[cycles]; // {EXPANDED}
 		int[] valid = new int[cycles]; // {EXPANDED}
@@ -743,90 +742,115 @@ public class CodeSimulator {
 
 			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
 			n33[i] = ~count_10_[i]; // {EXPANDED}
-			n48[i] = ~(n78[i] & n81[i]); // {EXPANDED}
-			n1[i] = (n78[i] ^ ena2[i]); // {EXPANDED}
+			n59[i] = ~(n88[i] & n87[i]); // {EXPANDED}
 			n73[i] = ~(count_1_[i] & count_0_[i]); // {EXPANDED}
-			n46[i] = n78[i] & ena2[i]; // {EXPANDED}
+			n48[i] = ~(n82[i] & n79[i]); // {EXPANDED}
+			n46[i] = ena2[i] & n79[i]; // {EXPANDED}
 			n26[i] = ~(count_5_[i] & count_4_[i]); // {EXPANDED}
-			n13[i] = (count_0_[i] ^ ena1[i]); // {EXPANDED}
+			n4[i] = (n82[i] ^ n46[i]); // {EXPANDED}
+			n56[i] = ~(n85[i] & n86[i]); // {EXPANDED}
 			n70[i] = count_0_[i] & ena1[i]; // {EXPANDED}
 			n34[i] = ~(count_8_[i] & count_9_[i]); // {EXPANDED}
-			n16[i] = (count_1_[i] ^ n70[i]); // {EXPANDED}
-			n4[i] = (n81[i] ^ n46[i]); // {EXPANDED}
-			n51[i] = ~(n82[i] & n83[i]); // {EXPANDED}
-			n74[i] = ~(count_2_[i] & count_3_[i]); // {EXPANDED}
-			n47[i] = ~ena2[i]; // {EXPANDED}
-			n64[i] = ~(n88[i] & n89[i]); // {EXPANDED}
-			n56[i] = ~(n85[i] & n84[i]); // {EXPANDED}
-			n29[i] = ~(count_6_[i] & count_7_[i]); // {EXPANDED}
-			n59[i] = ~(n87[i] & n86[i]); // {EXPANDED}
-			n44[i] = ~(n80[i] & count_11_[i]); // {EXPANDED}
+			n13[i] = (count_0_[i] ^ ena1[i]); // {EXPANDED}
 			n71[i] = count_1_[i] & n70[i]; // {EXPANDED}
+			n1[i] = (ena2[i] ^ n79[i]); // {EXPANDED}
+			n47[i] = ~ena2[i]; // {EXPANDED}
+			n74[i] = ~(count_2_[i] & count_3_[i]); // {EXPANDED}
+			n64[i] = ~(n89[i] & n90[i]); // {EXPANDED}
+			n44[i] = ~(n81[i] & count_11_[i]); // {EXPANDED}
+			n29[i] = ~(count_6_[i] & count_7_[i]); // {EXPANDED}
+			n51[i] = ~(n84[i] & n83[i]); // {EXPANDED}
 			n38[i] = ~(n73[i] | n33[i]); // {EXPANDED}
-			n35[i] = ~n34[i]; // {EXPANDED}
-			n17[i] = (count_2_[i] ^ n71[i]); // {EXPANDED}
+			n72[i] = n71[i] & count_2_[i]; // {EXPANDED}
+			n75[i] = ~(n73[i] | n74[i]); // {EXPANDED}
 			n60[i] = n56[i] | n59[i]; // {EXPANDED}
+			n17[i] = (n71[i] ^ count_2_[i]); // {EXPANDED}
 			n52[i] = n48[i] | n51[i]; // {EXPANDED}
+			n16[i] = (count_1_[i] ^ n70[i]); // {EXPANDED}
 			n39[i] = ~(n74[i] | n34[i]); // {EXPANDED}
 			n30[i] = n29[i] | n26[i]; // {EXPANDED}
-			n72[i] = count_2_[i] & n71[i]; // {EXPANDED}
+			n53[i] = n52[i] | n47[i]; // {EXPANDED}
+			n35[i] = ~n34[i]; // {EXPANDED}
 			n49[i] = ~(n48[i] | n47[i]); // {EXPANDED}
-			n75[i] = ~(n73[i] | n74[i]); // {EXPANDED}
+			n61[i] = ~(n60[i] | n53[i]); // {EXPANDED}
+			n5[i] = (n49[i] ^ n83[i]); // {EXPANDED}
+			n18[i] = (n72[i] ^ count_3_[i]); // {EXPANDED}
 			n40[i] = ~(n38[i] & n39[i]); // {EXPANDED}
 			n63[i] = n60[i] | n52[i]; // {EXPANDED}
-			n5[i] = (n82[i] ^ n49[i]); // {EXPANDED}
-			n53[i] = n52[i] | n47[i]; // {EXPANDED}
-			n18[i] = (n72[i] ^ count_3_[i]); // {EXPANDED}
-			n41[i] = ~(n40[i] | n30[i]); // {EXPANDED}
-			n50[i] = n82[i] & n49[i]; // {EXPANDED}
-			n76[i] = ~(ena1[i] & n75[i]); // {EXPANDED}
-			n61[i] = ~(n60[i] | n53[i]); // {EXPANDED}
-			n31[i] = ~(n76[i] | n30[i]); // {EXPANDED}
-			n6[i] = (n50[i] ^ n83[i]); // {EXPANDED}
-			n27[i] = ~(n76[i] | n26[i]); // {EXPANDED}
 			n57[i] = ~(n56[i] | n53[i]); // {EXPANDED}
-			n77[i] = ~n76[i]; // {EXPANDED}
-			n42[i] = n41[i] & ena1[i]; // {EXPANDED}
-			n65[i] = ~(n63[i] | n64[i]); // {EXPANDED}
+			n41[i] = ~(n40[i] | n30[i]); // {EXPANDED}
+			n76[i] = ~(n75[i] & ena1[i]); // {EXPANDED}
 			n54[i] = ~n53[i]; // {EXPANDED}
-			n58[i] = n57[i] & n86[i]; // {EXPANDED}
+			n50[i] = n49[i] & n83[i]; // {EXPANDED}
+			n58[i] = n57[i] & n87[i]; // {EXPANDED}
+			n55[i] = n85[i] & n54[i]; // {EXPANDED}
+			n77[i] = ~n76[i]; // {EXPANDED}
+			n31[i] = ~(n76[i] | n30[i]); // {EXPANDED}
+			n6[i] = (n50[i] ^ n84[i]); // {EXPANDED}
+			n62[i] = n61[i] & n89[i]; // {EXPANDED}
+			n42[i] = n41[i] & ena1[i]; // {EXPANDED}
+			n11[i] = (n61[i] ^ n89[i]); // {EXPANDED}
+			n65[i] = ~(n63[i] | n64[i]); // {EXPANDED}
+			n7[i] = (n85[i] ^ n54[i]); // {EXPANDED}
+			n9[i] = (n57[i] ^ n87[i]); // {EXPANDED}
+			n27[i] = ~(n76[i] | n26[i]); // {EXPANDED}
+			n23[i] = (count_8_[i] ^ n31[i]); // {EXPANDED}
+			n12[i] = (n62[i] ^ n90[i]); // {EXPANDED}
 			n19[i] = (count_4_[i] ^ n77[i]); // {EXPANDED}
-			n68[i] = ~(n65[i] & n79[i]); // {EXPANDED}
-			n28[i] = n27[i] & count_6_[i]; // {EXPANDED}
-			n11[i] = (n88[i] ^ n61[i]); // {EXPANDED}
-			n55[i] = n54[i] & n84[i]; // {EXPANDED}
-			n36[i] = ~(n31[i] & n35[i]); // {EXPANDED}
-			n7[i] = (n54[i] ^ n84[i]); // {EXPANDED}
-			n62[i] = n88[i] & n61[i]; // {EXPANDED}
-			n9[i] = (n57[i] ^ n86[i]); // {EXPANDED}
-			n23[i] = (n31[i] ^ count_8_[i]); // {EXPANDED}
+			n10[i] = (n88[i] ^ n58[i]); // {EXPANDED}
+			n21[i] = (count_6_[i] ^ n27[i]); // {EXPANDED}
+			n36[i] = ~(n35[i] & n31[i]); // {EXPANDED}
+			n68[i] = ~(n65[i] & n80[i]); // {EXPANDED}
+			n8[i] = (n55[i] ^ n86[i]); // {EXPANDED}
+			n28[i] = count_6_[i] & n27[i]; // {EXPANDED}
 			n66[i] = n65[i] & ena2[i]; // {EXPANDED}
-			n32[i] = n31[i] & count_8_[i]; // {EXPANDED}
 			n25[i] = count_4_[i] & n77[i]; // {EXPANDED}
-			n21[i] = (n27[i] ^ count_6_[i]); // {EXPANDED}
+			n32[i] = count_8_[i] & n31[i]; // {EXPANDED}
 			n37[i] = n36[i] & n33[i]; // {EXPANDED}
-			n24[i] = (n32[i] ^ count_9_[i]); // {EXPANDED}
 			n43[i] = ~(n36[i] | n33[i]); // {EXPANDED}
 			n69[i] = ~(n68[i] | n47[i]); // {EXPANDED}
-			n20[i] = (count_5_[i] ^ n25[i]); // {EXPANDED}
+			n24[i] = (n32[i] ^ count_9_[i]); // {EXPANDED}
 			n22[i] = (n28[i] ^ count_7_[i]); // {EXPANDED}
-			n67[i] = ~(n66[i] | n79[i]); // {EXPANDED}
-			n12[i] = (n62[i] ^ n89[i]); // {EXPANDED}
-			n45[i] = ~(n44[i] | n68[i]); // {EXPANDED}
-			n8[i] = (n85[i] ^ n55[i]); // {EXPANDED}
-			n10[i] = (n58[i] ^ n87[i]); // {EXPANDED}
+			n45[i] = ~(n68[i] | n44[i]); // {EXPANDED}
+			n67[i] = ~(n66[i] | n80[i]); // {EXPANDED}
+			n20[i] = (count_5_[i] ^ n25[i]); // {EXPANDED}
 			n14[i] = ~(n37[i] | n42[i]); // {EXPANDED}
 			n15[i] = (n43[i] ^ count_11_[i]); // {EXPANDED}
 			n2[i] = ~(n69[i] | n67[i]); // {EXPANDED}
 			valid[i] = ~(n41[i] & n45[i]); // {EXPANDED}
-			n3[i] = (n69[i] ^ n80[i]); // {EXPANDED}
+			n3[i] = (n81[i] ^ n69[i]); // {EXPANDED}
 
 			if (i < cycles-1) {
 
-				// {STATE_ASSIGN} {POSTFIX1=[i+1]} {POSTFIX2=[i]}
+				//@formatter:off
+				// {STATE_BIT}[i+1] |= {NEXT_STATE_BIT}[i];
+				count_0_[i+1] |= n13[i]; // {EXPANDED}
+				count_10_[i+1] |= n14[i]; // {EXPANDED}
+				count_11_[i+1] |= n15[i]; // {EXPANDED}
+				count_1_[i+1] |= n16[i]; // {EXPANDED}
+				count_2_[i+1] |= n17[i]; // {EXPANDED}
+				count_3_[i+1] |= n18[i]; // {EXPANDED}
+				count_4_[i+1] |= n19[i]; // {EXPANDED}
+				count_5_[i+1] |= n20[i]; // {EXPANDED}
+				count_6_[i+1] |= n21[i]; // {EXPANDED}
+				count_7_[i+1] |= n22[i]; // {EXPANDED}
+				count_8_[i+1] |= n23[i]; // {EXPANDED}
+				count_9_[i+1] |= n24[i]; // {EXPANDED}
+				n79[i+1] |= n1[i]; // {EXPANDED}
+				n80[i+1] |= n2[i]; // {EXPANDED}
+				n81[i+1] |= n3[i]; // {EXPANDED}
+				n82[i+1] |= n4[i]; // {EXPANDED}
+				n83[i+1] |= n5[i]; // {EXPANDED}
+				n84[i+1] |= n6[i]; // {EXPANDED}
+				n85[i+1] |= n7[i]; // {EXPANDED}
+				n86[i+1] |= n8[i]; // {EXPANDED}
+				n87[i+1] |= n9[i]; // {EXPANDED}
+				n88[i+1] |= n10[i]; // {EXPANDED}
+				n89[i+1] |= n11[i]; // {EXPANDED}
+				n90[i+1] |= n12[i]; // {EXPANDED}
+				//@formatter:on
 
 			}
-			//@formatter:on
 
 		}
 
@@ -846,7 +870,6 @@ public class CodeSimulator {
 		waveforms.add(count_7_); // {EXPANDED}
 		waveforms.add(count_8_); // {EXPANDED}
 		waveforms.add(count_9_); // {EXPANDED}
-		waveforms.add(n78); // {EXPANDED}
 		waveforms.add(n79); // {EXPANDED}
 		waveforms.add(n80); // {EXPANDED}
 		waveforms.add(n81); // {EXPANDED}
@@ -858,6 +881,7 @@ public class CodeSimulator {
 		waveforms.add(n87); // {EXPANDED}
 		waveforms.add(n88); // {EXPANDED}
 		waveforms.add(n89); // {EXPANDED}
+		waveforms.add(n90); // {EXPANDED}
 
 		// waveforms.add({INPUT_BIT});
 		waveforms.add(ena1); // {EXPANDED}
@@ -939,6 +963,7 @@ public class CodeSimulator {
 		waveforms.add(n75); // {EXPANDED}
 		waveforms.add(n76); // {EXPANDED}
 		waveforms.add(n77); // {EXPANDED}
+		waveforms.add(n78); // {EXPANDED}
 		waveforms.add(n8); // {EXPANDED}
 		waveforms.add(n9); // {EXPANDED}
 		waveforms.add(valid); // {EXPANDED}
@@ -955,3 +980,4 @@ public class CodeSimulator {
 	}
 
 }
+

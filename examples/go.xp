@@ -1,7 +1,7 @@
-#testCode 0
-#:q
+testCode 1
+:q
 
-synth_verilog examples/assertion-test4.v output/synth.v
+synth_verilog examples/assertion-test3.v output/synth.v
 
 ll examples/gate_library_mini.v
 
