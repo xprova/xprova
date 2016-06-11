@@ -372,9 +372,9 @@ public class CodeSimulator {
 
 					}
 
-					if (valid == 0) {
+					if (valid == 0 && assume == -1) {
 
-						violationState = nxState;
+						violationState = state;
 
 						break loop1;
 

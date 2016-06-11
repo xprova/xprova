@@ -683,8 +683,23 @@ public class ConsoleHandler {
 
 			proc.waitFor();
 
-			if (proc.exitValue() != 0)
-				throw new Exception("Error invoking java compiler");
+			if (proc.exitValue() != 0) {
+
+				BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+				BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+				String s = null;
+
+				while ((s = stdInput.readLine()) != null)
+					out.println(s);
+
+				while ((s = stdError.readLine()) != null)
+					out.println(s);
+
+				throw new Exception("Compilation failed");
+
+			}
 
 			// run code
 

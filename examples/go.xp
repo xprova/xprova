@@ -1,4 +1,4 @@
-synth_verilog examples/assertion-test4.v output/synth.v
+synth_verilog examples/assertion-test5.v output/synth.v
 
 ll examples/gate_library_mini.v
 
@@ -12,13 +12,14 @@ ungroupNets %s_%d_
 
 write_verilog output/synth_renamed.v
 
-prove --nocounter
+prove
+#--nocounter
+
+:quit
 
 export_dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
 ! dot -Tpdf output/netlist.dot -o output/netlist.pdf
-
-:quit
 
 def_ff QDFFRSBX1 CK RS D
 def_ff DFF CK RS D
