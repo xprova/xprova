@@ -1,6 +1,5 @@
 package net.xprova.simulations;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,8 +14,6 @@ import net.xprova.netlistgraph.Vertex;
 public class CodeGenerator {
 
 	private NetlistGraph graph = null;
-
-	private PrintStream out = null;
 
 	// flip-flop q output nets:
 	private TreeSet<Vertex> qNets;
@@ -34,15 +31,13 @@ public class CodeGenerator {
 
 	private int resetState;
 
-	public CodeGenerator(NetlistGraph graph, PrintStream out) throws Exception {
+	public CodeGenerator(NetlistGraph graph) throws Exception {
 
 		this.graph = graph;
 
-		this.out = out;
-
 	}
 
-	public void generate(String templateCode) throws Exception {
+	public ArrayList<String> generate(String templateCode) throws Exception {
 
 		populateStructures();
 
@@ -202,8 +197,7 @@ public class CodeGenerator {
 
 		}
 
-		for (String l : lines)
-			out.println(l);
+		return lines;
 
 	}
 

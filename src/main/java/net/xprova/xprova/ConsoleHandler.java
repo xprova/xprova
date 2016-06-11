@@ -1,6 +1,9 @@
 package net.xprova.xprova;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -595,16 +598,119 @@ public class ConsoleHandler {
 
 	}
 
-	@Command
-	public void genCode(String templateResourceFile) throws Exception {
+	@Command(aliases = { "prove" })
+	public void proveAssertions(String args[]) throws Exception {
+
+		// options:
+		// --printcode
+		// --norun
+
+		// parse command input
+
+		Option optPrintCode = Option.builder().desc("print generated code").required(false).longOpt("printcode")
+				.build();
+
+		Option optNoRun = Option.builder().desc("do not execute generated code").required(false).longOpt("norun")
+				.build();
+
+		Option optNoCounter = Option.builder().desc("do not print counter-example (if found)").required(false)
+				.longOpt("nocounter").build();
+
+		Options options = new Options();
+
+		options.addOption(optPrintCode);
+
+		options.addOption(optNoRun);
+
+		options.addOption(optNoCounter);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line = parser.parse(options, args);
+
+		// code:
+
+		if (graph == null)
+			throw new Exception("no design is loaded");
+
+		String invokeArgs = line.hasOption("nocounter") ? "" : "gen-counter-example";
+
+		String templateResourceFile = "template1.j";
+
+		String javaFileStr = "CodeSimulator.java";
+
+		String classFileStr = "CodeSimulator";
+
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+
+		File javaFile = new File(tempDir, javaFileStr);
+
+		String cmd = "javac " + javaFile.getAbsolutePath();
+
+		String cmd2 = String.format("java -classpath %s %s %s", tempDir.getAbsolutePath(), classFileStr, invokeArgs);
+
+		// generate code
 
 		String templateCode = loadResourceString(templateResourceFile);
 
-		(new CodeGenerator(graph, out)).generate(templateCode);
+		ArrayList<String> lines = (new CodeGenerator(graph)).generate(templateCode);
+
+		if (line.hasOption("printcode")) {
+
+			for (String l : lines)
+				out.println(l);
+
+		}
+
+		if (!line.hasOption("norun")) {
+
+			out.println("Saving code to " + javaFile.getAbsolutePath() + " ...");
+
+			PrintStream fout = new PrintStream(javaFile);
+
+			for (String l : lines)
+				fout.println(l);
+
+			fout.close();
+
+			// compile using javac
+
+			out.println("Compiling ...");
+
+			final Runtime rt = Runtime.getRuntime();
+
+			Process proc = rt.exec(cmd);
+
+			proc.waitFor();
+
+			if (proc.exitValue() != 0)
+				throw new Exception("Error invoking java compiler");
+
+			// run code
+
+			out.println("Executing compiled code ...");
+
+			Process proc2 = rt.exec(cmd2);
+
+			proc.waitFor();
+
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
+
+			String s = null;
+
+			while ((s = stdInput.readLine()) != null)
+				out.println(s);
+
+			while ((s = stdError.readLine()) != null)
+				out.println(s);
+
+		}
 
 	}
 
-	@Command
+	@Deprecated
 	public void testCode(int printCounterExample) throws Exception {
 
 		CodeSimulator sim1 = new CodeSimulator();

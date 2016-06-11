@@ -9,6 +9,21 @@ public class CodeSimulator {
 	public static final int L = 0;
 	public static final int H = -1;
 
+	public static void main(String args[]) throws Exception {
+
+		CodeSimulator sim1 = new CodeSimulator();
+
+		int initial = sim1.getResetState();
+
+		boolean generateCounterExample = args.length > 0 && "gen-counter-example".equals(args[0]);
+
+		int[] counterExample = sim1.exploreSpace(initial);
+
+		if (counterExample != null && generateCounterExample)
+			sim1.simulate(initial, counterExample);
+
+	}
+
 	public int getResetState() {
 
 		// return {RESET_STATE};
@@ -1370,4 +1385,3 @@ public class CodeSimulator {
 	}
 
 }
-

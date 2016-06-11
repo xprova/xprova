@@ -1,6 +1,3 @@
-testCode 1
-:q
-
 synth_verilog examples/assertion-test4.v output/synth.v
 
 ll examples/gate_library_mini.v
@@ -15,7 +12,7 @@ ungroupNets %s_%d_
 
 write_verilog output/synth_renamed.v
 
-genCode template1.j
+prove --nocounter
 
 export_dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
@@ -23,38 +20,8 @@ export_dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1
 
 :quit
 
-ll examples/gate_library_mini.v
-
-print
-
 def_ff QDFFRSBX1 CK RS D
 def_ff DFF CK RS D
 def_ff DFFx CK RS D
 
-print
-
-synth_verilog examples/assertion-test.v output/synth.v
-
-read_verilog -m top output/synth.v
-
-# augment_netlist
-
-rename_nets --ignore=clk,rst
-
-rename_modules
-
-
-
-ungroupNets %s_%d_
-
-print
-
-genCode
-
-print
-
-#testCode
-
-
-
-
+augment_netlist
