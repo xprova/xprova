@@ -80,7 +80,7 @@ public class SynthesisEngine {
 
 			String s = null;
 
-			out.print("yosys stderr:");
+			out.println("yosys stderr:");
 
 			while ((s = stdError.readLine()) != null)
 				out.println(s);

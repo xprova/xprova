@@ -1,4 +1,4 @@
-package net.xprova.simulations;
+package net.xprova.deprecated;
 
 import java.util.ArrayList;
 import java.util.Arrays;

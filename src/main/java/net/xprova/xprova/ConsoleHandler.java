@@ -21,6 +21,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import net.xprova.deprecated.CodeSimulator;
 import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
 import net.xprova.netlist.GateLibrary;
@@ -32,7 +33,6 @@ import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
 import net.xprova.simulations.CodeGenerator;
-import net.xprova.simulations.CodeSimulator;
 import net.xprova.verilogparser.VerilogParser;
 
 public class ConsoleHandler {

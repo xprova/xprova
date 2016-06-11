@@ -38,29 +38,7 @@ public class Main {
 
 	}
 
-	private static void runDebug(Console c) {
-
-		try {
-
-			String cmds[] = { ":source examples/go.xp" };
-
-			for (String cmd : cmds) {
-
-				c.runCommand(cmd);
-
-				System.out.println("");
-
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
-
-	}
-
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
 		Console c = new Console();
 
@@ -70,9 +48,7 @@ public class Main {
 
 		if (args.length == 1 && "runTests".equals(args[0])) {
 
-			runDebug(c);
-
-			return;
+			c.runScript("examples/go.xp");
 
 		} else {
 
