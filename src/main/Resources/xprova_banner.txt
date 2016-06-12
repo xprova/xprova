@@ -1,10 +1,13 @@
- __  __                          
- \ \/ /_ __  _ __ _____   ____ _ 
+ __  __
+ \ \/ /_ __  _ __ _____   ____ _
   \  /| '_ \| '__/ _ \ \ / / _` |
   /  \| |_) | | | (_) \ V / (_| |
  /_/\_\ .__/|_|  \___/ \_/ \__,_|
-      |_|                        
+      |_|
 
+EDA Tool for Formal Verification of Clock Domain Crossing
+
+Version : {VERSION}
 
 Type :l for a list of available commands or :q to quit
 
