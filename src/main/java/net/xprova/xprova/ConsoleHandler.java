@@ -781,7 +781,9 @@ public class ConsoleHandler {
 	}
 
 	@Command(aliases = {"ungroup_nets"}, description = "split arrays into individual nets")
-	public void ungroupNets(String netNameFormat) {
+	public void ungroupNets(String args[]) {
+
+		String netNameFormat = args.length == 0 ? "%s_%d_" : String.join(" ", args);
 
 		for (Vertex v : graph.getNets()) {
 

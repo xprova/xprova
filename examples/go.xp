@@ -8,7 +8,7 @@ rename_nets --ignore=clk,rst
 
 rename_modules
 
-ungroupNets %s_%d_
+ungroup_nets
 
 write_verilog output/synth_renamed.v
 
