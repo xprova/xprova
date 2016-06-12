@@ -1,9 +1,24 @@
 #!/bin/bash
-#
-# Run Your App
-#
-stty -icanon min 1 -echo
-java -jar -Djline.terminal=jline.UnixTerminal target/xprova-0.0.1-SNAPSHOT-jar-with-dependencies.jar 
-"$@"
-stty icanon echo
+
+XPROV_JAR=target/xprova-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+
+if [ ! -f $XPROV_JAR ]
+then
+
+	type mvn >/dev/null 2>&1 || { echo >&2 "maven is not installed"; exit 1; }
+
+	echo "Building Xprova for first time use ..."
+
+	mvn package > /dev/null
+
+fi
+
+if [ `uname -o` == "Cygwin" ]
+then
+	stty -icanon min 1 -echo
+	java -jar -Djline.terminal=jline.UnixTerminal $XPROV_JAR "$@"
+	stty icanon echo
+else
+	java -jar $XPROV_JAR "$@"
+fi
 
