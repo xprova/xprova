@@ -53,7 +53,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "load_lib", "ll" })
+	@Command(aliases = { "load_lib", "ll" }, description = "load a cell library")
 	public void loadLibrary(String libFile) throws Exception {
 
 		ArrayList<Netlist> libMods = VerilogParser.parseFile(libFile, new GateLibrary());
@@ -64,7 +64,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "list_modules" })
+	@Command(aliases = { "list_modules" }, description = "list the contents of the loaded cell library")
 	public void reportLibrary() {
 
 		if (lib == null) {
@@ -79,7 +79,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "read_verilog", "rv" })
+	@Command(aliases = { "read_verilog"}, description = "read a gate-level verilog netlist")
 	public void readVerilogFile(String args[]) throws Exception {
 
 		// parse command input
@@ -145,7 +145,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "write_verilog" })
+	@Command(aliases = { "write_verilog" }, description = "export current design as a verilog netlist")
 	public void writeVerilogFile(String args[]) throws Exception {
 
 		if (args.length != 1) {
@@ -159,7 +159,8 @@ public class ConsoleHandler {
 		Generator.generateFile(graph, outputVerilogFile);
 	}
 
-	@Command(aliases = { "export_dot" })
+	@Command(aliases = {
+			"export_dot" }, description = "export a graph representation of the loaded design in DOT format")
 	public void exportDotFile(String[] args) throws Exception {
 
 		// parse command input
@@ -358,7 +359,8 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "augment_netlist", "aug" })
+	@Command(aliases = { "augment_netlist",
+			"aug" }, description = "add metastable flip-flop models and associated connections")
 	public void augmentNetlist() throws Exception {
 
 		if (graph == null) {
@@ -375,7 +377,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "clear_ff_defs" })
+	@Command(aliases = { "clear_ff_defs" }, description = "clear flip-flop definitions")
 	public void clearDefsFF(String[] args) {
 
 		// specify flip-flop modules
@@ -384,7 +386,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "def_ff" })
+	@Command(aliases = { "def_ff" }, description = "define and specify the ports of a flip-flop cell")
 	public void addDefFF(String modName, String clkPort, String rstPort, String dPort) throws Exception {
 
 		if (defsFF.containsKey(modName)) {
@@ -403,7 +405,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "list_ff" })
+	@Command(aliases = { "list_ff" }, description = "list flip-flop definitions")
 	public void listDefFF() {
 
 		String strFormat = "%20s %14s %14s %14s\n";
@@ -419,7 +421,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "report_domains" })
+	@Command(aliases = { "report_domains" }, description = "print list of clock domains in current design")
 	public void reportClockDomains() throws Exception {
 
 		Transformer t1 = new Transformer(graph, defsFF);
@@ -443,7 +445,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "report_paths" })
+	@Command(aliases = { "report_xpaths" }, description = "print list of crossover paths in current design")
 	public void reportCrossoverPaths() {
 
 		String strFormat = "%20s -> %20s";
@@ -482,7 +484,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "rename_modules" })
+	@Command(aliases = { "rename_modules" }, description = "rename modules according to their types")
 	public void renameModules(String args[]) throws ParseException {
 
 		// rename modules
@@ -540,7 +542,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "rename_nets" })
+	@Command(aliases = { "rename_nets" }, description = "rename nets as n1, n2 ...")
 	public void renameNets(String args[]) throws ParseException {
 
 		// renames internal (i.e. non-port) nets
@@ -598,7 +600,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "prove" })
+	@Command(aliases = { "prove" }, description = "attempt to prove (assumption -> valid) in the current design")
 	public void proveAssertions(String args[]) throws Exception {
 
 		// options:
@@ -778,7 +780,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command
+	@Command(aliases = {"ungroup_nets"}, description = "split arrays into individual nets")
 	public void ungroupNets(String netNameFormat) {
 
 		for (Vertex v : graph.getNets()) {
@@ -803,7 +805,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "synth_verilog" })
+	@Command(aliases = { "synth_verilog" }, description = "synthesize behavioral verilog design using yosys")
 	public void synthBehavioralDesign(String args[]) throws Exception {
 
 		// TODO: implement the following switches
