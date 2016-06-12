@@ -58,6 +58,9 @@
 					<archive>
 						<manifest>
 							<mainClass>net.xprova.xprova.Main</mainClass>
+							    <addDefaultImplementationEntries>
+							    	true
+              					</addDefaultImplementationEntries>
 						</manifest>
 					</archive>
 					<descriptorRefs>

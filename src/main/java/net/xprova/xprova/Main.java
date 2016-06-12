@@ -3,6 +3,12 @@ package net.xprova.xprova;
 import java.io.InputStream;
 import java.util.Scanner;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
 import net.xprova.piccolo.Console;
 
 public class Main {
@@ -40,17 +46,39 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
+		// parse command input
+
+		Option optModule = Option.builder("s").desc("name of script file to execute").hasArg().argName("SCRIPT_FILE")
+				.required(false).build();
+
+		Options options = new Options();
+
+		options.addOption(optModule);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line = parser.parse(options, args);
+
+		// prepare and run console
+
 		Console c = new Console();
 
 		c.addHandler(new ConsoleHandler(System.out));
 
-		c.setBanner(loadBanner());
+		String banner = loadBanner();
 
-		if (args.length == 1 && "runTests".equals(args[0])) {
+		String version = Main.class.getPackage().getImplementationVersion();
 
-			c.runScript("examples/go.xp");
+		banner = banner.replace("{VERSION}", version == null ? "(debug)" : version);
+
+		c.setBanner(banner);
+
+		if (line.hasOption("s")) {
+
+			c.runScript(line.getOptionValue("s"));
 
 		} else {
+
 
 			c.run();
 
