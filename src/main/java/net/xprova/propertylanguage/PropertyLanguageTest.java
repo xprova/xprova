@@ -11,7 +11,7 @@ public class PropertyLanguageTest {
 
 	public void test() {
 
-		String str = "assert hello assert world";
+		String str = "assert a + b - c;";
 
 		ANTLRInputStream antlr = new ANTLRInputStream(str);
 
@@ -26,7 +26,7 @@ public class PropertyLanguageTest {
 		System.out.printf("Parsed %d assertions\n", assertionList.size());
 
 		for (AssertionContext a : assertionList)
-			System.out.println("ID = " + a.ID().toString());
+			System.out.println("ID = " + a.expression().getText());
 
 	}
 

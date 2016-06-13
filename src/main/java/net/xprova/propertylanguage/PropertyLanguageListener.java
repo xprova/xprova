@@ -27,4 +27,24 @@ public interface PropertyLanguageListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAssertion(PropertyLanguageParser.AssertionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpression(PropertyLanguageParser.ExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpression(PropertyLanguageParser.ExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#operator}.
+	 * @param ctx the parse tree
+	 */
+	void enterOperator(PropertyLanguageParser.OperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#operator}.
+	 * @param ctx the parse tree
+	 */
+	void exitOperator(PropertyLanguageParser.OperatorContext ctx);
 }

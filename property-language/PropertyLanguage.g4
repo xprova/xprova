@@ -1,10 +1,30 @@
-
 grammar PropertyLanguage;
 
-document : assertion* ;
+document
+	: assertion* EOF
+	;
 
-assertion : 'assert' ID ;
+assertion
+	: 'assert' expression ';'
+	;
 
-ID : [a-z]+ ;
+expression
+	: ID
+	| expression operator expression
+	| '(' expression ')'
+	;
 
-WS : [ \r\n\t] + -> channel (HIDDEN) ;
+operator
+	: '+'
+	| '-'
+	| '*'
+	| '/'
+	;
+
+ID
+	: [a-z]+
+	;
+
+WS
+	: [ \r\n\t] + -> channel (HIDDEN)
+	;

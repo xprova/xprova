@@ -35,6 +35,30 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAssertion(PropertyLanguageParser.AssertionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExpression(PropertyLanguageParser.ExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExpression(PropertyLanguageParser.ExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOperator(PropertyLanguageParser.OperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOperator(PropertyLanguageParser.OperatorContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
