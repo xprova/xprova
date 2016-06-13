@@ -32,6 +32,7 @@ import net.xprova.netlistgraph.NetlistGraphDotFormatter;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
+import net.xprova.propertylanguage.PropertyLanguageTest;
 import net.xprova.simulations.CodeGenerator;
 import net.xprova.verilogparser.VerilogParser;
 
@@ -819,6 +820,13 @@ public class ConsoleHandler {
 		String synthDesign = args[1];
 
 		(new SynthesisEngine()).synthesis(behavioralDesign, synthDesign, out);
+
+	}
+
+	@Command
+	public void testPL() {
+
+		(new PropertyLanguageTest()).test();
 
 	}
 
