@@ -372,7 +372,8 @@ public class CodeSimulator {
 
 					}
 
-					if (valid == 0 && assume == -1) {
+					// if ({NET:valid} == 0 && {NET:assume} == -1) {
+					if (valid == 0 && assume == -1) { // {EXPANDED}
 
 						violationState = state;
 
@@ -442,7 +443,7 @@ public class CodeSimulator {
 		ArrayList<String> result = new ArrayList<String>();
 
 		//@formatter:off
-		// result.add("{STATE_BIT}");
+		// result.add("{STATE_BIT_ORG}");
 		result.add("count_0_"); // {EXPANDED}
 		result.add("count_10_"); // {EXPANDED}
 		result.add("count_11_"); // {EXPANDED}
@@ -468,11 +469,11 @@ public class CodeSimulator {
 		result.add("n88"); // {EXPANDED}
 		result.add("n89"); // {EXPANDED}
 
-		// result.add("{INPUT_BIT}");
+		// result.add("{INPUT_BIT_ORG}");
 		result.add("ena1"); // {EXPANDED}
 		result.add("ena2"); // {EXPANDED}
 
-		// result.add("{NON_STATE_BIT}");
+		// result.add("{NON_STATE_BIT_ORG}");
 		result.add("n1"); // {EXPANDED}
 		result.add("n10"); // {EXPANDED}
 		result.add("n11"); // {EXPANDED}

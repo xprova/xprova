@@ -149,11 +149,8 @@ public class ConsoleHandler {
 	@Command(aliases = { "write_verilog" }, description = "export current design as a verilog netlist")
 	public void writeVerilogFile(String args[]) throws Exception {
 
-		if (args.length != 1) {
-
+		if (args.length != 1)
 			throw new Exception("requires one argument: filename");
-
-		}
 
 		String outputVerilogFile = args[0];
 

@@ -5,11 +5,7 @@ ll examples/gate_library_mini.v
 
 read_verilog -m top output/synth.v
 
-write_verilog output/synth-out.v
-
-rename_nets --ignore=clk,rst --format=%s
-
-rename_modules
+#rename_modules
 
 ungroup_nets
 

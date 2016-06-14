@@ -3,6 +3,7 @@ package net.xprova.simulations;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +27,9 @@ public class CodeGenerator {
 
 	// map: flip-flop output (q) -> input (d) nets
 	HashMap<Vertex, Vertex> flopMap;
+
+	// Java-friendly net names
+	HashMap<Vertex, String> jNetNames;
 
 	private ArrayList<String> assigns;
 
@@ -55,7 +59,7 @@ public class CodeGenerator {
 
 				lines.add(s);
 
-				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}") || s.contains("{NEXT_STATE_BIT}")) {
+				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}") || s.contains("{NEXT_STATE_BIT}") || s.contains("{STATE_BIT_ORG}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -65,11 +69,13 @@ public class CodeGenerator {
 
 						String si = s;
 
-						si = si.replace("{STATE_BIT}", v.toString());
+						si = si.replace("{STATE_BIT}", jNetNames.get(v));
 
 						si = si.replace("{STATE_BIT_INDEX}", Integer.toString(ind));
 
-						si = si.replace("{NEXT_STATE_BIT}", flopMap.get(v).toString());
+						si = si.replace("{NEXT_STATE_BIT}", jNetNames.get(flopMap.get(v)));
+
+						si = si.replace("{STATE_BIT_ORG}",  v.name.replace("\\", "\\\\"));
 
 						si += expandComment;
 
@@ -79,7 +85,7 @@ public class CodeGenerator {
 
 					}
 
-				} else if (s.contains("{NON_STATE_BIT}") || s.contains("{NON_STATE_BIT_INDEX}")) {
+				} else if (s.contains("{NON_STATE_BIT}") || s.contains("{NON_STATE_BIT_INDEX}") || s.contains("{NON_STATE_BIT_ORG}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -89,9 +95,11 @@ public class CodeGenerator {
 
 						String si = s;
 
-						si = si.replace("{NON_STATE_BIT}", v.toString());
+						si = si.replace("{NON_STATE_BIT}", jNetNames.get(v));
 
 						si = si.replace("{NON_STATE_BIT_INDEX}", Integer.toString(ind));
+
+						si = si.replace("{NON_STATE_BIT_ORG}",  v.name.replace("\\", "\\\\"));
 
 						si += expandComment;
 
@@ -101,7 +109,7 @@ public class CodeGenerator {
 
 					}
 
-				} else if (s.contains("{INPUT_BIT}") || s.contains("{INPUT_BIT_INDEX}")) {
+				} else if (s.contains("{INPUT_BIT}") || s.contains("{INPUT_BIT_INDEX}") || s.contains("{INPUT_BIT_ORG}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -111,9 +119,11 @@ public class CodeGenerator {
 
 						String si = s;
 
-						si = si.replace("{INPUT_BIT}", v.toString());
+						si = si.replace("{INPUT_BIT}", jNetNames.get(v));
 
 						si = si.replace("{INPUT_BIT_INDEX}", Integer.toString(ind));
+
+						si = si.replace("{INPUT_BIT_ORG}", v.name.replace("\\", "\\\\"));
 
 						si += expandComment;
 
@@ -156,6 +166,22 @@ public class CodeGenerator {
 						lines.add(si);
 
 					}
+
+				} else if (s.contains("{NET:")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					for (Entry<Vertex, String> entry : jNetNames.entrySet()) {
+
+						String key = String.format("{NET:%s}", entry.getKey().name);
+
+						s = s.replace(key, entry.getValue());
+
+					}
+
+					s += expandComment;
+
+					lines.add(s);
 
 				} else if (s.contains("{RESET_STATE}")) {
 
@@ -211,6 +237,8 @@ public class CodeGenerator {
 
 		flopMap = new HashMap<Vertex, Vertex>();
 
+		jNetNames = new HashMap<Vertex, String>();
+
 		// flip-flop d input nets:
 		HashSet<Vertex> dNets = new HashSet<Vertex>();
 
@@ -221,6 +249,24 @@ public class CodeGenerator {
 		HashSet<Vertex> inNets = new HashSet<Vertex>();
 
 		// populating the above sets
+
+		int netCount = 0;
+
+		for (Vertex v : graph.getNets()) {
+
+			String jNetName = v.name;
+
+			// to obtain a Java-friendly variable name,
+			// replace all non-word chars with underscores
+			jNetName = "n" + jNetName.replaceAll("[\\W]+", "_");
+
+			jNetName += "_" + netCount;
+
+			jNetNames.put(v, jNetName);
+
+			netCount += 1;
+
+		}
 
 		for (Vertex v : graph.getModulesByType("DFF")) {
 
@@ -265,9 +311,15 @@ public class CodeGenerator {
 
 			HashSet<Vertex> toVisitNext = new HashSet<Vertex>();
 
-			for (Vertex n : toVisit) {
+			final String strAND = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2};";
+			final String strNAND = "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});";
+			final String strOR = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2};";
+			final String strNOR = "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2});";
+			final String strNOT = "{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};";
+			final String strXOR = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});";
+			final String strWIRE_NG_INTERNAL = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
 
-				// out.println(n);
+			for (Vertex n : toVisit) {
 
 				Vertex driver = graph.getSourceModule(n);
 
@@ -283,45 +335,45 @@ public class CodeGenerator {
 
 				String line = "// ??";
 
+				String nNameJ = jNetNames.get(n);
+
+				String net1 = inputs.size() > 0 ? jNetNames.get(inputs.get(0)) : "";
+				String net2 = inputs.size() > 1 ? jNetNames.get(inputs.get(1)) : "";
+
 				if ("DFF".equals(driver.subtype))
 					continue;
 
 				if ("AND".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2};", n,
-							inputs.get(0), inputs.get(1));
+					line = String.format(strAND, nNameJ, net1, net2);
 
 				} else if ("NAND".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});", n,
-							inputs.get(0), inputs.get(1));
+					line = String.format(strNAND, nNameJ, net1, net2);
 
 				} else if ("OR".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2};", n,
-							inputs.get(0), inputs.get(1));
+					line = String.format(strOR, nNameJ, net1, net2);
 
 				} else if ("NOR".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2});", n,
-							inputs.get(0), inputs.get(1));
+					line = String.format(strNOR, nNameJ, net1, net2);
 
 				} else if ("NOT".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};", n, inputs.get(0));
+					line = String.format(strNOT, nNameJ, net1);
 
 				} else if ("XOR".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});", n,
-							inputs.get(0), inputs.get(1));
+					line = String.format(strXOR, nNameJ, net1, net2);
 
 				} else if ("WIRE_NG_INTERNAL".equals(driver.subtype)) {
 
-					line = String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};", n, inputs.get(0));
+					line = String.format(strWIRE_NG_INTERNAL, nNameJ, net1);
 
 				} else {
 
-					line = String.format("// ?? %s", driver.subtype);
+					throw new Exception("unrecognized gate");
 
 				}
 
