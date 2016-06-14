@@ -80,7 +80,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "read_verilog"}, description = "read a gate-level verilog netlist")
+	@Command(aliases = { "read_verilog" }, description = "read a gate-level verilog netlist")
 	public void readVerilogFile(String args[]) throws Exception {
 
 		// parse command input
@@ -548,16 +548,18 @@ public class ConsoleHandler {
 
 		// renames internal (i.e. non-port) nets
 
-		final String netStr = "n%d";
-
 		// parse input
 
 		Option optIgnore = Option.builder().desc("list of nets to ignore").hasArg().argName("IGNORE_NETS")
 				.required(false).longOpt("ignore").build();
 
+		Option optFormat = Option.builder().desc("net naming format").hasArg().argName("FORMAT").required(false)
+				.longOpt("format").build();
+
 		Options options = new Options();
 
 		options.addOption(optIgnore);
+		options.addOption(optFormat);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -566,6 +568,8 @@ public class ConsoleHandler {
 		String ignoreStr = line.getOptionValue("ignore", "");
 
 		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
+
+		String netStr = line.getOptionValue("format", "n%d");
 
 		// rename nets
 
@@ -591,9 +595,21 @@ public class ConsoleHandler {
 
 			if (!ignored.contains(n.name)) {
 
+				String jNetName = n.name;
+
+				// to obtain a Java-friendly variable name,
+				// replace all non-word chars with underscores
+				jNetName = jNetName.replaceAll("[\\W]+", "_");
+
 				netCount += 1;
 
-				n.name = String.format(netStr, netCount);
+				String nn = netStr;
+
+				nn = nn.replace("%d", "" + netCount);
+
+				nn = nn.replace("%s", "" + jNetName);
+
+				n.name = nn;
 
 			}
 
@@ -781,7 +797,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = {"ungroup_nets"}, description = "split arrays into individual nets")
+	@Command(aliases = { "ungroup_nets" }, description = "split arrays into individual nets")
 	public void ungroupNets(String args[]) {
 
 		String netNameFormat = args.length == 0 ? "%s_%d_" : String.join(" ", args);

@@ -1,12 +1,13 @@
-testPL
-:q
+
 synth_verilog examples/assertion-test5.v output/synth.v
 
 ll examples/gate_library_mini.v
 
 read_verilog -m top output/synth.v
 
-rename_nets --ignore=clk,rst
+write_verilog output/synth-out.v
+
+rename_nets --ignore=clk,rst --format=%s
 
 rename_modules
 

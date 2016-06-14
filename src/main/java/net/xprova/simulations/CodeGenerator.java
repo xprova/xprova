@@ -315,6 +315,10 @@ public class CodeGenerator {
 					line = String.format("{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});", n,
 							inputs.get(0), inputs.get(1));
 
+				} else if ("WIRE_NG_INTERNAL".equals(driver.subtype)) {
+
+					line = String.format("{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};", n, inputs.get(0));
+
 				} else {
 
 					line = String.format("// ?? %s", driver.subtype);
