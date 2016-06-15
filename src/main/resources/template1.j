@@ -579,9 +579,21 @@ public class CodeSimulator {
 
 		int cycles = inputs.length;
 
+		// determine longest signal name
+		// (for pretty printing)
+
+		int maxL = 0;
+
+		for (String s : sigNames)
+			maxL = s.length() > maxL ? s.length() : maxL;
+
+		String strFmt = String.format("%%%ds : ", maxL + 2);
+
+		// run simulation
+
 		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
 
-		System.out.printf("%10s : ", "Cycle");
+		System.out.printf(strFmt, "Cycle");
 
 		for (int i = 0; i < cycles; i++)
 			System.out.printf("%d", i % 10);
@@ -597,7 +609,7 @@ public class CodeSimulator {
 
 			int[] sig = waveforms.get(j);
 
-			System.out.printf("%10s : ", sigNames.get(j));
+			System.out.printf(strFmt, sigNames.get(j));
 
 			for (int i = 0; i < cycles; i++) {
 
@@ -844,7 +856,7 @@ public class CodeSimulator {
 
 				//@formatter:off
 				// {STATE_BIT}[i+1] |= {NEXT_STATE_BIT}[i];
-				//@formatter:on				
+				//@formatter:on
 
 			}
 
