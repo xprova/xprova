@@ -1,7 +1,10 @@
+ll examples/gate_library_mini.v
+
+read_verilog tests\escaped-test.v
+
+write_verilog output/escaped-output.v
 
 synth_verilog examples/assertion-test5.v output/synth.v
-
-ll examples/gate_library_mini.v
 
 read_verilog -m top output/synth.v
 

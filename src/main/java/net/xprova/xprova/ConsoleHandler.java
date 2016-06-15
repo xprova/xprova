@@ -697,21 +697,25 @@ public class ConsoleHandler {
 
 			Process proc = rt.exec(cmd);
 
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+			String s;
+
+			while ((s = stdError.readLine()) != null)
+				out.println(s);
+
+			while ((s = stdInput.readLine()) != null)
+				out.println(s);
+
+			stdInput.close();
+
+			stdError.close();
+
 			proc.waitFor();
 
 			if (proc.exitValue() != 0) {
-
-				BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-				BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
-				String s = null;
-
-				while ((s = stdInput.readLine()) != null)
-					out.println(s);
-
-				while ((s = stdError.readLine()) != null)
-					out.println(s);
 
 				throw new Exception("Compilation failed");
 
@@ -725,16 +729,14 @@ public class ConsoleHandler {
 
 			proc.waitFor();
 
-			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
+			BufferedReader stdInput2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
 
-			BufferedReader stdError = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
+			BufferedReader stdError2 = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
 
-			String s = null;
-
-			while ((s = stdInput.readLine()) != null)
+			while ((s = stdError2.readLine()) != null)
 				out.println(s);
 
-			while ((s = stdError.readLine()) != null)
+			while ((s = stdInput2.readLine()) != null)
 				out.println(s);
 
 		}
