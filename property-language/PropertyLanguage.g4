@@ -1,14 +1,6 @@
 grammar PropertyLanguage;
 
-document
-	: property* EOF
-	;
-
 property
-	: expression ';'
-	;
-
-expression
 	: identifier
 	| identifier '|->' identifier
 	;

@@ -47,11 +47,19 @@ public class ConsoleHandler {
 
 	private HashMap<String, FlipFlop> defsFF = null;
 
+	private ArrayList<Property> assumptions = null;
+
+	private ArrayList<Property> assertions = null;
+
 	public ConsoleHandler(PrintStream ps) {
 
 		out = ps;
 
 		defsFF = new HashMap<String, FlipFlop>();
+
+		assumptions = new ArrayList<Property>();
+
+		assertions = new ArrayList<Property>();
 
 	}
 
@@ -670,7 +678,9 @@ public class ConsoleHandler {
 
 		String templateCode = loadResourceString(templateResourceFile);
 
-		ArrayList<String> lines = (new CodeGenerator(graph)).generate(templateCode);
+		CodeGenerator cg = new CodeGenerator(graph, assumptions, assertions);
+
+		ArrayList<String> lines = cg.generate(templateCode);
 
 		if (line.hasOption("printcode")) {
 
@@ -839,15 +849,36 @@ public class ConsoleHandler {
 
 	}
 
-	@Command
-	public void testPL() {
+	@Command(description = "add an assumption for formal verification")
+	public void assume(String args[]) {
 
-		String str = "a;b; c|->   d;";
+		String pStr = String.join(" ", args);
 
-		List<Property> pList = (new PropertyParser()).parse(str);
+		PropertyParser pp = new PropertyParser();
 
-		for (Property p : pList)
-			System.out.println(p);
+		assumptions.add(pp.parse(pStr));
+	}
+
+	@Command(aliases = { "assert" }, description = "add an assertion for formal verification")
+	public void assertp(String args[]) {
+
+		String pStr = String.join(" ", args);
+
+		PropertyParser pp = new PropertyParser();
+
+		assertions.add(pp.parse(pStr));
+	}
+
+	@Command(description = "print a list of design properties (assumptions and assertions)")
+	public void list_properties(String args[]) throws Exception {
+
+		System.out.println("Properties:");
+
+		for (Property p : assumptions)
+			System.out.println("* assumption : " + p);
+
+		for (Property p : assertions)
+			System.out.println("* assertion  : " + p);
 
 	}
 

@@ -1,7 +1,5 @@
 T__0=1
-T__1=2
-Simple_identifier=3
-Escaped_identifier=4
-WS=5
-';'=1
-'|->'=2
+Simple_identifier=2
+Escaped_identifier=3
+WS=4
+'|->'=1

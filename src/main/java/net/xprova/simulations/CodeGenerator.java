@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import net.xprova.graph.Graph;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
+import net.xprova.propertylanguage.Property;
 
 public class CodeGenerator {
 
@@ -33,17 +34,30 @@ public class CodeGenerator {
 
 	private ArrayList<String> assigns;
 
+	private ArrayList<Property> assumptions, assertions;
+
 	private int resetState;
 
-	public CodeGenerator(NetlistGraph graph) throws Exception {
+	public CodeGenerator(NetlistGraph graph, ArrayList<Property> assumptions, ArrayList<Property> assertions)
+			throws Exception {
 
 		this.graph = graph;
+		this.assumptions = assumptions;
+		this.assertions = assertions;
 
 	}
 
 	public ArrayList<String> generate(String templateCode) throws Exception {
 
 		populateStructures();
+
+		HashMap<String, String> netNameMapping = new HashMap<String, String>();
+
+		for (Entry<Vertex, String> entry : jNetNames.entrySet()) {
+
+			netNameMapping.put(entry.getKey().toString(), entry.getValue());
+
+		}
 
 		String expandComment = " // {EXPANDED}";
 
@@ -59,7 +73,8 @@ public class CodeGenerator {
 
 				lines.add(s);
 
-				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}") || s.contains("{NEXT_STATE_BIT}") || s.contains("{STATE_BIT_ORG}")) {
+				if (s.contains("{STATE_BIT}") || s.contains("{STATE_BIT_INDEX}") || s.contains("{NEXT_STATE_BIT}")
+						|| s.contains("{STATE_BIT_ORG}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -75,7 +90,7 @@ public class CodeGenerator {
 
 						si = si.replace("{NEXT_STATE_BIT}", jNetNames.get(flopMap.get(v)));
 
-						si = si.replace("{STATE_BIT_ORG}",  v.name.replace("\\", "\\\\"));
+						si = si.replace("{STATE_BIT_ORG}", v.name.replace("\\", "\\\\"));
 
 						si += expandComment;
 
@@ -85,7 +100,8 @@ public class CodeGenerator {
 
 					}
 
-				} else if (s.contains("{NON_STATE_BIT}") || s.contains("{NON_STATE_BIT_INDEX}") || s.contains("{NON_STATE_BIT_ORG}")) {
+				} else if (s.contains("{NON_STATE_BIT}") || s.contains("{NON_STATE_BIT_INDEX}")
+						|| s.contains("{NON_STATE_BIT_ORG}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -99,7 +115,7 @@ public class CodeGenerator {
 
 						si = si.replace("{NON_STATE_BIT_INDEX}", Integer.toString(ind));
 
-						si = si.replace("{NON_STATE_BIT_ORG}",  v.name.replace("\\", "\\\\"));
+						si = si.replace("{NON_STATE_BIT_ORG}", v.name.replace("\\", "\\\\"));
 
 						si += expandComment;
 
@@ -109,7 +125,8 @@ public class CodeGenerator {
 
 					}
 
-				} else if (s.contains("{INPUT_BIT}") || s.contains("{INPUT_BIT_INDEX}") || s.contains("{INPUT_BIT_ORG}")) {
+				} else if (s.contains("{INPUT_BIT}") || s.contains("{INPUT_BIT_INDEX}")
+						|| s.contains("{INPUT_BIT_ORG}")) {
 
 					s = s.replaceFirst("//( )+", "");
 
@@ -212,6 +229,34 @@ public class CodeGenerator {
 					s += expandComment;
 
 					lines.add(s);
+
+				} else if (s.contains("{ASSUMPTION}")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					for (Property as : assumptions) {
+
+						String si = s.replace("{ASSUMPTION}", as.toString(netNameMapping));
+
+						si += expandComment;
+
+						lines.add(si);
+
+					}
+
+				} else if (s.contains("{ASSERTION}")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					for (Property as : assertions) {
+
+						String si = s.replace("{ASSERTION}", as.toString(netNameMapping));
+
+						si += expandComment;
+
+						lines.add(si);
+
+					}
 
 				}
 

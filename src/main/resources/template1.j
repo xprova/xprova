@@ -192,6 +192,9 @@ public class CodeSimulator {
 
 		int state = initial;
 
+		int all_assumptions;
+		int all_assertions;
+
 		System.out.println("Starting search ...");
 
 		long startTime = System.nanoTime();
@@ -372,8 +375,13 @@ public class CodeSimulator {
 
 					}
 
-					// if ({NET:valid} == 0 && {NET:assume} == -1) {
-					if (valid == 0 && assume == -1) { // {EXPANDED}
+					all_assumptions = -1;
+					all_assertions = -1;
+
+					// all_assumptions &= {ASSUMPTION};
+					// all_assertions &= {ASSERTION};
+
+					if (all_assumptions == -1 && all_assertions == 0) {
 
 						violationState = state;
 

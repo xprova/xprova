@@ -16,18 +16,6 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDocument(PropertyLanguageParser.DocumentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDocument(PropertyLanguageParser.DocumentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterProperty(PropertyLanguageParser.PropertyContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -35,18 +23,6 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitProperty(PropertyLanguageParser.PropertyContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterExpression(PropertyLanguageParser.ExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExpression(PropertyLanguageParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -1,8 +1,5 @@
 package net.xprova.propertylanguage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -10,7 +7,7 @@ import net.xprova.propertylanguage.PropertyLanguageParser.PropertyContext;
 
 public class PropertyParser {
 
-	public List<Property> parse(String str) {
+	public Property parse(String str) {
 
 		ANTLRInputStream antlr = new ANTLRInputStream(str);
 
@@ -20,32 +17,24 @@ public class PropertyParser {
 
 		PropertyLanguageParser p1 = new PropertyLanguageParser(tokenStream);
 
-		List<PropertyContext> properyList = p1.document().property();
+		PropertyContext p = p1.property();
 
-		ArrayList<Property> pList = new ArrayList<Property>();
+		if (p.getChildCount() == 3) {
 
-		for (PropertyContext a : properyList) {
+			// this is an implication expression
 
-			if (a.expression().getChildCount() == 3) {
+			String antecedent = p.identifier(0).getText();
+			String consequent = p.identifier(1).getText();
 
-				// this is an implication expression
+			return new Property(antecedent, consequent);
 
-				String antecedent = a.expression().identifier(0).getText();
-				String consequent = a.expression().identifier(1).getText();
+		} else {
 
-				pList.add(new Property(antecedent, consequent));
+			// a regular expression
 
-			} else {
-
-				// a regular expression
-
-				pList.add(new Property(a.expression().identifier(0).getText()));
-
-			}
+			return new Property(p.identifier(0).getText());
 
 		}
-
-		return pList;
 
 	}
 
