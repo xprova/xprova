@@ -32,7 +32,8 @@ import net.xprova.netlistgraph.NetlistGraphDotFormatter;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
-import net.xprova.propertylanguage.PropertyLanguageTest;
+import net.xprova.propertylanguage.Property;
+import net.xprova.propertylanguage.PropertyParser;
 import net.xprova.simulations.CodeGenerator;
 import net.xprova.verilogparser.VerilogParser;
 
@@ -841,7 +842,12 @@ public class ConsoleHandler {
 	@Command
 	public void testPL() {
 
-		(new PropertyLanguageTest()).test();
+		String str = "a;b; c|->   d;";
+
+		List<Property> pList = (new PropertyParser()).parse(str);
+
+		for (Property p : pList)
+			System.out.println(p);
 
 	}
 

@@ -18,15 +18,15 @@ public interface PropertyLanguageListener extends ParseTreeListener {
 	 */
 	void exitDocument(PropertyLanguageParser.DocumentContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PropertyLanguageParser#assertion}.
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#property}.
 	 * @param ctx the parse tree
 	 */
-	void enterAssertion(PropertyLanguageParser.AssertionContext ctx);
+	void enterProperty(PropertyLanguageParser.PropertyContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PropertyLanguageParser#assertion}.
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#property}.
 	 * @param ctx the parse tree
 	 */
-	void exitAssertion(PropertyLanguageParser.AssertionContext ctx);
+	void exitProperty(PropertyLanguageParser.PropertyContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PropertyLanguageParser#expression}.
 	 * @param ctx the parse tree
@@ -38,13 +38,13 @@ public interface PropertyLanguageListener extends ParseTreeListener {
 	 */
 	void exitExpression(PropertyLanguageParser.ExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PropertyLanguageParser#operator}.
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#identifier}.
 	 * @param ctx the parse tree
 	 */
-	void enterOperator(PropertyLanguageParser.OperatorContext ctx);
+	void enterIdentifier(PropertyLanguageParser.IdentifierContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PropertyLanguageParser#operator}.
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#identifier}.
 	 * @param ctx the parse tree
 	 */
-	void exitOperator(PropertyLanguageParser.OperatorContext ctx);
+	void exitIdentifier(PropertyLanguageParser.IdentifierContext ctx);
 }

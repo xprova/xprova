@@ -1,29 +1,30 @@
 grammar PropertyLanguage;
 
 document
-	: assertion* EOF
+	: property* EOF
 	;
 
-assertion
-	: 'assert' expression ';'
+property
+	: expression ';'
 	;
 
 expression
-	: ID
-	| expression operator expression
-	| '(' expression ')'
+	: identifier
+	| identifier '|->' identifier
 	;
 
-operator
-	: '+'
-	| '-'
-	| '*'
-	| '/'
-	;
+identifier
+   : Simple_identifier
+   | Escaped_identifier
+   ;
 
-ID
-	: [a-z]+
-	;
+Simple_identifier
+   : [a-zA-Z_] [a-zA-Z0-9_$]*
+   ;
+
+Escaped_identifier
+   : '\\' ('\u0021'..'\u007E')+ ~ [ \r\t\n]*
+   ;
 
 WS
 	: [ \r\n\t] + -> channel (HIDDEN)
