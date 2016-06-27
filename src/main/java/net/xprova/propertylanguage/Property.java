@@ -8,11 +8,15 @@ public class Property {
 
 	private String expr;
 
+	private String printExpr;
+
 	private List<String> orderedIdentifiers;
 
 	public Property(String expr) {
 
 		this.expr = "ID";
+
+		this.printExpr = expr;
 
 		orderedIdentifiers = new ArrayList<String>();
 
@@ -24,7 +28,7 @@ public class Property {
 
 		this.expr = "(~ID | ID)";
 
-//		this.expr = String.format("(~%s | %s)", antecedent, consequent);
+		this.printExpr = String.format("%s |-> %s", antecedent, consequent);
 
 		orderedIdentifiers = new ArrayList<String>();
 
@@ -43,19 +47,11 @@ public class Property {
 	@Override
 	public String toString() {
 
-		String result = expr;
-
-		for (String id : orderedIdentifiers)
-			result = result.replaceFirst("ID", id);
-
-		return expr;
+		return printExpr;
 
 	}
 
 	public String toString(HashMap<String, String> mapID) {
-
-		// same as toString but maps identifier names according
-		// to mapID
 
 		String result = expr;
 
