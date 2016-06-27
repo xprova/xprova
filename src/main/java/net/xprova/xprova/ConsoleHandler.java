@@ -21,7 +21,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import net.xprova.deprecated.CodeSimulator;
 import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
 import net.xprova.netlist.GateLibrary;
@@ -749,28 +748,6 @@ public class ConsoleHandler {
 
 			while ((s = stdInput2.readLine()) != null)
 				out.println(s);
-
-		}
-
-	}
-
-	@Deprecated
-	public void testCode(int printCounterExample) throws Exception {
-
-		CodeSimulator sim1 = new CodeSimulator();
-
-		int initial = sim1.getResetState();
-
-		if (printCounterExample == 1) {
-
-			int[] counterExample = sim1.exploreSpace(initial);
-
-			if (counterExample != null)
-				sim1.simulate(initial, counterExample);
-
-		} else {
-
-			sim1.exploreSpace(initial);
 
 		}
 
