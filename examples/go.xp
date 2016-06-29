@@ -8,10 +8,6 @@ synth_verilog examples/assertion-test6.v output/synth.v
 
 read_verilog -m top output/synth.v
 
-#rename_modules
-
-ungroup_nets
-
 write_verilog output/synth_renamed.v
 
 prove

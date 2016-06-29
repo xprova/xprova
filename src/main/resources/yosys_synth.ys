@@ -26,7 +26,7 @@ opt_clean
 # add TIE1 and TIE0 cells
 hilomap -singleton -hicell TIE1 y -locell TIE0 y
 
-splitnets -format __
+#splitnets -format __
 
 # write synthesized design
 write_verilog %SYNTH_FILE%
