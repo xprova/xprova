@@ -45,6 +45,27 @@ public class CodeGenerator {
 		this.assumptions = assumptions;
 		this.assertions = assertions;
 
+		checkProperties(assumptions);
+		checkProperties(assertions);
+
+	}
+
+	private void checkProperties(ArrayList<Property> pList) throws Exception {
+
+		for (Property p : pList) {
+
+			for (String id : p.getIdentifiers()) {
+
+				if (graph.getVertex(id) == null) {
+
+					throw new Exception(String.format("Property (%s) contains an unrecognized identifier (%s)", p, id));
+
+				}
+
+			}
+
+		}
+
 	}
 
 	public ArrayList<String> generate(String templateCode) throws Exception {
