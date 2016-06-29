@@ -17,7 +17,7 @@ public class PropertyLanguageParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, Simple_identifier=2, Escaped_identifier=3, WS=4;
+		T__0=1, Simple_identifier=2, Bit_identifier=3, Escaped_identifier=4, WS=5;
 	public static final int
 		RULE_property = 0, RULE_identifier = 1;
 	public static final String[] ruleNames = {
@@ -28,7 +28,8 @@ public class PropertyLanguageParser extends Parser {
 		null, "'|->'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, "Simple_identifier", "Escaped_identifier", "WS"
+		null, null, "Simple_identifier", "Bit_identifier", "Escaped_identifier", 
+		"WS"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -140,6 +141,7 @@ public class PropertyLanguageParser extends Parser {
 
 	public static class IdentifierContext extends ParserRuleContext {
 		public TerminalNode Simple_identifier() { return getToken(PropertyLanguageParser.Simple_identifier, 0); }
+		public TerminalNode Bit_identifier() { return getToken(PropertyLanguageParser.Bit_identifier, 0); }
 		public TerminalNode Escaped_identifier() { return getToken(PropertyLanguageParser.Escaped_identifier, 0); }
 		public IdentifierContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -164,7 +166,7 @@ public class PropertyLanguageParser extends Parser {
 			{
 			setState(11);
 			_la = _input.LA(1);
-			if ( !(_la==Simple_identifier || _la==Escaped_identifier) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Simple_identifier) | (1L << Bit_identifier) | (1L << Escaped_identifier))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			} else {
 				consume();
@@ -183,8 +185,8 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\6\20\4\2\t\2\4\3"+
-		"\t\3\3\2\3\2\3\2\3\2\3\2\5\2\f\n\2\3\3\3\3\3\3\2\2\4\2\4\2\3\3\2\4\5\16"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\7\20\4\2\t\2\4\3"+
+		"\t\3\3\2\3\2\3\2\3\2\3\2\5\2\f\n\2\3\3\3\3\3\3\2\2\4\2\4\2\3\3\2\4\6\16"+
 		"\2\13\3\2\2\2\4\r\3\2\2\2\6\f\5\4\3\2\7\b\5\4\3\2\b\t\7\3\2\2\t\n\5\4"+
 		"\3\2\n\f\3\2\2\2\13\6\3\2\2\2\13\7\3\2\2\2\f\3\3\2\2\2\r\16\t\2\2\2\16"+
 		"\5\3\2\2\2\3\13";

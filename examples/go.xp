@@ -1,5 +1,7 @@
-assume c
-assert b|->a
+assume count[0]
+assume count[2]
+assume count[3]
+assert count[4] |-> count[5]
 list_properties
 
 load_lib examples/gate_library_mini.v
