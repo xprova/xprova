@@ -62,7 +62,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "load_lib", "ll" }, description = "load a cell library")
+	@Command(aliases = { "load_lib" }, description = "load a cell library")
 	public void loadLibrary(String libFile) throws Exception {
 
 		ArrayList<Netlist> libMods = VerilogParser.parseFile(libFile, new GateLibrary());
@@ -365,8 +365,8 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "augment_netlist",
-			"aug" }, description = "add metastable flip-flop models and associated connections")
+	@Command(aliases = {
+			"augment_netlist", }, description = "add metastable flip-flop models and associated connections")
 	public void augmentNetlist() throws Exception {
 
 		if (graph == null) {
@@ -622,7 +622,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "prove" }, description = "attempt to prove (assumption -> valid) in the current design")
+	@Command(aliases = { "prove" }, description = "attempt to prove defined assertions")
 	public void proveAssertions(String args[]) throws Exception {
 
 		// options:
