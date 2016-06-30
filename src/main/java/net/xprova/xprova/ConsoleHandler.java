@@ -504,7 +504,7 @@ public class ConsoleHandler {
 
 	}
 
-	public void renameModules(HashSet<String> ignored, String strFormat) {
+	private void renameModules(HashSet<String> ignored, String strFormat) {
 
 		// rename modules
 
@@ -542,7 +542,7 @@ public class ConsoleHandler {
 
 	}
 
-	public void renameNets(HashSet<String> ignored, String strFormat) {
+	private void renameNets(HashSet<String> ignored, String strFormat) {
 
 		// renames internal (i.e. non-port) nets
 
@@ -622,7 +622,6 @@ public class ConsoleHandler {
 
 			String cmd = args[0];
 
-
 			if ("modules".equals(cmd)) {
 
 				String strFormat = line.getOptionValue("format", "%s%d");
@@ -636,6 +635,14 @@ public class ConsoleHandler {
 				String strFormat = line.getOptionValue("format", "n%d");
 
 				renameNets(ignored, strFormat);
+
+				return;
+
+			} else if ("splitarr".equals(cmd)) {
+
+				String strFormat = line.getOptionValue("format", "%s_%d_");
+
+				splitArr(strFormat);
 
 				return;
 
@@ -809,10 +816,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "ungroup_nets" }, description = "split arrays into individual nets")
-	public void ungroupNets(String args[]) {
-
-		String netNameFormat = args.length == 0 ? "%s_%d_" : String.join(" ", args);
+	private void splitArr(String netNameFormat) {
 
 		for (Vertex v : graph.getNets()) {
 

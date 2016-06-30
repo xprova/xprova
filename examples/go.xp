@@ -12,6 +12,7 @@ read_verilog -m top output/synth.v
 
 rename modules
 rename nets
+rename splitarr
 
 write_verilog output/synth_renamed.v
 
