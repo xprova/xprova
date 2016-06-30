@@ -61,34 +61,44 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "load_lib" }, description = "load a cell library")
-	public void loadLibrary(String libFile) throws Exception {
+	@Command(description = "add and manage cell libraries")
+	public void library(String[] args) throws Exception {
 
-		ArrayList<Netlist> libMods = VerilogParser.parseFile(libFile, new GateLibrary());
+		if (args.length > 0) {
 
-		lib = new GateLibrary(libMods);
+			String cmd = args[0];
 
-		out.printf("Loaded %d modules from library %s\n", libMods.size(), libFile);
+			if ("load".equals(cmd) && args.length > 1) {
 
-	}
+				String libFile = args[1];
 
-	@Command(aliases = { "list_modules" }, description = "list the contents of the loaded cell library")
-	public void reportLibrary() {
+				ArrayList<Netlist> libMods = VerilogParser.parseFile(libFile, new GateLibrary());
 
-		if (lib == null) {
+				lib = new GateLibrary(libMods);
 
-			out.println("No library is currently loaded");
+				out.printf("Loaded %d modules from library %s\n", libMods.size(), libFile);
 
-		} else {
+				return;
 
-			lib.printModules();
+			} else if ("list".equals(cmd)) {
+
+				if (lib == null)
+					out.println("No library is currently loaded");
+				else
+					lib.printModules();
+
+				return;
+
+			}
 
 		}
 
+		throw new Exception("error parsing arguments of library");
+
 	}
 
-	@Command(aliases = { "read_verilog" }, description = "read a gate-level verilog netlist")
-	public void readVerilogFile(String args[]) throws Exception {
+	@Command(aliases = { "read" }, description = "read verilog file (gate-level netlist)")
+	public void read(String args[]) throws Exception {
 
 		// parse command input
 
@@ -654,7 +664,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "prove" }, description = "attempt to prove defined assertions")
+	@Command(aliases = { "prove" }, description = "attempt to prove assertions")
 	public void proveAssertions(String args[]) throws Exception {
 
 		// options:
