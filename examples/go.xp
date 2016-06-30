@@ -6,11 +6,16 @@ list_properties
 
 load_lib examples/gate_library_mini.v
 
-synth_verilog examples/assertion-test6.v output/synth.v
+synth examples/assertion-test6.v output/synth.v
 
 read_verilog -m top output/synth.v
 
+rename modules
+rename nets
+
 write_verilog output/synth_renamed.v
+
+:q
 
 prove
 #--nocounter
@@ -19,10 +24,10 @@ prove
 
 export_dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
-! dot -Tpdf output/netlist.dot -o output/netlist.pdf
+:! dot -Tpdf output/netlist.dot -o output/netlist.pdf
 
-def_ff QDFFRSBX1 CK RS D
-def_ff DFF CK RS D
-def_ff DFFx CK RS D
+flop define QDFFRSBX1 CK RS D
+flop define DFF CK RS D
+flop define DFFx CK RS D
 
-augment_netlist
+augment

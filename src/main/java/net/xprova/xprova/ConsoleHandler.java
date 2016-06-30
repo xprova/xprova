@@ -19,7 +19,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import net.xprova.dot.GraphDotPrinter;
 import net.xprova.graph.Graph;
@@ -365,9 +364,8 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = {
-			"augment_netlist", }, description = "add metastable flip-flop models and associated connections")
-	public void augmentNetlist() throws Exception {
+	@Command(aliases = { "augment", }, description = "add metastable flip-flop models and associated connections")
+	public void augment() throws Exception {
 
 		if (graph == null) {
 
@@ -506,29 +504,9 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "rename_modules" }, description = "rename modules according to their types")
-	public void renameModules(String args[]) throws ParseException {
+	public void renameModules(HashSet<String> ignored, String strFormat) {
 
 		// rename modules
-
-		final String modStr = "%s%d";
-
-		// parse input
-
-		Option optIgnore = Option.builder().desc("list of nets to ignore").hasArg().argName("IGNORE_NETS")
-				.required(false).longOpt("ignore").build();
-
-		Options options = new Options();
-
-		options.addOption(optIgnore);
-
-		CommandLineParser parser = new DefaultParser();
-
-		CommandLine line = parser.parse(options, args);
-
-		String ignoreStr = line.getOptionValue("ignore", "");
-
-		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
 
 		List<Vertex> sortedMods = new ArrayList<Vertex>(graph.getModules());
 
@@ -554,7 +532,7 @@ public class ConsoleHandler {
 
 				c = (c == null) ? 1 : c + 1;
 
-				v.name = String.format(modStr, lowerMod, c);
+				v.name = String.format(strFormat, lowerMod, c);
 
 				modCounts.put(lowerMod, c);
 
@@ -564,33 +542,9 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "rename_nets" }, description = "rename nets as n1, n2 ...")
-	public void renameNets(String args[]) throws ParseException {
+	public void renameNets(HashSet<String> ignored, String strFormat) {
 
 		// renames internal (i.e. non-port) nets
-
-		// parse input
-
-		Option optIgnore = Option.builder().desc("list of nets to ignore").hasArg().argName("IGNORE_NETS")
-				.required(false).longOpt("ignore").build();
-
-		Option optFormat = Option.builder().desc("net naming format").hasArg().argName("FORMAT").required(false)
-				.longOpt("format").build();
-
-		Options options = new Options();
-
-		options.addOption(optIgnore);
-		options.addOption(optFormat);
-
-		CommandLineParser parser = new DefaultParser();
-
-		CommandLine line = parser.parse(options, args);
-
-		String ignoreStr = line.getOptionValue("ignore", "");
-
-		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
-
-		String netStr = line.getOptionValue("format", "n%d");
 
 		// rename nets
 
@@ -624,7 +578,7 @@ public class ConsoleHandler {
 
 				netCount += 1;
 
-				String nn = netStr;
+				String nn = strFormat;
 
 				nn = nn.replace("%d", "" + netCount);
 
@@ -635,6 +589,61 @@ public class ConsoleHandler {
 			}
 
 		}
+
+	}
+
+	@Command(description = "rename nets or modules")
+	public void rename(String args[]) throws Exception {
+
+		// parse input
+
+		Option optIgnore = Option.builder().desc("list of nets/modules to ignore").hasArg().argName("IGNORE")
+				.required(false).longOpt("ignore").build();
+
+		Option optFormat = Option.builder().desc("naming format").hasArg().argName("FORMAT").required(false)
+				.longOpt("format").build();
+
+		Options options = new Options();
+
+		options.addOption(optIgnore);
+		options.addOption(optFormat);
+
+		options.addOption(optIgnore);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line = parser.parse(options, args);
+
+		String ignoreStr = line.getOptionValue("ignore", "");
+
+		HashSet<String> ignored = new HashSet<String>(Arrays.asList(ignoreStr.split(",")));
+
+		if (args.length > 0) {
+
+			String cmd = args[0];
+
+
+			if ("modules".equals(cmd)) {
+
+				String strFormat = line.getOptionValue("format", "%s%d");
+
+				renameModules(ignored, strFormat);
+
+				return;
+
+			} else if ("nets".equals(cmd)) {
+
+				String strFormat = line.getOptionValue("format", "n%d");
+
+				renameNets(ignored, strFormat);
+
+				return;
+
+			}
+
+		}
+
+		throw new Exception("error parsing arguments of rename");
 
 	}
 
@@ -827,7 +836,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "synth_verilog" }, description = "synthesize behavioral verilog design using yosys")
+	@Command(aliases = { "synth" }, description = "synthesize behavioral verilog design using yosys")
 	public void synthBehavioralDesign(String args[]) throws Exception {
 
 		// TODO: implement the following switches
