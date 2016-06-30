@@ -383,48 +383,68 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "clear_ff_defs" }, description = "clear flip-flop definitions")
-	public void clearDefsFF(String[] args) {
+	@Command(aliases = { "def_ff" }, description = "manage flip-flop definitions")
+	public void addDefFF(String[] args) throws Exception {
 
-		// specify flip-flop modules
+		if (args.length == 1) {
 
-		defsFF.clear();
+			String cmd = args[0];
 
-	}
+			if ("clear".equals(cmd)) {
 
-	@Command(aliases = { "def_ff" }, description = "define and specify the ports of a flip-flop cell")
-	public void addDefFF(String modName, String clkPort, String rstPort, String dPort) throws Exception {
+				out.println("Cleared flip-flop definitions");
 
-		if (defsFF.containsKey(modName)) {
+				defsFF.clear();
 
-			throw new Exception(String.format("definition already exists for flip-flop <%s> ", modName));
+				return;
 
-		} else {
+			} else if ("list".equals(cmd)) {
 
-			FlipFlop ff = new FlipFlop(modName, clkPort, rstPort, dPort);
+				if (defsFF.isEmpty()) {
 
-			defsFF.put(modName, ff);
+					out.println("No flip-flop definitions");
 
-			out.printf("defined flip-flop <%s>\n", modName);
+				} else {
+
+					String strFormat = "%20s %14s %14s %14s\n";
+
+					out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port", "Data Port"));
+					out.print(String.format(strFormat, "----------------", "----------", "----------", "---------"));
+
+					for (FlipFlop f : defsFF.values())
+						out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort, f.dPort));
+
+				}
+
+				return;
+
+			}
+
+		} else if (args.length == 4) {
+
+			String modName = args[0];
+			String clkPort = args[1];
+			String rstPort = args[2];
+			String dPort = args[3];
+
+			if (defsFF.containsKey(modName)) {
+
+				throw new Exception(String.format("definition already exists for flip-flop <%s> ", modName));
+
+			} else {
+
+				FlipFlop ff = new FlipFlop(modName, clkPort, rstPort, dPort);
+
+				defsFF.put(modName, ff);
+
+				out.printf("defined flip-flop <%s>\n", modName);
+
+				return;
+			}
 
 		}
 
-	}
-
-	@Command(aliases = { "list_ff" }, description = "list flip-flop definitions")
-	public void listDefFF() {
-
-		String strFormat = "%20s %14s %14s %14s\n";
-
-		out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port", "Data Port"));
-		out.print(String.format(strFormat, "----------------", "----------", "----------", "---------"));
-
-		for (FlipFlop f : defsFF.values()) {
-
-			out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort, f.dPort));
-
-		}
-
+		throw new Exception("Unable to parse def_ff arguments");
 	}
 
 	@Command(aliases = { "report_domains" }, description = "print list of clock domains in current design")
