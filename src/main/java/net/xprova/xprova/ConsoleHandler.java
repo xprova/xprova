@@ -383,49 +383,45 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "def_ff" }, description = "manage flip-flop definitions")
-	public void addDefFF(String[] args) throws Exception {
+	@Command(description = "manage flip-flop definitions")
+	public void flop(String[] args) throws Exception {
 
-		if (args.length == 1) {
+		String cmd = args[0];
 
-			String cmd = args[0];
+		if ("clear".equals(cmd)) {
 
-			if ("clear".equals(cmd)) {
+			out.println("Cleared flip-flop definitions");
 
-				out.println("Cleared flip-flop definitions");
+			defsFF.clear();
 
-				defsFF.clear();
+			return;
 
-				return;
+		} else if ("list".equals(cmd)) {
 
-			} else if ("list".equals(cmd)) {
+			if (defsFF.isEmpty()) {
 
-				if (defsFF.isEmpty()) {
+				out.println("No flip-flop definitions");
 
-					out.println("No flip-flop definitions");
+			} else {
 
-				} else {
+				String strFormat = "%20s %14s %14s %14s\n";
 
-					String strFormat = "%20s %14s %14s %14s\n";
+				out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port", "Data Port"));
+				out.print(String.format(strFormat, "----------------", "----------", "----------", "---------"));
 
-					out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port", "Data Port"));
-					out.print(String.format(strFormat, "----------------", "----------", "----------", "---------"));
-
-					for (FlipFlop f : defsFF.values())
-						out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort, f.dPort));
-
-				}
-
-				return;
+				for (FlipFlop f : defsFF.values())
+					out.print(String.format(strFormat, f.moduleName, f.clkPort, f.rstPort, f.dPort));
 
 			}
 
-		} else if (args.length == 4) {
+			return;
 
-			String modName = args[0];
-			String clkPort = args[1];
-			String rstPort = args[2];
-			String dPort = args[3];
+		} else if ("define".equals(cmd)) {
+
+			String modName = args[1];
+			String clkPort = args[2];
+			String rstPort = args[3];
+			String dPort = args[4];
 
 			if (defsFF.containsKey(modName)) {
 
