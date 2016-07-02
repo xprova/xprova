@@ -70,6 +70,8 @@ public class CodeGenerator {
 
 	public ArrayList<String> generate(String templateCode) throws Exception {
 
+		CodeGenExprFormatter formatter = new CodeGenExprFormatter();
+
 		populateStructures();
 
 		HashMap<String, String> netNameMapping = new HashMap<String, String>();
@@ -257,7 +259,7 @@ public class CodeGenerator {
 
 					for (Property as : assumptions) {
 
-						String si = s.replace("{ASSUMPTION}", as.toString(netNameMapping));
+						String si = s.replace("{ASSUMPTION}", as.getExpression(formatter, netNameMapping));
 
 						si += expandComment;
 
@@ -271,7 +273,7 @@ public class CodeGenerator {
 
 					for (Property as : assertions) {
 
-						String si = s.replace("{ASSERTION}", as.toString(netNameMapping));
+						String si = s.replace("{ASSERTION}", as.getExpression(formatter, netNameMapping));
 
 						si += expandComment;
 

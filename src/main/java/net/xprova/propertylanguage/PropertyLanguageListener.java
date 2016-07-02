@@ -88,6 +88,16 @@ public interface PropertyLanguageListener extends ParseTreeListener {
 	 */
 	void exitNAtom(PropertyLanguageParser.NAtomContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#timeAtom}.
+	 * @param ctx the parse tree
+	 */
+	void enterTimeAtom(PropertyLanguageParser.TimeAtomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#timeAtom}.
+	 * @param ctx the parse tree
+	 */
+	void exitTimeAtom(PropertyLanguageParser.TimeAtomContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PropertyLanguageParser#atom}.
 	 * @param ctx the parse tree
 	 */

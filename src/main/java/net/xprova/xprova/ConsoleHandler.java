@@ -31,7 +31,6 @@ import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
 import net.xprova.propertylanguage.Property;
-import net.xprova.propertylanguage.PropertyParser;
 import net.xprova.simulations.CodeGenerator;
 import net.xprova.verilogparser.VerilogParser;
 
@@ -870,9 +869,7 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		PropertyParser pp = new PropertyParser();
-
-		assumptions.add(pp.parse(pStr));
+		assumptions.add(new Property(pStr));
 	}
 
 	@Command(aliases = { "assert" }, description = "add an assertion for formal verification")
@@ -880,9 +877,7 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		PropertyParser pp = new PropertyParser();
-
-		assertions.add(pp.parse(pStr));
+		assertions.add(new Property(pStr));
 	}
 
 	@Command(description = "print a list of design properties (assumptions and assertions)")
