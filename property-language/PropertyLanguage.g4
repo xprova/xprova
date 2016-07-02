@@ -37,7 +37,11 @@ eqExpr
 	;
 
 nAtom
-	: NOT? atom
+	: NOT? timeAtom
+	;
+
+timeAtom
+	: atom (AT NUM)?
 	;
 
 atom
@@ -49,7 +53,7 @@ atom
 
 ID
 	: Simple_identifier
-	| Bit_identifier
+	| Bit1_identifier
 	| Escaped_identifier
 	;
 
@@ -103,6 +107,14 @@ RPAREN
 
 HASH
 	: '#'
+	;
+
+AT
+	: '@'
+	;
+
+NUM
+	: '-'? [0-9] +
 	;
 
 WS
