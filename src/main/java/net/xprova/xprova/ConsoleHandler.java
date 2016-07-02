@@ -866,7 +866,7 @@ public class ConsoleHandler {
 	}
 
 	@Command(description = "add an assumption for formal verification")
-	public void assume(String args[]) {
+	public void assume(String args[]) throws Exception {
 
 		String pStr = String.join(" ", args);
 
@@ -876,7 +876,7 @@ public class ConsoleHandler {
 	}
 
 	@Command(aliases = { "assert" }, description = "add an assertion for formal verification")
-	public void assertp(String args[]) {
+	public void assertp(String args[]) throws Exception {
 
 		String pStr = String.join(" ", args);
 

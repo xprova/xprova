@@ -6,41 +6,26 @@ import java.util.List;
 
 public class Property {
 
-	private String expr;
+	private final String expr;
 
-	private String printExpr;
+	private final String printExpr;
 
-	private List<String> orderedIdentifiers;
+	private final List<String> orderedIDs;
 
-	public Property(String expr) {
+	private final String codeID;
 
-		this.expr = "ID";
+	public Property(String expr, String printExpr, List<String> orderedIDs, String codeID) {
 
-		this.printExpr = expr;
-
-		orderedIdentifiers = new ArrayList<String>();
-
-		orderedIdentifiers.add(expr);
-
-	}
-
-	public Property(String antecedent, String consequent) {
-
-		this.expr = "(~ID | ID)";
-
-		this.printExpr = String.format("%s |-> %s", antecedent, consequent);
-
-		orderedIdentifiers = new ArrayList<String>();
-
-		orderedIdentifiers.add(antecedent);
-
-		orderedIdentifiers.add(consequent);
+		this.expr = expr;
+		this.printExpr = printExpr;
+		this.orderedIDs = orderedIDs;
+		this.codeID = codeID;
 
 	}
 
 	public List<String> getIdentifiers() {
 
-		return new ArrayList<String>(orderedIdentifiers);
+		return new ArrayList<String>(orderedIDs);
 
 	}
 
@@ -55,8 +40,8 @@ public class Property {
 
 		String result = expr;
 
-		for (String id : orderedIdentifiers)
-			result = result.replaceFirst("ID", mapID.get(id));
+		for (String id : orderedIDs)
+			result = result.replaceFirst(codeID, mapID.get(id));
 
 		return result;
 
