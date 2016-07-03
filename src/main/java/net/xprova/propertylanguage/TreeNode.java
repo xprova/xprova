@@ -36,7 +36,7 @@ public class TreeNode {
 
 	private void print(String prefix, boolean isTail) {
 
-		String n = delay != 0 ? String.format("%s @ %d", name, delay) : name;
+		String n = delay != 0 ? String.format("%s (delay %d)", name, delay) : name;
 
 		System.out.println(prefix + (isTail ? "└── " : "├── ") + n);
 

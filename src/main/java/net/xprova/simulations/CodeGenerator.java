@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import net.xprova.graph.Graph;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
+import net.xprova.netlistgraph.VertexType;
 import net.xprova.propertylanguage.Property;
 
 public class CodeGenerator {
@@ -38,21 +39,30 @@ public class CodeGenerator {
 
 	private int resetState;
 
+	private final String delayFormat = "%s @%d";
+
 	public CodeGenerator(NetlistGraph graph, ArrayList<Property> assumptions, ArrayList<Property> assertions)
 			throws Exception {
 
-		this.graph = graph;
+		this.graph = new NetlistGraph(graph);
+
 		this.assumptions = assumptions;
 		this.assertions = assertions;
 
-		checkProperties(assumptions);
-		checkProperties(assertions);
+		HashSet<Property> properties = new HashSet<Property>();
+
+		properties.addAll(assumptions);
+		properties.addAll(assertions);
+
+		checkProperties(properties);
+
+		addPropertyFlops(properties);
 
 	}
 
-	private void checkProperties(ArrayList<Property> pList) throws Exception {
+	private void checkProperties(HashSet<Property> propertes) throws Exception {
 
-		for (Property p : pList) {
+		for (Property p : propertes) {
 
 			for (String id : p.getIdentifiers()) {
 
@@ -64,6 +74,49 @@ public class CodeGenerator {
 
 			}
 
+		}
+
+	}
+
+	private void addPropertyFlops(HashSet<Property> properties) throws Exception {
+
+		HashMap<String, Integer> delays = new HashMap<String, Integer>();
+
+		for (Property p : properties)
+			p.getDelays(delays);
+
+		for (Entry<String, Integer> entry : delays.entrySet())
+			addFlopChain(entry.getKey(), entry.getValue());
+
+	}
+
+	private void addFlopChain(String netName, int n) throws Exception {
+
+		// appends a chain of n flip-flops to netName naming their outputs nets
+		// netName@i
+
+		Vertex netQ = graph.getVertex(netName);
+
+		for (int i = 1; i <= n; i++) {
+
+			String nextNextName = String.format(delayFormat, netName, i);
+
+			Vertex nextFF = new Vertex(nextNextName + "_ff1", VertexType.MODULE, "DFF");
+
+			Vertex nextQ = new Vertex(nextNextName, VertexType.NET, "WIRE");
+
+			graph.addVertex(nextFF);
+			graph.addVertex(nextQ);
+
+			Vertex clk = graph.getVertex("clk");
+			Vertex rst = graph.getVertex("rst");
+
+			graph.addConnection(clk, nextFF, "CK");
+			graph.addConnection(rst, nextFF, "RS");
+			graph.addConnection(netQ, nextFF, "D");
+			graph.addConnection(nextFF, nextQ, "Q");
+
+			netQ = nextQ;
 		}
 
 	}
@@ -259,7 +312,7 @@ public class CodeGenerator {
 
 					for (Property as : assumptions) {
 
-						String si = s.replace("{ASSUMPTION}", as.getExpression(formatter, netNameMapping));
+						String si = s.replace("{ASSUMPTION}", as.getExpression(formatter, netNameMapping, delayFormat));
 
 						si += expandComment;
 
@@ -273,7 +326,7 @@ public class CodeGenerator {
 
 					for (Property as : assertions) {
 
-						String si = s.replace("{ASSERTION}", as.getExpression(formatter, netNameMapping));
+						String si = s.replace("{ASSERTION}", as.getExpression(formatter, netNameMapping, delayFormat));
 
 						si += expandComment;
 

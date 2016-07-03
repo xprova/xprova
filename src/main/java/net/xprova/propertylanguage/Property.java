@@ -83,23 +83,27 @@ public class Property {
 
 	}
 
-	private String getExprRecur(TreeNode root, ExpressionFormatter formatter, HashMap<String, String> identifierMap) {
+	private String getExprRecur(TreeNode root, ExpressionFormatter formatter, HashMap<String, String> identifierMap,
+			String delayFormat) {
 
 		// each non-ID expression is wrapped in parenthesis
 
-		String r = root.name;
+		// delay format specifies how identifiers with non-zero delays should be
+		// formatted
+		// e.g. "%s @%d" formats net1 with a delay of 3 as "net1 @3"
+
+		String r = (root.delay == 0) ? root.name : String.format(delayFormat, root.name, root.delay);
 
 		if (root.isTerminal()) {
 
-			return identifierMap == null ? r : identifierMap.get(r);
+			return (identifierMap == null) ? r : identifierMap.get(r);
 
 		}
-		;
 
 		ArrayList<String> operands = new ArrayList<String>();
 
 		for (TreeNode c : root.children)
-			operands.add(getExprRecur(c, formatter, identifierMap));
+			operands.add(getExprRecur(c, formatter, identifierMap, delayFormat));
 
 		if (r.equals(NOT)) {
 
@@ -156,6 +160,26 @@ public class Property {
 				flattenDelays(c, root.delay + parentDelay);
 
 			root.delay = 0;
+
+		}
+
+	}
+
+	private void getDelaysRecur(TreeNode root, HashMap<String, Integer> delays) {
+
+		if (root.isTerminal()) {
+
+			int currentDelay = delays.getOrDefault(root.name, 0);
+
+			int d = root.delay > currentDelay ? root.delay : currentDelay;
+
+			if (d != 0)
+				delays.put(root.name, d);
+
+		} else {
+
+			for (TreeNode c : root.children)
+				getDelaysRecur(c, delays);
 
 		}
 
@@ -252,11 +276,11 @@ public class Property {
 
 		root = parseAST(e.getChild(0));
 
-		// // temp
-		//
-		// flattenDelays(root, 0);
-		//
-		// root.print();
+		// temp
+
+		flattenDelays(root, 0);
+
+		root.print();
 		//
 		// System.out.println("max delay = " + getMaxDelay(root));
 		//
@@ -278,16 +302,29 @@ public class Property {
 
 	}
 
-	public String getExpression(ExpressionFormatter formatter, HashMap<String, String> identifierMap) {
+	public String getExpression(ExpressionFormatter formatter, HashMap<String, String> identifierMap,
+			String delayFormat) {
 
-		return getExprRecur(root, formatter, identifierMap);
+		return getExprRecur(root, formatter, identifierMap, delayFormat);
 
 	}
 
 	@Override
 	public String toString() {
 
-		return getExprRecur(root, new ExpressionFormatter(), null);
+		return getExprRecur(root, new ExpressionFormatter(), null, "%s @%d");
+
+	}
+
+	public void printExpressionTree() {
+
+		root.print();
+
+	}
+
+	public void getDelays(HashMap<String, Integer> delays) {
+
+		getDelaysRecur(root, delays);
 
 	}
 
