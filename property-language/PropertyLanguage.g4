@@ -37,10 +37,14 @@ eqExpr
 	;
 
 nAtom
-	: NOT? timeAtom
+	: NOT? timeAtomHash
 	;
 
-timeAtom
+timeAtomHash
+	: (HASH NUM)? timeAtomAt
+	;
+
+timeAtomAt
 	: atom (AT NUM)?
 	;
 
@@ -53,7 +57,7 @@ atom
 
 ID
 	: Simple_identifier
-	| Bit1_identifier
+	| Bit_identifier
 	| Escaped_identifier
 	;
 
@@ -114,7 +118,7 @@ AT
 	;
 
 NUM
-	: '-'? [0-9] +
+	: [0-9] +
 	;
 
 WS

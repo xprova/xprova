@@ -22,11 +22,11 @@ public class PropertyLanguageParser extends Parser {
 		AT=15, NUM=16, WS=17;
 	public static final int
 		RULE_property = 0, RULE_expr = 1, RULE_implyExp = 2, RULE_orExpr = 3, 
-		RULE_xorExpr = 4, RULE_andExpr = 5, RULE_eqExpr = 6, RULE_nAtom = 7, RULE_timeAtom = 8, 
-		RULE_atom = 9;
+		RULE_xorExpr = 4, RULE_andExpr = 5, RULE_eqExpr = 6, RULE_nAtom = 7, RULE_timeAtomHash = 8, 
+		RULE_timeAtomAt = 9, RULE_atom = 10;
 	public static final String[] ruleNames = {
 		"property", "expr", "implyExp", "orExpr", "xorExpr", "andExpr", "eqExpr", 
-		"nAtom", "timeAtom", "atom"
+		"nAtom", "timeAtomHash", "timeAtomAt", "atom"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
@@ -112,9 +112,9 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(20);
+			setState(22);
 			expr();
-			setState(21);
+			setState(23);
 			match(EOF);
 			}
 		}
@@ -153,7 +153,7 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(23);
+			setState(25);
 			implyExp();
 			}
 		}
@@ -197,15 +197,15 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(25);
+			setState(27);
 			orExpr();
-			setState(28);
+			setState(30);
 			_la = _input.LA(1);
 			if (_la==IMPLY) {
 				{
-				setState(26);
+				setState(28);
 				match(IMPLY);
-				setState(27);
+				setState(29);
 				orExpr();
 				}
 			}
@@ -255,21 +255,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(30);
+			setState(32);
 			xorExpr();
-			setState(35);
+			setState(37);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==OR) {
 				{
 				{
-				setState(31);
+				setState(33);
 				match(OR);
-				setState(32);
+				setState(34);
 				xorExpr();
 				}
 				}
-				setState(37);
+				setState(39);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -318,21 +318,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(38);
+			setState(40);
 			andExpr();
-			setState(43);
+			setState(45);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==XOR) {
 				{
 				{
-				setState(39);
+				setState(41);
 				match(XOR);
-				setState(40);
+				setState(42);
 				andExpr();
 				}
 				}
-				setState(45);
+				setState(47);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -381,21 +381,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(46);
+			setState(48);
 			eqExpr();
-			setState(51);
+			setState(53);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==AND) {
 				{
 				{
-				setState(47);
+				setState(49);
 				match(AND);
-				setState(48);
+				setState(50);
 				eqExpr();
 				}
 				}
-				setState(53);
+				setState(55);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -442,20 +442,20 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(54);
+			setState(56);
 			nAtom();
-			setState(57);
+			setState(59);
 			_la = _input.LA(1);
 			if (_la==EQ || _la==NEQ) {
 				{
-				setState(55);
+				setState(57);
 				_la = _input.LA(1);
 				if ( !(_la==EQ || _la==NEQ) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(56);
+				setState(58);
 				nAtom();
 				}
 			}
@@ -474,8 +474,8 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static class NAtomContext extends ParserRuleContext {
-		public TimeAtomContext timeAtom() {
-			return getRuleContext(TimeAtomContext.class,0);
+		public TimeAtomHashContext timeAtomHash() {
+			return getRuleContext(TimeAtomHashContext.class,0);
 		}
 		public TerminalNode NOT() { return getToken(PropertyLanguageParser.NOT, 0); }
 		public NAtomContext(ParserRuleContext parent, int invokingState) {
@@ -499,17 +499,17 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(60);
+			setState(62);
 			_la = _input.LA(1);
 			if (_la==NOT) {
 				{
-				setState(59);
+				setState(61);
 				match(NOT);
 				}
 			}
 
-			setState(62);
-			timeAtom();
+			setState(64);
+			timeAtomHash();
 			}
 		}
 		catch (RecognitionException re) {
@@ -523,42 +523,95 @@ public class PropertyLanguageParser extends Parser {
 		return _localctx;
 	}
 
-	public static class TimeAtomContext extends ParserRuleContext {
+	public static class TimeAtomHashContext extends ParserRuleContext {
+		public TimeAtomAtContext timeAtomAt() {
+			return getRuleContext(TimeAtomAtContext.class,0);
+		}
+		public TerminalNode HASH() { return getToken(PropertyLanguageParser.HASH, 0); }
+		public TerminalNode NUM() { return getToken(PropertyLanguageParser.NUM, 0); }
+		public TimeAtomHashContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_timeAtomHash; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterTimeAtomHash(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitTimeAtomHash(this);
+		}
+	}
+
+	public final TimeAtomHashContext timeAtomHash() throws RecognitionException {
+		TimeAtomHashContext _localctx = new TimeAtomHashContext(_ctx, getState());
+		enterRule(_localctx, 16, RULE_timeAtomHash);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(68);
+			_la = _input.LA(1);
+			if (_la==HASH) {
+				{
+				setState(66);
+				match(HASH);
+				setState(67);
+				match(NUM);
+				}
+			}
+
+			setState(70);
+			timeAtomAt();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TimeAtomAtContext extends ParserRuleContext {
 		public AtomContext atom() {
 			return getRuleContext(AtomContext.class,0);
 		}
 		public TerminalNode AT() { return getToken(PropertyLanguageParser.AT, 0); }
 		public TerminalNode NUM() { return getToken(PropertyLanguageParser.NUM, 0); }
-		public TimeAtomContext(ParserRuleContext parent, int invokingState) {
+		public TimeAtomAtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_timeAtom; }
+		@Override public int getRuleIndex() { return RULE_timeAtomAt; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterTimeAtom(this);
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterTimeAtomAt(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitTimeAtom(this);
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitTimeAtomAt(this);
 		}
 	}
 
-	public final TimeAtomContext timeAtom() throws RecognitionException {
-		TimeAtomContext _localctx = new TimeAtomContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_timeAtom);
+	public final TimeAtomAtContext timeAtomAt() throws RecognitionException {
+		TimeAtomAtContext _localctx = new TimeAtomAtContext(_ctx, getState());
+		enterRule(_localctx, 18, RULE_timeAtomAt);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(64);
+			setState(72);
 			atom();
-			setState(67);
+			setState(75);
 			_la = _input.LA(1);
 			if (_la==AT) {
 				{
-				setState(65);
+				setState(73);
 				match(AT);
-				setState(66);
+				setState(74);
 				match(NUM);
 				}
 			}
@@ -599,25 +652,25 @@ public class PropertyLanguageParser extends Parser {
 
 	public final AtomContext atom() throws RecognitionException {
 		AtomContext _localctx = new AtomContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_atom);
+		enterRule(_localctx, 20, RULE_atom);
 		try {
-			setState(74);
+			setState(82);
 			switch (_input.LA(1)) {
 			case ID:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(69);
+				setState(77);
 				match(ID);
 				}
 				break;
 			case LPAREN:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(70);
+				setState(78);
 				match(LPAREN);
-				setState(71);
+				setState(79);
 				expr();
-				setState(72);
+				setState(80);
 				match(RPAREN);
 				}
 				break;
@@ -637,25 +690,27 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\23O\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\3"+
-		"\2\3\2\3\2\3\3\3\3\3\4\3\4\3\4\5\4\37\n\4\3\5\3\5\3\5\7\5$\n\5\f\5\16"+
-		"\5\'\13\5\3\6\3\6\3\6\7\6,\n\6\f\6\16\6/\13\6\3\7\3\7\3\7\7\7\64\n\7\f"+
-		"\7\16\7\67\13\7\3\b\3\b\3\b\5\b<\n\b\3\t\5\t?\n\t\3\t\3\t\3\n\3\n\3\n"+
-		"\5\nF\n\n\3\13\3\13\3\13\3\13\3\13\5\13M\n\13\3\13\2\2\f\2\4\6\b\n\f\16"+
-		"\20\22\24\2\3\3\2\13\fL\2\26\3\2\2\2\4\31\3\2\2\2\6\33\3\2\2\2\b \3\2"+
-		"\2\2\n(\3\2\2\2\f\60\3\2\2\2\168\3\2\2\2\20>\3\2\2\2\22B\3\2\2\2\24L\3"+
-		"\2\2\2\26\27\5\4\3\2\27\30\7\2\2\3\30\3\3\2\2\2\31\32\5\6\4\2\32\5\3\2"+
-		"\2\2\33\36\5\b\5\2\34\35\7\r\2\2\35\37\5\b\5\2\36\34\3\2\2\2\36\37\3\2"+
-		"\2\2\37\7\3\2\2\2 %\5\n\6\2!\"\7\b\2\2\"$\5\n\6\2#!\3\2\2\2$\'\3\2\2\2"+
-		"%#\3\2\2\2%&\3\2\2\2&\t\3\2\2\2\'%\3\2\2\2(-\5\f\7\2)*\7\t\2\2*,\5\f\7"+
-		"\2+)\3\2\2\2,/\3\2\2\2-+\3\2\2\2-.\3\2\2\2.\13\3\2\2\2/-\3\2\2\2\60\65"+
-		"\5\16\b\2\61\62\7\7\2\2\62\64\5\16\b\2\63\61\3\2\2\2\64\67\3\2\2\2\65"+
-		"\63\3\2\2\2\65\66\3\2\2\2\66\r\3\2\2\2\67\65\3\2\2\28;\5\20\t\29:\t\2"+
-		"\2\2:<\5\20\t\2;9\3\2\2\2;<\3\2\2\2<\17\3\2\2\2=?\7\n\2\2>=\3\2\2\2>?"+
-		"\3\2\2\2?@\3\2\2\2@A\5\22\n\2A\21\3\2\2\2BE\5\24\13\2CD\7\21\2\2DF\7\22"+
-		"\2\2EC\3\2\2\2EF\3\2\2\2F\23\3\2\2\2GM\7\3\2\2HI\7\16\2\2IJ\5\4\3\2JK"+
-		"\7\17\2\2KM\3\2\2\2LG\3\2\2\2LH\3\2\2\2M\25\3\2\2\2\n\36%-\65;>EL";
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\23W\4\2\t\2\4\3\t"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
+		"\f\t\f\3\2\3\2\3\2\3\3\3\3\3\4\3\4\3\4\5\4!\n\4\3\5\3\5\3\5\7\5&\n\5\f"+
+		"\5\16\5)\13\5\3\6\3\6\3\6\7\6.\n\6\f\6\16\6\61\13\6\3\7\3\7\3\7\7\7\66"+
+		"\n\7\f\7\16\79\13\7\3\b\3\b\3\b\5\b>\n\b\3\t\5\tA\n\t\3\t\3\t\3\n\3\n"+
+		"\5\nG\n\n\3\n\3\n\3\13\3\13\3\13\5\13N\n\13\3\f\3\f\3\f\3\f\3\f\5\fU\n"+
+		"\f\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24\26\2\3\3\2\13\fT\2\30\3\2\2\2\4\33"+
+		"\3\2\2\2\6\35\3\2\2\2\b\"\3\2\2\2\n*\3\2\2\2\f\62\3\2\2\2\16:\3\2\2\2"+
+		"\20@\3\2\2\2\22F\3\2\2\2\24J\3\2\2\2\26T\3\2\2\2\30\31\5\4\3\2\31\32\7"+
+		"\2\2\3\32\3\3\2\2\2\33\34\5\6\4\2\34\5\3\2\2\2\35 \5\b\5\2\36\37\7\r\2"+
+		"\2\37!\5\b\5\2 \36\3\2\2\2 !\3\2\2\2!\7\3\2\2\2\"\'\5\n\6\2#$\7\b\2\2"+
+		"$&\5\n\6\2%#\3\2\2\2&)\3\2\2\2\'%\3\2\2\2\'(\3\2\2\2(\t\3\2\2\2)\'\3\2"+
+		"\2\2*/\5\f\7\2+,\7\t\2\2,.\5\f\7\2-+\3\2\2\2.\61\3\2\2\2/-\3\2\2\2/\60"+
+		"\3\2\2\2\60\13\3\2\2\2\61/\3\2\2\2\62\67\5\16\b\2\63\64\7\7\2\2\64\66"+
+		"\5\16\b\2\65\63\3\2\2\2\669\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28\r\3\2\2"+
+		"\29\67\3\2\2\2:=\5\20\t\2;<\t\2\2\2<>\5\20\t\2=;\3\2\2\2=>\3\2\2\2>\17"+
+		"\3\2\2\2?A\7\n\2\2@?\3\2\2\2@A\3\2\2\2AB\3\2\2\2BC\5\22\n\2C\21\3\2\2"+
+		"\2DE\7\20\2\2EG\7\22\2\2FD\3\2\2\2FG\3\2\2\2GH\3\2\2\2HI\5\24\13\2I\23"+
+		"\3\2\2\2JM\5\26\f\2KL\7\21\2\2LN\7\22\2\2MK\3\2\2\2MN\3\2\2\2N\25\3\2"+
+		"\2\2OU\7\3\2\2PQ\7\16\2\2QR\5\4\3\2RS\7\17\2\2SU\3\2\2\2TO\3\2\2\2TP\3"+
+		"\2\2\2U\27\3\2\2\2\13 \'/\67=@FMT";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

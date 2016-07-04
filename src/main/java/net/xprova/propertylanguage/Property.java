@@ -24,6 +24,7 @@ public class Property {
 	private final String IMPLY = "|->";
 	private final String LPAREN = "(";
 	private final String AT = "@";
+	private final String HASH = "#";
 
 	// expression tree traversal functions
 
@@ -44,7 +45,7 @@ public class Property {
 
 	}
 
-	private int getMaxDelay(TreeNode root) {
+	private int getMinDelay(TreeNode root) {
 
 		if (root.isTerminal()) {
 
@@ -52,17 +53,17 @@ public class Property {
 
 		} else {
 
-			int maxDelay = Integer.MIN_VALUE;
+			int minDelay = Integer.MAX_VALUE;
 
 			for (TreeNode n : root.children) {
 
-				int d = getMaxDelay(n);
+				int d = getMinDelay(n);
 
-				maxDelay = d > maxDelay ? d : maxDelay;
+				minDelay = d < minDelay ? d : minDelay;
 
 			}
 
-			return maxDelay;
+			return minDelay;
 
 		}
 
@@ -247,7 +248,17 @@ public class Property {
 				int delay = Integer.valueOf(c2);
 
 				return new TreeNode(LPAREN, children, delay);
+
+			} else if (c0.equals(HASH)) {
+
+				children.add(parseAST(root.getChild(2)));
+
+				int delay = -Integer.valueOf(c1);
+
+				return new TreeNode(LPAREN, children, delay);
+
 			}
+
 		}
 
 		System.out.println(root.getText());
@@ -276,9 +287,13 @@ public class Property {
 
 		root = parseAST(e.getChild(0));
 
-		// temp
+		// step 3: normalise delays
 
 		flattenDelays(root, 0);
+
+		int minDelay = getMinDelay(root);
+
+		addDelayRecur(root, -minDelay);
 
 		root.print();
 		//

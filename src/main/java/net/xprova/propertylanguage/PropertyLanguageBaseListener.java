@@ -112,13 +112,25 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTimeAtom(PropertyLanguageParser.TimeAtomContext ctx) { }
+	@Override public void enterTimeAtomHash(PropertyLanguageParser.TimeAtomHashContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTimeAtom(PropertyLanguageParser.TimeAtomContext ctx) { }
+	@Override public void exitTimeAtomHash(PropertyLanguageParser.TimeAtomHashContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTimeAtomAt(PropertyLanguageParser.TimeAtomAtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTimeAtomAt(PropertyLanguageParser.TimeAtomAtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
