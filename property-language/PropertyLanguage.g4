@@ -33,19 +33,15 @@ andExpr
 	;
 
 eqExpr
-	: nAtom ( (EQ|NEQ) nAtom)?
+	: timeAtom ( (EQ|NEQ) timeAtom)?
+	;
+
+timeAtom
+	: ( (HASH|AT) NUM)? nAtom
 	;
 
 nAtom
-	: NOT? timeAtomHash
-	;
-
-timeAtomHash
-	: (HASH NUM)? timeAtomAt
-	;
-
-timeAtomAt
-	: atom (AT NUM)?
+	: NOT? atom
 	;
 
 atom

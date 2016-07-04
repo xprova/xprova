@@ -239,17 +239,28 @@ public class Property {
 
 				return new TreeNode(LPAREN, children);
 
-			} else if (c1.equals(AT)) {
+			}
+//			else if (c1.equals(AT)) {
+//
+//				children.add(parseAST(root.getChild(0)));
+//
+//				String c2 = root.getChild(2).getText();
+//
+//				int delay = Integer.valueOf(c2);
+//
+//				return new TreeNode(LPAREN, children, delay);
+//
+//			}
+			else if (c0.equals(AT)) {
 
-				children.add(parseAST(root.getChild(0)));
+				children.add(parseAST(root.getChild(2)));
 
-				String c2 = root.getChild(2).getText();
-
-				int delay = Integer.valueOf(c2);
+				int delay = Integer.valueOf(c1);
 
 				return new TreeNode(LPAREN, children, delay);
 
-			} else if (c0.equals(HASH)) {
+			}
+			else if (c0.equals(HASH)) {
 
 				children.add(parseAST(root.getChild(2)));
 

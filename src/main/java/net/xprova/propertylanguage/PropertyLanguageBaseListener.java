@@ -100,6 +100,18 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTimeAtom(PropertyLanguageParser.TimeAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTimeAtom(PropertyLanguageParser.TimeAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNAtom(PropertyLanguageParser.NAtomContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -107,30 +119,6 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNAtom(PropertyLanguageParser.NAtomContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTimeAtomHash(PropertyLanguageParser.TimeAtomHashContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTimeAtomHash(PropertyLanguageParser.TimeAtomHashContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTimeAtomAt(PropertyLanguageParser.TimeAtomAtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTimeAtomAt(PropertyLanguageParser.TimeAtomAtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
