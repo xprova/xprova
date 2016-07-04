@@ -7,7 +7,7 @@
 
 #assert count[5] |-> #1 (~count[3])
 
-assert count[4] |-> @1 ~count[3]
+assert count[4] |=> #1 count[3]
 
 list_properties
 

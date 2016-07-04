@@ -17,7 +17,7 @@ expr
 	;
 
 implyExp
-	: orExpr (IMPLY orExpr)?
+	: orExpr ((IMPLY|IMPLY_NEXT) orExpr)?
 	;
 
 orExpr
@@ -95,6 +95,10 @@ NEQ
 
 IMPLY
 	: '|->'
+	;
+
+IMPLY_NEXT
+	: '|=>'
 	;
 
 LPAREN

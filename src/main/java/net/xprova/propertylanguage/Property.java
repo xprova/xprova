@@ -22,6 +22,7 @@ public class Property {
 	private final String EQ = "==";
 	private final String NEQ = "!=";
 	private final String IMPLY = "|->";
+	private final String IMPLY_NEXT = "|=>";
 	private final String LPAREN = "(";
 	private final String AT = "@";
 	private final String HASH = "#";
@@ -186,6 +187,24 @@ public class Property {
 
 	}
 
+	private void rewriteImplyNext(TreeNode root) {
+
+		// changes (x |-> #n y) into (x |-> #n+1 y) through the expression
+
+		for (TreeNode c : root.children)
+			rewriteImplyNext(c);
+
+		if (root.name.equals(IMPLY_NEXT)) {
+
+			root.name = IMPLY;
+
+			TreeNode c1 = root.children.get(1);
+
+			c1.delay -= 1;
+		}
+
+	}
+
 	// AST parsing
 
 	private TreeNode parseAST(ParseTree root) throws Exception {
@@ -226,7 +245,7 @@ public class Property {
 
 				return new TreeNode(c1, children);
 
-			} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1)) {
+			} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
 
 				children.add(parseAST(root.getChild(0)));
 				children.add(parseAST(root.getChild(2)));
@@ -239,19 +258,7 @@ public class Property {
 
 				return new TreeNode(LPAREN, children);
 
-			}
-//			else if (c1.equals(AT)) {
-//
-//				children.add(parseAST(root.getChild(0)));
-//
-//				String c2 = root.getChild(2).getText();
-//
-//				int delay = Integer.valueOf(c2);
-//
-//				return new TreeNode(LPAREN, children, delay);
-//
-//			}
-			else if (c0.equals(AT)) {
+			} else if (c0.equals(AT)) {
 
 				children.add(parseAST(root.getChild(2)));
 
@@ -259,8 +266,7 @@ public class Property {
 
 				return new TreeNode(LPAREN, children, delay);
 
-			}
-			else if (c0.equals(HASH)) {
+			} else if (c0.equals(HASH)) {
 
 				children.add(parseAST(root.getChild(2)));
 
@@ -298,7 +304,11 @@ public class Property {
 
 		root = parseAST(e.getChild(0));
 
-		// step 3: normalise delays
+		// step 3: process syntactic sugar
+
+		rewriteImplyNext(root);
+
+		// step 4: normalise delays
 
 		flattenDelays(root, 0);
 

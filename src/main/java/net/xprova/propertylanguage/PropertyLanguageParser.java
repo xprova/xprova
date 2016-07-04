@@ -18,8 +18,8 @@ public class PropertyLanguageParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		ID=1, Simple_identifier=2, Bit_identifier=3, Escaped_identifier=4, AND=5, 
-		OR=6, XOR=7, NOT=8, EQ=9, NEQ=10, IMPLY=11, LPAREN=12, RPAREN=13, HASH=14, 
-		AT=15, NUM=16, WS=17;
+		OR=6, XOR=7, NOT=8, EQ=9, NEQ=10, IMPLY=11, IMPLY_NEXT=12, LPAREN=13, 
+		RPAREN=14, HASH=15, AT=16, NUM=17, WS=18;
 	public static final int
 		RULE_property = 0, RULE_expr = 1, RULE_implyExp = 2, RULE_orExpr = 3, 
 		RULE_xorExpr = 4, RULE_andExpr = 5, RULE_eqExpr = 6, RULE_timeAtom = 7, 
@@ -31,12 +31,12 @@ public class PropertyLanguageParser extends Parser {
 
 	private static final String[] _LITERAL_NAMES = {
 		null, null, null, null, null, "'&'", "'|'", "'^'", "'~'", "'=='", "'!='", 
-		"'|->'", "'('", "')'", "'#'", "'@'"
+		"'|->'", "'|=>'", "'('", "')'", "'#'", "'@'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
 		null, "ID", "Simple_identifier", "Bit_identifier", "Escaped_identifier", 
-		"AND", "OR", "XOR", "NOT", "EQ", "NEQ", "IMPLY", "LPAREN", "RPAREN", "HASH", 
-		"AT", "NUM", "WS"
+		"AND", "OR", "XOR", "NOT", "EQ", "NEQ", "IMPLY", "IMPLY_NEXT", "LPAREN", 
+		"RPAREN", "HASH", "AT", "NUM", "WS"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -176,6 +176,7 @@ public class PropertyLanguageParser extends Parser {
 			return getRuleContext(OrExprContext.class,i);
 		}
 		public TerminalNode IMPLY() { return getToken(PropertyLanguageParser.IMPLY, 0); }
+		public TerminalNode IMPLY_NEXT() { return getToken(PropertyLanguageParser.IMPLY_NEXT, 0); }
 		public ImplyExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -201,10 +202,15 @@ public class PropertyLanguageParser extends Parser {
 			orExpr();
 			setState(28);
 			_la = _input.LA(1);
-			if (_la==IMPLY) {
+			if (_la==IMPLY || _la==IMPLY_NEXT) {
 				{
 				setState(26);
-				match(IMPLY);
+				_la = _input.LA(1);
+				if ( !(_la==IMPLY || _la==IMPLY_NEXT) ) {
+				_errHandler.recoverInline(this);
+				} else {
+					consume();
+				}
 				setState(27);
 				orExpr();
 				}
@@ -643,26 +649,26 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\23P\4\2\t\2\4\3\t"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\24P\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\3"+
 		"\2\3\2\3\2\3\3\3\3\3\4\3\4\3\4\5\4\37\n\4\3\5\3\5\3\5\7\5$\n\5\f\5\16"+
 		"\5\'\13\5\3\6\3\6\3\6\7\6,\n\6\f\6\16\6/\13\6\3\7\3\7\3\7\7\7\64\n\7\f"+
 		"\7\16\7\67\13\7\3\b\3\b\3\b\5\b<\n\b\3\t\3\t\5\t@\n\t\3\t\3\t\3\n\5\n"+
 		"E\n\n\3\n\3\n\3\13\3\13\3\13\3\13\3\13\5\13N\n\13\3\13\2\2\f\2\4\6\b\n"+
-		"\f\16\20\22\24\2\4\3\2\13\f\3\2\20\21M\2\26\3\2\2\2\4\31\3\2\2\2\6\33"+
-		"\3\2\2\2\b \3\2\2\2\n(\3\2\2\2\f\60\3\2\2\2\168\3\2\2\2\20?\3\2\2\2\22"+
-		"D\3\2\2\2\24M\3\2\2\2\26\27\5\4\3\2\27\30\7\2\2\3\30\3\3\2\2\2\31\32\5"+
-		"\6\4\2\32\5\3\2\2\2\33\36\5\b\5\2\34\35\7\r\2\2\35\37\5\b\5\2\36\34\3"+
-		"\2\2\2\36\37\3\2\2\2\37\7\3\2\2\2 %\5\n\6\2!\"\7\b\2\2\"$\5\n\6\2#!\3"+
-		"\2\2\2$\'\3\2\2\2%#\3\2\2\2%&\3\2\2\2&\t\3\2\2\2\'%\3\2\2\2(-\5\f\7\2"+
-		")*\7\t\2\2*,\5\f\7\2+)\3\2\2\2,/\3\2\2\2-+\3\2\2\2-.\3\2\2\2.\13\3\2\2"+
-		"\2/-\3\2\2\2\60\65\5\16\b\2\61\62\7\7\2\2\62\64\5\16\b\2\63\61\3\2\2\2"+
-		"\64\67\3\2\2\2\65\63\3\2\2\2\65\66\3\2\2\2\66\r\3\2\2\2\67\65\3\2\2\2"+
-		"8;\5\20\t\29:\t\2\2\2:<\5\20\t\2;9\3\2\2\2;<\3\2\2\2<\17\3\2\2\2=>\t\3"+
-		"\2\2>@\7\22\2\2?=\3\2\2\2?@\3\2\2\2@A\3\2\2\2AB\5\22\n\2B\21\3\2\2\2C"+
-		"E\7\n\2\2DC\3\2\2\2DE\3\2\2\2EF\3\2\2\2FG\5\24\13\2G\23\3\2\2\2HN\7\3"+
-		"\2\2IJ\7\16\2\2JK\5\4\3\2KL\7\17\2\2LN\3\2\2\2MH\3\2\2\2MI\3\2\2\2N\25"+
-		"\3\2\2\2\n\36%-\65;?DM";
+		"\f\16\20\22\24\2\5\3\2\r\16\3\2\13\f\3\2\21\22M\2\26\3\2\2\2\4\31\3\2"+
+		"\2\2\6\33\3\2\2\2\b \3\2\2\2\n(\3\2\2\2\f\60\3\2\2\2\168\3\2\2\2\20?\3"+
+		"\2\2\2\22D\3\2\2\2\24M\3\2\2\2\26\27\5\4\3\2\27\30\7\2\2\3\30\3\3\2\2"+
+		"\2\31\32\5\6\4\2\32\5\3\2\2\2\33\36\5\b\5\2\34\35\t\2\2\2\35\37\5\b\5"+
+		"\2\36\34\3\2\2\2\36\37\3\2\2\2\37\7\3\2\2\2 %\5\n\6\2!\"\7\b\2\2\"$\5"+
+		"\n\6\2#!\3\2\2\2$\'\3\2\2\2%#\3\2\2\2%&\3\2\2\2&\t\3\2\2\2\'%\3\2\2\2"+
+		"(-\5\f\7\2)*\7\t\2\2*,\5\f\7\2+)\3\2\2\2,/\3\2\2\2-+\3\2\2\2-.\3\2\2\2"+
+		".\13\3\2\2\2/-\3\2\2\2\60\65\5\16\b\2\61\62\7\7\2\2\62\64\5\16\b\2\63"+
+		"\61\3\2\2\2\64\67\3\2\2\2\65\63\3\2\2\2\65\66\3\2\2\2\66\r\3\2\2\2\67"+
+		"\65\3\2\2\28;\5\20\t\29:\t\3\2\2:<\5\20\t\2;9\3\2\2\2;<\3\2\2\2<\17\3"+
+		"\2\2\2=>\t\4\2\2>@\7\23\2\2?=\3\2\2\2?@\3\2\2\2@A\3\2\2\2AB\5\22\n\2B"+
+		"\21\3\2\2\2CE\7\n\2\2DC\3\2\2\2DE\3\2\2\2EF\3\2\2\2FG\5\24\13\2G\23\3"+
+		"\2\2\2HN\7\3\2\2IJ\7\17\2\2JK\5\4\3\2KL\7\20\2\2LN\3\2\2\2MH\3\2\2\2M"+
+		"I\3\2\2\2N\25\3\2\2\2\n\36%-\65;?DM";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
