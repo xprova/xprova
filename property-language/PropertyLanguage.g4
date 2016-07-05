@@ -30,6 +30,7 @@ xorExpr
 
 andExpr
 	: eqExpr (AND eqExpr)*
+	| eqExpr (DOUBLE_HASH(NUM)? eqExpr)*
 	;
 
 eqExpr
@@ -111,6 +112,10 @@ RPAREN
 
 HASH
 	: '#'
+	;
+
+DOUBLE_HASH
+	: '##'
 	;
 
 AT

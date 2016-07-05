@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import net.xprova.propertylanguage.PropertyLanguageParser.AtomContext;
@@ -26,6 +27,7 @@ public class Property {
 	private final String LPAREN = "(";
 	private final String AT = "@";
 	private final String HASH = "#";
+	private final String DOUBLE_HASH = "##";
 
 	// expression tree traversal functions
 
@@ -244,6 +246,51 @@ public class Property {
 					children.add(parseAST(root.getChild(i)));
 
 				return new TreeNode(c1, children);
+
+			} else if (DOUBLE_HASH.equals(c1)) {
+
+				int cumDelay = 0;
+
+				for (int i = 0; i < root.getChildCount(); i++) {
+
+					ParseTree ci = root.getChild(i);
+
+					if (ci.getPayload() instanceof Token) {
+
+						Token pl = (Token) ci.getPayload();
+
+						if (DOUBLE_HASH.equals(pl.getText())) {
+
+							cumDelay += 1;
+
+						} else {
+
+							// token is NUM
+
+							// mind the (-1): we've incremented cumDelay when
+							// we processed the preceding DOUBLE_DASH so this
+							// is to make the total increase due to ##n equal
+							// to n
+
+							cumDelay += Integer.valueOf(pl.getText()) - 1;
+
+						}
+
+					} else {
+
+						// this is an identifier
+
+						TreeNode childNode = parseAST(ci);
+
+						childNode.delay -= cumDelay;
+
+						children.add(childNode);
+
+					}
+
+				}
+
+				return new TreeNode(AND, children);
 
 			} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
 
