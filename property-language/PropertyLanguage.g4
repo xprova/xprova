@@ -13,10 +13,15 @@ property
 	;
 
 expr
-	: implyExp
+	: funcExpr
 	;
 
-implyExp
+funcExpr
+	: (ROSE|FELL|STABLE) LPAREN implyExpr RPAREN
+	| implyExpr
+	;
+
+implyExpr
 	: orExpr ((IMPLY|IMPLY_NEXT) orExpr)?
 	;
 
@@ -120,6 +125,18 @@ DOUBLE_HASH
 
 AT
 	: '@'
+	;
+
+ROSE
+	: '$rose'
+	;
+
+FELL
+	: '$fell'
+	;
+
+STABLE
+	: '$stable'
 	;
 
 NUM
