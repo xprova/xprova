@@ -28,6 +28,10 @@ public class Property {
 	private final String AT = "@";
 	private final String HASH = "#";
 	private final String DOUBLE_HASH = "##";
+	private final String ROSE = "$rose";
+	private final String FELL = "$fell";
+	private final String STABLE = "$stable";
+	private final String CHANGED = "$changed";
 
 	// expression tree traversal functions
 
@@ -189,12 +193,12 @@ public class Property {
 
 	}
 
-	private void rewriteImplyNext(TreeNode root) {
-
-		// changes (x |-> #n y) into (x |-> #n+1 y) through the expression
+	private void rewriteSyntaticSugar(TreeNode root) {
 
 		for (TreeNode c : root.children)
-			rewriteImplyNext(c);
+			rewriteSyntaticSugar(c);
+
+		// change (x |-> #n y) into (x |-> #n+1 y)
 
 		if (root.name.equals(IMPLY_NEXT)) {
 
@@ -203,6 +207,82 @@ public class Property {
 			TreeNode c1 = root.children.get(1);
 
 			c1.delay -= 1;
+		}
+
+		// change ($rose(x)) into (~x & #1 x)
+
+		if (root.name.equals(ROSE)) {
+
+			root.name = AND;
+
+			TreeNode c1 = root.children.get(0);
+
+			TreeNode c2 = new TreeNode(NOT, new TreeNode(c1), 1);
+
+			root.children.clear();
+
+			root.children.add(c1);
+			root.children.add(c2);
+		}
+
+		// change ($fell(x)) into (x & #1 ~x)
+
+		if (root.name.equals(FELL)) {
+
+			root.name = AND;
+
+			TreeNode c1 = root.children.get(0);
+
+			TreeNode c2 = new TreeNode(NOT, new TreeNode(c1), 0);
+
+			c1.delay += 1;
+
+			root.children.clear();
+
+			root.children.add(c1);
+			root.children.add(c2);
+		}
+
+		// $stable(x) into ~(x ^ #1 x)
+
+		if (root.name.equals(STABLE)) {
+
+			TreeNode c1 = new TreeNode(root.children.get(0));
+			TreeNode c2 = new TreeNode(root.children.get(0));
+
+			c2.delay += 1;
+
+			TreeNode xorN = new TreeNode(XOR, 0);
+
+			xorN.children.add(c1);
+			xorN.children.add(c2);
+
+			root.name = NOT;
+
+			root.children.clear();
+
+			root.children.add(xorN);
+
+		}
+
+		// $changed(x) into (x ^ #1 x)
+
+
+
+		if (root.name.equals(CHANGED)) {
+
+			TreeNode c1 = new TreeNode(root.children.get(0));
+			TreeNode c2 = new TreeNode(root.children.get(0));
+
+			c2.delay += 1;
+
+			root.name = XOR;
+
+			root.children.clear();
+
+			root.children.add(c1);
+			root.children.add(c2);
+
 		}
 
 	}
@@ -235,93 +315,99 @@ public class Property {
 
 			return new TreeNode(root.getChild(0).getText(), children);
 
-		} else {
+		}
 
-			String c0 = root.getChild(0).getText();
-			String c1 = root.getChild(1).getText();
+		String c0 = root.getChild(0).getText();
+		String c1 = root.getChild(1).getText();
 
-			if (AND.equals(c1) || XOR.equals(c1) || OR.equals(c1)) {
+		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0)) {
 
-				for (int i = 0; i < root.getChildCount(); i += 2)
-					children.add(parseAST(root.getChild(i)));
+			children.add(parseAST(root.getChild(2)));
 
-				return new TreeNode(c1, children);
+			return new TreeNode(c0, children);
 
-			} else if (DOUBLE_HASH.equals(c1)) {
+		}
 
-				int cumDelay = 0;
+		if (AND.equals(c1) || XOR.equals(c1) || OR.equals(c1)) {
 
-				for (int i = 0; i < root.getChildCount(); i++) {
+			for (int i = 0; i < root.getChildCount(); i += 2)
+				children.add(parseAST(root.getChild(i)));
 
-					ParseTree ci = root.getChild(i);
+			return new TreeNode(c1, children);
 
-					if (ci.getPayload() instanceof Token) {
+		} else if (DOUBLE_HASH.equals(c1)) {
 
-						Token pl = (Token) ci.getPayload();
+			int cumDelay = 0;
 
-						if (DOUBLE_HASH.equals(pl.getText())) {
+			for (int i = 0; i < root.getChildCount(); i++) {
 
-							cumDelay += 1;
+				ParseTree ci = root.getChild(i);
 
-						} else {
+				if (ci.getPayload() instanceof Token) {
 
-							// token is NUM
+					Token pl = (Token) ci.getPayload();
 
-							// mind the (-1): we've incremented cumDelay when
-							// we processed the preceding DOUBLE_DASH so this
-							// is to make the total increase due to ##n equal
-							// to n
+					if (DOUBLE_HASH.equals(pl.getText())) {
 
-							cumDelay += Integer.valueOf(pl.getText()) - 1;
-
-						}
+						cumDelay += 1;
 
 					} else {
 
-						// this is an identifier
+						// token is NUM
 
-						TreeNode childNode = parseAST(ci);
+						// mind the (-1): we've incremented cumDelay when
+						// we processed the preceding DOUBLE_DASH so this
+						// is to make the total increase due to ##n equal
+						// to n
 
-						childNode.delay -= cumDelay;
-
-						children.add(childNode);
+						cumDelay += Integer.valueOf(pl.getText()) - 1;
 
 					}
 
+				} else {
+
+					// this is an identifier
+
+					TreeNode childNode = parseAST(ci);
+
+					childNode.delay -= cumDelay;
+
+					children.add(childNode);
+
 				}
 
-				return new TreeNode(AND, children);
-
-			} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
-
-				children.add(parseAST(root.getChild(0)));
-				children.add(parseAST(root.getChild(2)));
-
-				return new TreeNode(c1, children);
-
-			} else if (c0.equals(LPAREN)) {
-
-				children.add(parseAST(root.getChild(1)));
-
-				return new TreeNode(LPAREN, children);
-
-			} else if (c0.equals(AT)) {
-
-				children.add(parseAST(root.getChild(2)));
-
-				int delay = Integer.valueOf(c1);
-
-				return new TreeNode(LPAREN, children, delay);
-
-			} else if (c0.equals(HASH)) {
-
-				children.add(parseAST(root.getChild(2)));
-
-				int delay = -Integer.valueOf(c1);
-
-				return new TreeNode(LPAREN, children, delay);
-
 			}
+
+			return new TreeNode(AND, children);
+
+		} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
+
+			children.add(parseAST(root.getChild(0)));
+			children.add(parseAST(root.getChild(2)));
+
+			return new TreeNode(c1, children);
+
+		} else if (c0.equals(LPAREN)) {
+
+			children.add(parseAST(root.getChild(1)));
+
+			return new TreeNode(LPAREN, children);
+
+		} else if (c0.equals(AT)) {
+
+			children.add(parseAST(root.getChild(2)));
+
+			int delay = Integer.valueOf(c1);
+
+			return new TreeNode(LPAREN, children, delay);
+
+		} else if (c0.equals(HASH)) {
+
+			children.add(parseAST(root.getChild(2)));
+
+			int delay = -Integer.valueOf(c1);
+
+			return new TreeNode(LPAREN, children, delay);
 
 		}
 
@@ -353,7 +439,7 @@ public class Property {
 
 		// step 3: process syntactic sugar
 
-		rewriteImplyNext(root);
+		rewriteSyntaticSugar(root);
 
 		// step 4: normalise delays
 

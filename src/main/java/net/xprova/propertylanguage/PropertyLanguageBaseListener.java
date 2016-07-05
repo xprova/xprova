@@ -40,13 +40,25 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterImplyExp(PropertyLanguageParser.ImplyExpContext ctx) { }
+	@Override public void enterFuncExpr(PropertyLanguageParser.FuncExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitImplyExp(PropertyLanguageParser.ImplyExpContext ctx) { }
+	@Override public void exitFuncExpr(PropertyLanguageParser.FuncExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterImplyExpr(PropertyLanguageParser.ImplyExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImplyExpr(PropertyLanguageParser.ImplyExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

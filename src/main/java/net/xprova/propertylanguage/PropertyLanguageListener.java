@@ -28,15 +28,25 @@ public interface PropertyLanguageListener extends ParseTreeListener {
 	 */
 	void exitExpr(PropertyLanguageParser.ExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PropertyLanguageParser#implyExp}.
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#funcExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterImplyExp(PropertyLanguageParser.ImplyExpContext ctx);
+	void enterFuncExpr(PropertyLanguageParser.FuncExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PropertyLanguageParser#implyExp}.
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#funcExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitImplyExp(PropertyLanguageParser.ImplyExpContext ctx);
+	void exitFuncExpr(PropertyLanguageParser.FuncExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PropertyLanguageParser#implyExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterImplyExpr(PropertyLanguageParser.ImplyExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PropertyLanguageParser#implyExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitImplyExpr(PropertyLanguageParser.ImplyExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PropertyLanguageParser#orExpr}.
 	 * @param ctx the parse tree

@@ -9,9 +9,25 @@ public class TreeNode {
 	public int delay;
 	public List<TreeNode> children;
 
+	public TreeNode(String name, TreeNode child, int delay) {
+
+		this.name = name;
+
+		this.delay = delay;
+
+		this.children = new ArrayList<TreeNode>();
+
+		children.add(child);
+	}
+
 	public TreeNode(String name, List<TreeNode> children) {
 
 		this(name, children, 0);
+	}
+
+	public TreeNode(String name, int delay) {
+
+		this(name, new ArrayList<TreeNode>(), delay);
 	}
 
 	public TreeNode(String name, List<TreeNode> children, int delay) {
@@ -21,6 +37,19 @@ public class TreeNode {
 		this.children = children == null ? new ArrayList<TreeNode>() : children;
 
 		this.delay = delay;
+	}
+
+	public TreeNode(TreeNode other) {
+
+		this.name = other.name;
+
+		this.delay = other.delay;
+
+		this.children = new ArrayList<TreeNode>();
+
+		for (TreeNode c : other.children)
+			this.children.add(new TreeNode(c));
+
 	}
 
 	public void print() {
