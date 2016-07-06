@@ -2,7 +2,7 @@
 
 # assert ~(count[1] ##4 ~count[1])
 
-assert ena |=> ($changed(count[1]))
+assert ena |=> ($stable(count[4]))
 
 list_properties
 

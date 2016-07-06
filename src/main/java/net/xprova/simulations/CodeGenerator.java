@@ -39,7 +39,7 @@ public class CodeGenerator {
 
 	private int resetState;
 
-	private final String delayFormat = "%s @%d";
+	private final String delayFormat = "@%d %s";
 
 	public CodeGenerator(NetlistGraph graph, ArrayList<Property> assumptions, ArrayList<Property> assertions)
 			throws Exception {
@@ -99,7 +99,7 @@ public class CodeGenerator {
 
 		for (int i = 1; i <= n; i++) {
 
-			String nextNextName = String.format(delayFormat, netName, i);
+			String nextNextName = String.format(delayFormat, i, netName);
 
 			Vertex nextFF = new Vertex(nextNextName + "_ff1", VertexType.MODULE, "DFF");
 

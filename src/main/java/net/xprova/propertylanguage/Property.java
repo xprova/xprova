@@ -100,7 +100,7 @@ public class Property {
 		// formatted
 		// e.g. "%s @%d" formats net1 with a delay of 3 as "net1 @3"
 
-		String r = (root.delay == 0) ? root.name : String.format(delayFormat, root.name, root.delay);
+		String r = (root.delay == 0) ? root.name : String.format(delayFormat, root.delay, root.name);
 
 		if (root.isTerminal()) {
 
@@ -481,7 +481,7 @@ public class Property {
 	@Override
 	public String toString() {
 
-		return getExprRecur(root, new ExpressionFormatter(), null, "%s @%d");
+		return getExprRecur(root, new ExpressionFormatter(), null, "@%d %s");
 
 	}
 
