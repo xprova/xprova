@@ -67,15 +67,15 @@ public class TreeNode {
 
 		String n = delay != 0 ? String.format("%s (delay %d)", name, delay) : name;
 
-		System.out.println(prefix + (isTail ? "└── " : "├── ") + n);
+		System.out.println(prefix + (isTail ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ") + n);
 
 		if (children != null) {
 
 			for (int i = 0; i < children.size() - 1; i++)
-				children.get(i).print(prefix + (isTail ? "    " : "│   "), false);
+				children.get(i).print(prefix + (isTail ? "    " : "\u00E2��   "), false);
 
 			if (children.size() > 0)
-				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "│   "), true);
+				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u00E2��   "), true);
 
 		}
 	}
