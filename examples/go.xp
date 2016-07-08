@@ -4,7 +4,7 @@
 
 assert ena |=> ($stable(count[4]))
 
-list_properties
+props
 
 library load examples/gate_library_mini.v
 
@@ -12,14 +12,14 @@ synth examples/assertion-test6.v output/synth.v
 
 read -m top output/synth.v
 
-write_verilog output/synth_renamed.v
+write output/synth_renamed.v
 
 prove
 #--nocounter
 
 :quit
 
-export_dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
+dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
 
 :! dot -Tpdf output/netlist.dot -o output/netlist.pdf
 
