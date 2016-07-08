@@ -60,7 +60,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(description = "add and manage cell libraries")
+	//@formatter:off
+	@Command(
+		description = "add and manage cell libraries",
+		help = {
+			"Usage:",
+			"  library load <verilog_file>",
+			"  library list"
+		}
+	)
+	//@formatter:on
 	public void library(String[] args) throws Exception {
 
 		if (args.length > 0) {
@@ -96,7 +105,19 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "read" }, description = "read verilog file (gate-level netlist)")
+	//@formatter:off
+	@Command(
+		aliases = { "read" },
+		description = "read verilog file (gate-level netlist)",
+		help = {
+			"Usage:",
+			"  read [-m module] <verilog_file>",
+			"",
+			"Options:",
+			"  -m module : load a specific module from file"
+		}
+	)
+	//@formatter:on
 	public void read(String args[]) throws Exception {
 
 		// parse command input
@@ -162,7 +183,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "write_verilog" }, description = "export current design as a verilog netlist")
+	//@formatter:off
+	@Command(
+		aliases = { "write_verilog" },
+		description = "export current design as a verilog netlist",
+		help = {
+			"Usage:",
+			"  write_verilog <verilog_file>",
+		}
+	)
+	//@formatter:on
 	public void writeVerilogFile(String args[]) throws Exception {
 
 		if (args.length != 1)
@@ -173,8 +203,23 @@ public class ConsoleHandler {
 		Generator.generateFile(graph, outputVerilogFile);
 	}
 
-	@Command(aliases = {
-			"export_dot" }, description = "export a graph representation of the loaded design in DOT format")
+	//@formatter:off
+	@Command(
+		aliases = { "export_dot" },
+		description = "export a graph representation of the loaded design in DOT format",
+		help = {
+			"Usage:",
+			"  export_dot [--ignore-edges e1,e2,...] [--ignore-vertices v1,v2,...]",
+			"             [--type fng] [--to vertex] [--combine v1,v2,...] <dot_file>",
+			"",
+			"Options:",
+			"  --ignore-edges e1,e2,...     exclude edges from graph",
+			"  --ignore-vertices v1,v2,...  exclude vertices from graph",
+			"  --type fng                   include (f)lip-flops, (n)ets and/or (g)ates",
+			"  --combine v1,v2,...          combine group of vertices into a single vertex",
+		}
+	)
+	//@formatter:on
 	public void exportDotFile(String[] args) throws Exception {
 
 		// parse command input
@@ -373,7 +418,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "augment", }, description = "add metastable flip-flop models and associated connections")
+	//@formatter:off
+	@Command(
+		aliases = { "augment"},
+		description = "add metastable flip-flop models and associated connections",
+		help = {
+			"Usage:",
+			"  augment",
+		}
+	)
+	//@formatter:on
 	public void augment() throws Exception {
 
 		if (graph == null) {
