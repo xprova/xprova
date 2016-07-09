@@ -33,10 +33,37 @@ module DFF (CK, RS, ST, D, Q);
 	output Q;
 endmodule
 
+module DFFx (CK, RS, ST, D, Q, M, V, T, rD, rV);
+	input CK, RS, ST, D;
+	output Q;
+	input V;
+	output M, T;
+	input rD, rV;
+endmodule
+
 module TIE0(y);
 	output y;
 endmodule
 
 module TIE1(y);
+	output y;
+endmodule
+
+module TIEX(y);
+	output y;
+endmodule
+
+module MUX2 (y, a, b, s);
+	input a, b, s;
+	output y;
+endmodule
+
+module X2H (y, a);
+	input a;
+	output y;
+endmodule
+
+module H2X (y, a);
+	input a;
 	output y;
 endmodule

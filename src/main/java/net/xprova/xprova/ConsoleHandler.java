@@ -437,7 +437,7 @@ public class ConsoleHandler {
 
 			Transformer t1 = new Transformer(graph, defsFF);
 
-			t1.transformCDC();
+			t1.transformCDC(true);
 
 		}
 

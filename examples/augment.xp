@@ -1,0 +1,26 @@
+library load examples/gate_library_mini.v
+
+read examples/DFFx.v
+
+dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst,CK,RS output/netlist.dot
+
+:! dot -Tpdf output/netlist.dot -o output/netlist.pdf
+
+:q
+
+#synth examples/assertion-test6.v output/synth.v
+#read -m top examples/simple_4.v
+#flop define QDFFRSBX1 CK RS D
+#flop define DFF CK RS D
+#flop define DFFx CK RS D
+#augment
+#write_verilog output/simple_1_synth.v
+
+read output/simple_1_synth.v
+
+assert ~y
+prove
+
+dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
+
+:! dot -Tpdf output/netlist.dot -o output/netlist.pdf

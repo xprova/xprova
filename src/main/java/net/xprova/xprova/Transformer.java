@@ -10,7 +10,11 @@ import net.xprova.netlistgraph.VertexType;
 
 public class Transformer {
 
-	private static final String model1 = "DFFx", model2 = "DFFx2";
+	// model1: DFF cell with M and V ports
+	// model2: DFF cell with T port
+	// fow now both model1 and model2 are set to the cell DFFx
+
+	private static final String model1 = "DFFx", model2 = "DFFx";
 
 	private static final String portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
 
@@ -70,7 +74,7 @@ public class Transformer {
 
 	}
 
-	public void transformCDC() throws Exception {
+	public void transformCDC(boolean addRandomBits) throws Exception {
 
 		HashSet<Vertex> clocks = getClocks();
 
@@ -365,37 +369,43 @@ public class Transformer {
 		// then it must also have an r2 bit
 
 		HashSet<Vertex> DFFxs = graph.getModulesByType(model1);
-		/*
-		 * graph.addPort("r"); // add port first
-		 *
-		 * int rbits = 0;
-		 *
-		 * for (Vertex flop : DFFxs) {
-		 *
-		 * //boolean hasM = graph.getNet(flop, portM) != null;
-		 *
-		 * Vertex r1 = new Vertex("r[" + rbits + "]", VertexType.NET, "input");
-		 *
-		 * graph.addVertex(r1);
-		 *
-		 * graph.addConnection(r1, flop, "r1");
-		 *
-		 * rbits = rbits + 1;
-		 *
-		 * // if (hasM) {
-		 *
-		 * Vertex r2 = new Vertex("r[" + rbits + "]", VertexType.NET, "input");
-		 *
-		 * graph.addVertex(r2);
-		 *
-		 * graph.addConnection(r2, flop, "r2");
-		 *
-		 * rbits = rbits + 1;
-		 *
-		 * // }
-		 *
-		 * }
-		 */
+
+		if (addRandomBits) {
+
+			graph.addPort("r"); // add port first
+
+			int rbits = 0;
+
+			for (Vertex flop : DFFxs) {
+
+				if (graph.getNet(flop, "M") != null) {
+
+					Vertex r1 = new Vertex("r[" + rbits + "]", VertexType.NET, "input");
+
+					graph.addVertex(r1);
+
+					graph.addConnection(r1, flop, "rM");
+
+					rbits = rbits + 1;
+
+				}
+
+				if (graph.getNet(flop, "V") != null) {
+
+					Vertex r2 = new Vertex("r[" + rbits + "]", VertexType.NET, "input");
+
+					graph.addVertex(r2);
+
+					graph.addConnection(r2, flop, "rV");
+
+					rbits = rbits + 1;
+
+				}
+
+			}
+
+		}
+
 		for (Vertex flop : DFFxs) {
 			// additional fix
 
