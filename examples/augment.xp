@@ -1,6 +1,6 @@
-library load examples/gate_library_mini.v
+library load lib/xprova.v
 
-read examples/DFFx.v
+read lib/DFFx.v
 
 dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst,CK,RS output/netlist.dot
 

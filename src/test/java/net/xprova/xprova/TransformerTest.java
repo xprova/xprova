@@ -83,7 +83,7 @@ public class TransformerTest  {
 
 		// augment design
 
-		t.transformCDC();
+		t.transformCDC(false);
 
 		// check augmented netlist
 		// should contain two more nets
@@ -94,9 +94,7 @@ public class TransformerTest  {
 
 		assertEquals(graph.getModulesByType("DFF").size(), 2); // flops 1 and 5
 
-		assertEquals(graph.getModulesByType("DFFx2").size(), 1); // flop 2
-
-		assertEquals(graph.getModulesByType("DFFx").size(), 2); // flops 3 and 4
+		assertEquals(graph.getModulesByType("DFFx").size(), 3); // flops 2, 3 and 4
 
 	}
 
@@ -138,7 +136,7 @@ public class TransformerTest  {
 
 		// augment design
 
-		t.transformCDC();
+		t.transformCDC(false);
 
 		// check augmented netlist
 
@@ -150,9 +148,7 @@ public class TransformerTest  {
 
 		assertEquals(graph.getModulesByType("DFF").size(), 2); // flops 1 and 5
 
-		assertEquals(graph.getModulesByType("DFFx2").size(), 1); // flop 2
-
-		assertEquals(graph.getModulesByType("DFFx").size(), 2); // flops 3 and 4
+		assertEquals(graph.getModulesByType("DFFx").size(), 3); // flops 2, 3 and 4
 
 	}
 
