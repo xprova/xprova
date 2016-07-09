@@ -11,6 +11,11 @@ then
 
 	mvn package > /dev/null
 
+	if [ $? -ne 0 ]; then
+		echo "Maven build failed!"
+		exit 1
+	fi
+
 fi
 
 if [ `uname -o` == "Cygwin" ]

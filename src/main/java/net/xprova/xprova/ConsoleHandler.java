@@ -60,7 +60,23 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(description = "add and manage cell libraries")
+	private void assertDesignLoaded() throws Exception {
+
+		if (graph == null)
+			throw new Exception("no design is loaded");
+
+	}
+
+	//@formatter:off
+	@Command(
+		description = "add and manage cell libraries",
+		help = {
+			"Usage:",
+			"  library load <verilog_file>",
+			"  library list"
+		}
+	)
+	//@formatter:on
 	public void library(String[] args) throws Exception {
 
 		if (args.length > 0) {
@@ -96,7 +112,19 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "read" }, description = "read verilog file (gate-level netlist)")
+	//@formatter:off
+	@Command(
+		aliases = { "read" },
+		description = "read verilog file (gate-level netlist)",
+		help = {
+			"Usage:",
+			"  read [-m module] <verilog_file>",
+			"",
+			"Options:",
+			"  -m module : load a specific module from file"
+		}
+	)
+	//@formatter:on
 	public void read(String args[]) throws Exception {
 
 		// parse command input
@@ -162,8 +190,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "write_verilog" }, description = "export current design as a verilog netlist")
-	public void writeVerilogFile(String args[]) throws Exception {
+	//@formatter:off
+	@Command(
+		description = "export current design as a verilog netlist",
+		help = {
+			"Usage:",
+			"  write <verilog_file>",
+		}
+	)
+	//@formatter:on
+	public void write(String args[]) throws Exception {
 
 		if (args.length != 1)
 			throw new Exception("requires one argument: filename");
@@ -173,9 +209,23 @@ public class ConsoleHandler {
 		Generator.generateFile(graph, outputVerilogFile);
 	}
 
-	@Command(aliases = {
-			"export_dot" }, description = "export a graph representation of the loaded design in DOT format")
-	public void exportDotFile(String[] args) throws Exception {
+	//@formatter:off
+	@Command(
+		description = "export a graph representation of the loaded design in DOT format",
+		help = {
+			"Usage:",
+			"  dot [--ignore-edges e1,e2,...] [--ignore-vertices v1,v2,...]",
+			"      [--type fng] [--to vertex] [--combine v1,v2,...] <dot_file>",
+			"",
+			"Options:",
+			"  --ignore-edges e1,e2,...     exclude edges from graph",
+			"  --ignore-vertices v1,v2,...  exclude vertices from graph",
+			"  --type fng                   include (f)lip-flops, (n)ets and/or (g)ates",
+			"  --combine v1,v2,...          combine group of vertices into a single vertex",
+		}
+	)
+	//@formatter:on
+	public void dot(String[] args) throws Exception {
 
 		// parse command input
 
@@ -222,13 +272,7 @@ public class ConsoleHandler {
 
 		// produce graph
 
-		if (graph == null) {
-
-			out.println("No design is currently loaded");
-
-			return;
-
-		}
+		assertDesignLoaded();
 
 		NetlistGraph effectiveNetlist;
 
@@ -373,7 +417,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "augment", }, description = "add metastable flip-flop models and associated connections")
+	//@formatter:off
+	@Command(
+		aliases = { "augment"},
+		description = "add metastable flip-flop models and associated connections",
+		help = {
+			"Usage:",
+			"  augment",
+		}
+	)
+	//@formatter:on
 	public void augment() throws Exception {
 
 		if (graph == null) {
@@ -384,13 +437,23 @@ public class ConsoleHandler {
 
 			Transformer t1 = new Transformer(graph, defsFF);
 
-			t1.transformCDC();
+			t1.transformCDC(true);
 
 		}
 
 	}
 
-	@Command(description = "manage flip-flop definitions")
+	//@formatter:off
+	@Command(
+		description = "manage flip-flop definitions",
+		help = {
+			"Usage:",
+			"  flop clear",
+			"  flop list",
+			"  flop define <module> <clk> <rst> <d>",
+		}
+	)
+	//@formatter:on
 	public void flop(String[] args) throws Exception {
 
 		String cmd = args[0];
@@ -450,8 +513,35 @@ public class ConsoleHandler {
 		throw new Exception("Unable to parse def_ff arguments");
 	}
 
-	@Command(aliases = { "report_domains" }, description = "print list of clock domains in current design")
-	public void reportClockDomains() throws Exception {
+	//@formatter:off
+	@Command(
+		description = "generate design reports",
+		help = {
+			"Usage:",
+			"  report domains",
+			"  report xpaths",
+		}
+	)
+	//@formatter:on
+	public void report(String arg) throws Exception {
+
+		if ("domains".equals(arg)) {
+
+			reportClockDomains();
+
+		} else if ("xpaths".equals(arg)) {
+
+			reportCrossoverPaths();
+
+		} else {
+
+			out.println("Unrecognized option");
+
+		}
+
+	}
+
+	private void reportClockDomains() throws Exception {
 
 		Transformer t1 = new Transformer(graph, defsFF);
 
@@ -474,8 +564,7 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "report_xpaths" }, description = "print list of crossover paths in current design")
-	public void reportCrossoverPaths() {
+	private void reportCrossoverPaths() {
 
 		String strFormat = "%20s -> %20s";
 
@@ -695,8 +784,7 @@ public class ConsoleHandler {
 
 		// code:
 
-		if (graph == null)
-			throw new Exception("no design is loaded");
+		assertDesignLoaded();
 
 		String invokeArgs = line.hasOption("nocounter") ? "" : "gen-counter-example";
 
@@ -881,15 +969,23 @@ public class ConsoleHandler {
 	}
 
 	@Command(description = "print a list of design properties (assumptions and assertions)")
-	public void list_properties(String args[]) throws Exception {
+	public void props(String args[]) throws Exception {
 
-		System.out.println("Properties:");
+		if (assumptions.size() + assertions.size() > 0) {
 
-		for (Property p : assumptions)
-			System.out.println("* assumption : " + p);
+			out.println("Properties:");
 
-		for (Property p : assertions)
-			System.out.println("* assertion  : " + p);
+			for (Property p : assumptions)
+				out.println("* assumption : " + p);
+
+			for (Property p : assertions)
+				out.println("* assertion  : " + p);
+
+		} else {
+
+			out.println("no properties defined");
+
+		}
 
 	}
 
