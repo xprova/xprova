@@ -38,7 +38,7 @@ public class ConsoleHandler {
 
 	private GateLibrary lib = null;
 
-	private NetlistGraph graph = null;
+	private NetlistGraph top = null;
 
 	private PrintStream out = null;
 
@@ -47,6 +47,8 @@ public class ConsoleHandler {
 	private ArrayList<Property> assumptions = null;
 
 	private ArrayList<Property> assertions = null;
+
+	private HashMap<String, NetlistGraph> designs = null;
 
 	public ConsoleHandler(PrintStream ps) {
 
@@ -58,11 +60,13 @@ public class ConsoleHandler {
 
 		assertions = new ArrayList<Property>();
 
+		designs = new HashMap<String, NetlistGraph>();
+
 	}
 
 	private void assertDesignLoaded() throws Exception {
 
-		if (graph == null)
+		if (top == null)
 			throw new Exception("no design is loaded");
 
 	}
@@ -121,7 +125,7 @@ public class ConsoleHandler {
 			"  read [-m module] <verilog_file>",
 			"",
 			"Options:",
-			"  -m module : load a specific module from file"
+			"  -m module : specify top module (first in file be default)"
 		}
 	)
 	//@formatter:on
@@ -153,38 +157,58 @@ public class ConsoleHandler {
 			if (!str.isEmpty())
 				verilogFile = str.trim();
 
-		Netlist selNetlist = null;
-
 		// read verilog file
 
 		if (lib == null) {
 
-			out.println("No library is current loaded");
+			throw new Exception("No library is currently loaded");
 
 		} else {
 
 			ArrayList<Netlist> nls = VerilogParser.parseFile(verilogFile, lib);
 
+			HashMap<String, Netlist> newNLs = new HashMap<String, Netlist>();
+
+			for (Netlist nl :nls)
+				newNLs.put(nl.name, nl);
+
 			String moduleName = line.getOptionValue("m", nls.get(0).name);
+
+			if (!newNLs.containsKey(moduleName))
+				throw new Exception(String.format("Cannot find module <%s> in file <%s>", moduleName, verilogFile));
+
+			ArrayList<NetlistGraph> newDesigns = new ArrayList<NetlistGraph>();
 
 			for (Netlist nl : nls) {
 
-				if (nl.name.equals(moduleName)) {
+				out.printf("Parsing module <%s> ...\n", nl.name);
 
-					selNetlist = nl;
-
-					break;
-
-				}
+				newDesigns.add(new NetlistGraph(nl));
 
 			}
 
-			if (selNetlist == null)
-				throw new Exception(String.format("Cannot find module <%s> in file <%s>", moduleName, verilogFile));
+			int countBefore = designs.size();
 
-			graph = new NetlistGraph(selNetlist);
+			for (NetlistGraph ng : newDesigns)
+				designs.put(ng.getName(), ng);
 
-			out.printf("Loaded design <%s>\n", selNetlist.name);
+			int countAfter = designs.size();
+
+			int countNew = countAfter - countBefore;
+
+			int countOverwritten = newDesigns.size() - countNew;
+
+			out.printf("Successfully parsed and loaded %d new module(s) \n", newDesigns.size());
+
+			if (countOverwritten > 0) {
+
+				out.printf("%d existing modules were re-read.\n", countOverwritten);
+
+			}
+
+			out.printf("Top design is <%s>\n", moduleName);
+
+			top = designs.get(moduleName);
 
 		}
 
@@ -206,7 +230,7 @@ public class ConsoleHandler {
 
 		String outputVerilogFile = args[0];
 
-		Generator.generateFile(graph, outputVerilogFile);
+		Generator.generateFile(top, outputVerilogFile);
 	}
 
 	//@formatter:off
@@ -280,30 +304,30 @@ public class ConsoleHandler {
 
 			String vName = line.getOptionValue("to");
 
-			Vertex flop = graph.getVertex(vName);
+			Vertex flop = top.getVertex(vName);
 
 			if (flop == null) {
 
 				throw new Exception(
-						String.format("netlist <%s> does not contain flip-flip <%s>", graph.getName(), vName));
+						String.format("netlist <%s> does not contain flip-flip <%s>", top.getName(), vName));
 
 			}
 
-			HashSet<Vertex> flipflops = graph.getModulesByTypes(defsFF.keySet());
+			HashSet<Vertex> flipflops = top.getModulesByTypes(defsFF.keySet());
 
-			HashSet<Vertex> flopInputVertices = graph.bfs(flop, flipflops, true);
+			HashSet<Vertex> flopInputVertices = top.bfs(flop, flipflops, true);
 
-			Graph<Vertex> flopGraph = graph.reduce(flipflops);
+			Graph<Vertex> flopGraph = top.reduce(flipflops);
 
 			flopInputVertices.add(flop);
 
 			flopInputVertices.addAll(flopGraph.getSources(flop));
 
-			effectiveNetlist = graph.getSubGraph(flopInputVertices);
+			effectiveNetlist = top.getSubGraph(flopInputVertices);
 
 		} else {
 
-			effectiveNetlist = graph;
+			effectiveNetlist = top;
 
 		}
 
@@ -324,7 +348,7 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			HashSet<Vertex> flipflops = graph.getModulesByTypes(defsFF.keySet());
+			HashSet<Vertex> flipflops = top.getModulesByTypes(defsFF.keySet());
 
 			// are flipflops are flipflops2 the same?
 
@@ -352,7 +376,7 @@ public class ConsoleHandler {
 
 		}
 
-		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(graph);
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(top);
 
 		if (line.hasOption("ignore-edges")) {
 
@@ -429,13 +453,13 @@ public class ConsoleHandler {
 	//@formatter:on
 	public void augment() throws Exception {
 
-		if (graph == null) {
+		if (top == null) {
 
 			out.println("No design is currently loaded");
 
 		} else {
 
-			Transformer t1 = new Transformer(graph, defsFF);
+			Transformer t1 = new Transformer(top, defsFF);
 
 			t1.transformCDC(true);
 
@@ -543,7 +567,7 @@ public class ConsoleHandler {
 
 	private void reportClockDomains() throws Exception {
 
-		Transformer t1 = new Transformer(graph, defsFF);
+		Transformer t1 = new Transformer(top, defsFF);
 
 		HashSet<Vertex> clks = t1.getClocks();
 
@@ -570,16 +594,16 @@ public class ConsoleHandler {
 
 		ArrayList<String> paths = new ArrayList<String>();
 
-		HashSet<Vertex> flops = graph.getModulesByTypes(defsFF.keySet());
+		HashSet<Vertex> flops = top.getModulesByTypes(defsFF.keySet());
 
-		Graph<Vertex> ffGraph = graph.reduce(flops);
+		Graph<Vertex> ffGraph = top.reduce(flops);
 
 		for (Vertex src : flops) {
 
 			for (Vertex dst : ffGraph.getDestinations(src)) {
 
-				Vertex clk1 = graph.getNet(src, defsFF.get(src.subtype).clkPort);
-				Vertex clk2 = graph.getNet(dst, defsFF.get(dst.subtype).clkPort);
+				Vertex clk1 = top.getNet(src, defsFF.get(src.subtype).clkPort);
+				Vertex clk2 = top.getNet(dst, defsFF.get(dst.subtype).clkPort);
 
 				if (clk1 != clk2)
 					paths.add(String.format(strFormat, src, dst));
@@ -606,7 +630,7 @@ public class ConsoleHandler {
 
 		// rename modules
 
-		List<Vertex> sortedMods = new ArrayList<Vertex>(graph.getModules());
+		List<Vertex> sortedMods = new ArrayList<Vertex>(top.getModules());
 
 		Collections.sort(sortedMods, new Comparator<Vertex>() {
 
@@ -648,9 +672,9 @@ public class ConsoleHandler {
 
 		int netCount = 0;
 
-		HashSet<Vertex> nonIO = graph.getNets();
+		HashSet<Vertex> nonIO = top.getNets();
 
-		nonIO.removeAll(graph.getIONets());
+		nonIO.removeAll(top.getIONets());
 
 		List<Vertex> nonIOList = new ArrayList<Vertex>(nonIO);
 
@@ -806,7 +830,7 @@ public class ConsoleHandler {
 
 		String templateCode = loadResourceString(templateResourceFile);
 
-		CodeGenerator cg = new CodeGenerator(graph, assumptions, assertions);
+		CodeGenerator cg = new CodeGenerator(top, assumptions, assertions);
 
 		ArrayList<String> lines = cg.generate(templateCode);
 
@@ -915,7 +939,7 @@ public class ConsoleHandler {
 
 	private void splitArr(String netNameFormat) {
 
-		for (Vertex v : graph.getNets()) {
+		for (Vertex v : top.getNets()) {
 
 			int k1 = v.name.indexOf("[");
 			int k2 = v.name.indexOf("]");
@@ -938,7 +962,7 @@ public class ConsoleHandler {
 	}
 
 	@Command(aliases = { "synth" }, description = "synthesize behavioral verilog design using yosys")
-	public void synthBehavioralDesign(String args[]) throws Exception {
+	public void synth(String args[]) throws Exception {
 
 		// TODO: implement the following switches
 		// -v : verbose mode, show output of yosys
