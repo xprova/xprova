@@ -12,7 +12,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -38,7 +40,7 @@ public class ConsoleHandler {
 
 	private GateLibrary lib = null;
 
-	private NetlistGraph top = null;
+	private NetlistGraph current = null;
 
 	private PrintStream out = null;
 
@@ -48,7 +50,7 @@ public class ConsoleHandler {
 
 	private ArrayList<Property> assertions = null;
 
-	private HashMap<String, NetlistGraph> designs = null;
+	private TreeMap<String, NetlistGraph> designs = null;
 
 	public ConsoleHandler(PrintStream ps) {
 
@@ -60,13 +62,13 @@ public class ConsoleHandler {
 
 		assertions = new ArrayList<Property>();
 
-		designs = new HashMap<String, NetlistGraph>();
+		designs = new TreeMap<String, NetlistGraph>();
 
 	}
 
 	private void assertDesignLoaded() throws Exception {
 
-		if (top == null)
+		if (current == null)
 			throw new Exception("no design is loaded");
 
 	}
@@ -169,7 +171,7 @@ public class ConsoleHandler {
 
 			HashMap<String, Netlist> newNLs = new HashMap<String, Netlist>();
 
-			for (Netlist nl :nls)
+			for (Netlist nl : nls)
 				newNLs.put(nl.name, nl);
 
 			String moduleName = line.getOptionValue("m", nls.get(0).name);
@@ -181,7 +183,7 @@ public class ConsoleHandler {
 
 			for (Netlist nl : nls) {
 
-				out.printf("Parsing module <%s> ...\n", nl.name);
+				out.printf("Parsing design <%s> in file <%s> ...\n", nl.name, verilogFile);
 
 				newDesigns.add(new NetlistGraph(nl));
 
@@ -198,7 +200,7 @@ public class ConsoleHandler {
 
 			int countOverwritten = newDesigns.size() - countNew;
 
-			out.printf("Successfully parsed and loaded %d new module(s) \n", newDesigns.size());
+			out.printf("Successfully parsed and loaded %d new design(s) \n", newDesigns.size());
 
 			if (countOverwritten > 0) {
 
@@ -206,9 +208,9 @@ public class ConsoleHandler {
 
 			}
 
-			out.printf("Top design is <%s>\n", moduleName);
+			out.printf("Current design is <%s>\n", moduleName);
 
-			top = designs.get(moduleName);
+			current = designs.get(moduleName);
 
 		}
 
@@ -230,7 +232,7 @@ public class ConsoleHandler {
 
 		String outputVerilogFile = args[0];
 
-		Generator.generateFile(top, outputVerilogFile);
+		Generator.generateFile(current, outputVerilogFile);
 	}
 
 	//@formatter:off
@@ -304,30 +306,30 @@ public class ConsoleHandler {
 
 			String vName = line.getOptionValue("to");
 
-			Vertex flop = top.getVertex(vName);
+			Vertex flop = current.getVertex(vName);
 
 			if (flop == null) {
 
 				throw new Exception(
-						String.format("netlist <%s> does not contain flip-flip <%s>", top.getName(), vName));
+						String.format("netlist <%s> does not contain flip-flip <%s>", current.getName(), vName));
 
 			}
 
-			HashSet<Vertex> flipflops = top.getModulesByTypes(defsFF.keySet());
+			HashSet<Vertex> flipflops = current.getModulesByTypes(defsFF.keySet());
 
-			HashSet<Vertex> flopInputVertices = top.bfs(flop, flipflops, true);
+			HashSet<Vertex> flopInputVertices = current.bfs(flop, flipflops, true);
 
-			Graph<Vertex> flopGraph = top.reduce(flipflops);
+			Graph<Vertex> flopGraph = current.reduce(flipflops);
 
 			flopInputVertices.add(flop);
 
 			flopInputVertices.addAll(flopGraph.getSources(flop));
 
-			effectiveNetlist = top.getSubGraph(flopInputVertices);
+			effectiveNetlist = current.getSubGraph(flopInputVertices);
 
 		} else {
 
-			effectiveNetlist = top;
+			effectiveNetlist = current;
 
 		}
 
@@ -348,7 +350,7 @@ public class ConsoleHandler {
 
 			selectedVertices = new HashSet<Vertex>();
 
-			HashSet<Vertex> flipflops = top.getModulesByTypes(defsFF.keySet());
+			HashSet<Vertex> flipflops = current.getModulesByTypes(defsFF.keySet());
 
 			// are flipflops are flipflops2 the same?
 
@@ -376,7 +378,7 @@ public class ConsoleHandler {
 
 		}
 
-		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(top);
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(current);
 
 		if (line.hasOption("ignore-edges")) {
 
@@ -453,13 +455,13 @@ public class ConsoleHandler {
 	//@formatter:on
 	public void augment() throws Exception {
 
-		if (top == null) {
+		if (current == null) {
 
 			out.println("No design is currently loaded");
 
 		} else {
 
-			Transformer t1 = new Transformer(top, defsFF);
+			Transformer t1 = new Transformer(current, defsFF);
 
 			t1.transformCDC(true);
 
@@ -565,9 +567,107 @@ public class ConsoleHandler {
 
 	}
 
+	//@formatter:off
+	@Command(
+		description = "manage loaded designs",
+		help = {
+			"Usage:",
+			"  design list",
+			"  design current <name>"
+		}
+	)
+	//@formatter:on
+	public void design(String args[]) throws Exception {
+
+		if (args.length > 0) {
+
+			String cmd = args[0];
+
+			if (cmd.equals("list")) {
+
+				if (designs.size() > 0) {
+
+					out.println("Loaded designs:");
+
+					for (Entry<String, NetlistGraph> e : designs.entrySet()) {
+
+						String curStr = (e.getValue() == current) ? " (current)" : "";
+
+						out.printf("  * %s%s\n", e.getKey(), curStr);
+
+					}
+
+				} else {
+
+					out.println("no designs are currently loaded");
+
+				}
+
+			} else if (cmd.equals("current") && args.length > 1) {
+
+				String designName = args[1];
+
+				NetlistGraph d = designs.get(designName);
+
+				if (d == null) {
+
+					String strE = String.format("Design <%s> not found", designName);
+
+					throw new Exception(strE);
+
+				} else {
+
+					current = d;
+
+					out.printf("Current design is <%s>\n", designName);
+
+				}
+
+			} else if (cmd.equals("rm") && args.length > 1) {
+
+				String designName = args[1];
+
+				NetlistGraph d = designs.get(designName);
+
+				if (d == null) {
+
+					String strE = String.format("Design <%s> not found", designName);
+
+					throw new Exception(strE);
+
+				} else {
+
+					designs.remove(designName);
+
+					out.printf("Removed design <%s>\n", designName);
+
+					if (current == d) {
+
+						current = null;
+
+						if (designs.size() > 0) {
+
+							Entry<String, NetlistGraph> entry = designs.entrySet().iterator().next();
+
+							current = entry.getValue();
+
+							out.printf("Current design is <%s>\n", entry.getKey());
+
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
 	private void reportClockDomains() throws Exception {
 
-		Transformer t1 = new Transformer(top, defsFF);
+		Transformer t1 = new Transformer(current, defsFF);
 
 		HashSet<Vertex> clks = t1.getClocks();
 
@@ -594,16 +694,16 @@ public class ConsoleHandler {
 
 		ArrayList<String> paths = new ArrayList<String>();
 
-		HashSet<Vertex> flops = top.getModulesByTypes(defsFF.keySet());
+		HashSet<Vertex> flops = current.getModulesByTypes(defsFF.keySet());
 
-		Graph<Vertex> ffGraph = top.reduce(flops);
+		Graph<Vertex> ffGraph = current.reduce(flops);
 
 		for (Vertex src : flops) {
 
 			for (Vertex dst : ffGraph.getDestinations(src)) {
 
-				Vertex clk1 = top.getNet(src, defsFF.get(src.subtype).clkPort);
-				Vertex clk2 = top.getNet(dst, defsFF.get(dst.subtype).clkPort);
+				Vertex clk1 = current.getNet(src, defsFF.get(src.subtype).clkPort);
+				Vertex clk2 = current.getNet(dst, defsFF.get(dst.subtype).clkPort);
 
 				if (clk1 != clk2)
 					paths.add(String.format(strFormat, src, dst));
@@ -630,7 +730,7 @@ public class ConsoleHandler {
 
 		// rename modules
 
-		List<Vertex> sortedMods = new ArrayList<Vertex>(top.getModules());
+		List<Vertex> sortedMods = new ArrayList<Vertex>(current.getModules());
 
 		Collections.sort(sortedMods, new Comparator<Vertex>() {
 
@@ -672,9 +772,9 @@ public class ConsoleHandler {
 
 		int netCount = 0;
 
-		HashSet<Vertex> nonIO = top.getNets();
+		HashSet<Vertex> nonIO = current.getNets();
 
-		nonIO.removeAll(top.getIONets());
+		nonIO.removeAll(current.getIONets());
 
 		List<Vertex> nonIOList = new ArrayList<Vertex>(nonIO);
 
@@ -830,7 +930,7 @@ public class ConsoleHandler {
 
 		String templateCode = loadResourceString(templateResourceFile);
 
-		CodeGenerator cg = new CodeGenerator(top, assumptions, assertions);
+		CodeGenerator cg = new CodeGenerator(current, assumptions, assertions);
 
 		ArrayList<String> lines = cg.generate(templateCode);
 
@@ -939,7 +1039,7 @@ public class ConsoleHandler {
 
 	private void splitArr(String netNameFormat) {
 
-		for (Vertex v : top.getNets()) {
+		for (Vertex v : current.getNets()) {
 
 			int k1 = v.name.indexOf("[");
 			int k2 = v.name.indexOf("]");

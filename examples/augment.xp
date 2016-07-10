@@ -1,6 +1,17 @@
 library load lib/xprova.v
 
 read lib/DFFx.v
+#read examples/simple_2.v
+#read examples/simple_3.v
+read examples/simple_4.v
+
+design list
+
+design current DFFx
+
+design list
+
+:q
 
 dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst,CK,RS output/netlist.dot
 
