@@ -2,6 +2,22 @@
 
 XPROV_JAR=target/xprova-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
+args=$@
+
+if [[ $1 = "--rebuild" || $1 = "-r" ]]
+then
+	type mvn >/dev/null 2>&1 || { echo >&2 "maven is not installed"; exit 1; }
+	echo "Cleaning existing build ..."
+	mvn clean &> /dev/null
+	args=${@:2}
+elif [[ $1 = "--clean" || $1 = "-c" ]]
+then
+	type mvn >/dev/null 2>&1 || { echo >&2 "maven is not installed"; exit 1; }
+	echo "Cleaning existing build (including maven dependencies) ..."
+	mvn clean -U &> /dev/null
+	args=${@:2}
+fi
+
 if [ ! -f $XPROV_JAR ]
 then
 
@@ -21,9 +37,9 @@ fi
 if [ `uname -o` == "Cygwin" ]
 then
 	stty -icanon min 1 -echo
-	java -jar -Djline.terminal=jline.UnixTerminal $XPROV_JAR "$@"
+	java -jar -Djline.terminal=jline.UnixTerminal $XPROV_JAR "$args"
 	stty icanon echo
 else
-	java -jar $XPROV_JAR "$@"
+	java -jar $XPROV_JAR "$args"
 fi
 
