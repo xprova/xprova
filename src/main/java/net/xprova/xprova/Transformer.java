@@ -384,7 +384,7 @@ public class Transformer {
 
 					graph.addVertex(r1);
 
-					graph.addConnection(r1, flop, "rM");
+					graph.addConnection(r1, flop, "rD");
 
 					rbits = rbits + 1;
 

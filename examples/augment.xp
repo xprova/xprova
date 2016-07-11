@@ -1,17 +1,14 @@
 library load lib/xprova.v
 
-read lib/DFFx.v
-#read examples/simple_2.v
-#read examples/simple_3.v
-read examples/simple_4.v
+read lib/Test.v
 
-design list
+read lib/design1.v
 
-design current DFFx
+augment
 
-design list
+expand
 
-:q
+#write output/simple_4_aug.v
 
 dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst,CK,RS output/netlist.dot
 
@@ -19,11 +16,12 @@ dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,
 
 :q
 
+
+
+:q
+
 #synth examples/assertion-test6.v output/synth.v
 #read -m top examples/simple_4.v
-#flop define QDFFRSBX1 CK RS D
-#flop define DFF CK RS D
-#flop define DFFx CK RS D
 #augment
 #write_verilog output/simple_1_synth.v
 

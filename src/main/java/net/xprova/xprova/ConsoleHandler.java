@@ -573,7 +573,8 @@ public class ConsoleHandler {
 		help = {
 			"Usage:",
 			"  design list",
-			"  design current <name>"
+			"  design current <name>",
+			"  design rm <name>"
 		}
 	)
 	//@formatter:on
@@ -597,9 +598,13 @@ public class ConsoleHandler {
 
 					}
 
+					return;
+
 				} else {
 
 					out.println("no designs are currently loaded");
+
+					return;
 
 				}
 
@@ -620,6 +625,8 @@ public class ConsoleHandler {
 					current = d;
 
 					out.printf("Current design is <%s>\n", designName);
+
+					return;
 
 				}
 
@@ -657,11 +664,15 @@ public class ConsoleHandler {
 
 					}
 
+					return;
+
 				}
 
 			}
 
 		}
+
+		throw new Exception("error parsing arguments of design");
 
 	}
 
@@ -1110,6 +1121,13 @@ public class ConsoleHandler {
 			out.println("no properties defined");
 
 		}
+
+	}
+
+	@Command
+	public void expand() throws Exception {
+
+		current.expand(current.getVertex("t1"), designs.get("Test"));
 
 	}
 

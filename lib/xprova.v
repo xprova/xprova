@@ -67,3 +67,10 @@ module H2X (y, a);
 	input a;
 	output y;
 endmodule
+
+module Test (p1, p2, p3, p4);
+
+	input p1, p2;
+	output p3, p4;
+
+endmodule
