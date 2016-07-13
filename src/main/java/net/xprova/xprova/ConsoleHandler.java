@@ -939,8 +939,8 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "prove" }, description = "attempt to prove assertions")
-	public void proveAssertions(String args[]) throws Exception {
+	@Command(description = "attempt to prove assertions")
+	public void prove(String args[]) throws Exception {
 
 		// options:
 		// --printcode
@@ -1179,7 +1179,8 @@ public class ConsoleHandler {
 	@Command
 	public void expand() throws Exception {
 
-		current.expand(current.getVertex("t1"), designs.get("Test"));
+		current.expand(current.getVertex("ff3"), designs.get("DFFx"));
+//		current.expand(current.getVertex("t1"), designs.get("Test"));
 
 	}
 

@@ -1,0 +1,3 @@
+flop define QDFFRSBX1 CK RS D
+flop define DFF CK RS D
+flop define DFFx CK RS D

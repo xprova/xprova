@@ -1,26 +1,10 @@
 library load lib/xprova.v
 
-read lib/Test.v
+read lib/DFFx.v
 
-read lib/design1.v
-
-augment
+read output/simple_1_aug.v
 
 expand
 
-#write output/simple_4_aug.v
-
 dot -t=fng -e=SB,RB,CK -v=resetn,reset,clk1,clk2,clk,rst,CK,RS --pdf output/netlist.pdf
-
-:q
-
-#synth examples/assertion-test6.v output/synth.v
-#read -m top examples/simple_4.v
-#augment
-#write_verilog output/simple_1_synth.v
-
-read output/simple_1_synth.v
-
-assert ~y
-prove
 
