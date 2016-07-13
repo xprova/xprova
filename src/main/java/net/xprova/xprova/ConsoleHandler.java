@@ -241,13 +241,16 @@ public class ConsoleHandler {
 		help = {
 			"Usage:",
 			"  dot [--ignore-edges e1,e2,...] [--ignore-vertices v1,v2,...]",
-			"      [--type fng] [--to vertex] [--combine v1,v2,...] <dot_file>",
+			"      [--type fng] [--to flipflop] [--combine v1,v2,...]",
+			"      [--pdf] <output_file>",
 			"",
 			"Options:",
-			"  --ignore-edges e1,e2,...     exclude edges from graph",
-			"  --ignore-vertices v1,v2,...  exclude vertices from graph",
-			"  --type fng                   include (f)lip-flops, (n)ets and/or (g)ates",
-			"  --combine v1,v2,...          combine group of vertices into a single vertex",
+			"  -e --ignore-edges e1,e2,...     exclude edges from graph",
+			"  -v --ignore-vertices v1,v2,...  exclude vertices from graph",
+			"  --to <flipflop>                 export sub-graph of flipflop and its combinational logic",
+			"  -t --type fng                   include (f)lip-flops, (n)ets and/or (g)ates",
+			"  -c --combine v1,v2,...          combine group of vertices into a single vertex",
+			"  --pdf                           output a PDF file directly (requires DOT)"
 		}
 	)
 	//@formatter:on
@@ -255,19 +258,19 @@ public class ConsoleHandler {
 
 		// parse command input
 
-		Option optIgnoreEdges = Option.builder().desc("list of edges to ignore").hasArg().argName("IGNORE_EDGES")
-				.required(false).longOpt("ignore-edges").build();
+		Option optIgnoreEdges = Option.builder("e").hasArg().argName("IGNORE_EDGES").required(false)
+				.longOpt("ignore-edges").build();
 
-		Option optIgnoreVertices = Option.builder().desc("list of vertices to ignore").hasArg()
-				.argName("IGNORE_VERTICES").required(false).longOpt("ignore-vertices").build();
+		Option optIgnoreVertices = Option.builder("v").hasArg().argName("IGNORE_VERTICES").required(false)
+				.longOpt("ignore-vertices").build();
 
-		Option optType = Option.builder("t").longOpt("type").hasArg().desc("graph elements: ([n]ets|[g]ates|[f]lops)")
-				.build();
+		Option optType = Option.builder("t").longOpt("type").hasArg().build();
 
-		Option optTo = Option.builder().longOpt("to").hasArg().desc("destination flip-flop").build();
+		Option optTo = Option.builder().longOpt("to").hasArg().build();
 
-		Option optCombine = Option.builder().longOpt("combine").hasArg().desc("list of vertex prefixes to combine")
-				.build();
+		Option optCombine = Option.builder("c").longOpt("combine").hasArg().build();
+
+		Option optPDF = Option.builder().longOpt("pdf").build();
 
 		Options options = new Options();
 
@@ -281,6 +284,8 @@ public class ConsoleHandler {
 
 		options.addOption(optCombine);
 
+		options.addOption(optPDF);
+
 		CommandLineParser parser = new DefaultParser();
 
 		CommandLine line = parser.parse(options, args);
@@ -290,11 +295,11 @@ public class ConsoleHandler {
 
 		// use first non-empty argument as file name
 
-		String dotFile = "";
+		String outFile = "";
 
 		for (String str : line.getArgList())
 			if (!str.isEmpty())
-				dotFile = str.trim();
+				outFile = str.trim();
 
 		// produce graph
 
@@ -392,7 +397,54 @@ public class ConsoleHandler {
 
 		}
 
-		GraphDotPrinter.printGraph(dotFile, sg, formatter, selectedVertices);
+		if (line.hasOption("--pdf")) {
+
+			String dotFileStr = "netlist.dot";
+
+			File tempDir = new File(System.getProperty("java.io.tmpdir"));
+
+			File javaFile = new File(tempDir, dotFileStr);
+
+			String cmd = "dot -Tpdf " + javaFile.getAbsolutePath() + " -o " + outFile;
+
+			// write temp dot file
+
+			GraphDotPrinter.printGraph(javaFile.getAbsolutePath(), sg, formatter, selectedVertices);
+
+			// invoke DOT
+
+			final Runtime rt = Runtime.getRuntime();
+
+			Process proc = rt.exec(cmd);
+
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+			String s;
+
+			while ((s = stdError.readLine()) != null)
+				out.println(s);
+
+			while ((s = stdInput.readLine()) != null)
+				out.println(s);
+
+			stdInput.close();
+
+			stdError.close();
+
+			proc.waitFor();
+
+			if (proc.exitValue() != 0) {
+
+				throw new Exception("Error while attempting to convert dot file to pdf using DOT");
+
+			}
+
+		} else {
+
+			GraphDotPrinter.printGraph(outFile, sg, formatter, selectedVertices);
+		}
 
 	}
 

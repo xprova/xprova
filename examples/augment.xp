@@ -10,13 +10,7 @@ expand
 
 #write output/simple_4_aug.v
 
-dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst,CK,RS output/netlist.dot
-
-:! dot -Tpdf output/netlist.dot -o output/netlist.pdf
-
-:q
-
-
+dot -t=fng -e=SB,RB,CK -v=resetn,reset,clk1,clk2,clk,rst,CK,RS --pdf output/netlist.pdf
 
 :q
 
@@ -30,6 +24,3 @@ read output/simple_1_synth.v
 assert ~y
 prove
 
-dot --type=fng --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
-
-:! dot -Tpdf output/netlist.dot -o output/netlist.pdf
