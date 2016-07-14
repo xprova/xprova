@@ -1,10 +1,16 @@
 library load lib/xprova.v
 
 read lib/DFFx.v
+read examples/simple_1.v
+
+:s examples/flopdefs.xp
+
+augment
+
+write output/simple_1_aug.v
 
 read output/simple_1_aug.v
 
 expand
 
 dot -t=fng -e=SB,RB,CK -v=resetn,reset,clk1,clk2,clk,rst,CK,RS --pdf output/netlist.pdf
-
