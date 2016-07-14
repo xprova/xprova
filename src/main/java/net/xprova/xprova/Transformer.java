@@ -14,7 +14,7 @@ public class Transformer {
 	// model2: DFF cell with T port
 	// fow now both model1 and model2 are set to the cell DFFx
 
-	private static final String model1 = "DFFx", model2 = "DFFx_T";
+	private static final String model1 = "DFFx", model2 = "DFFx";
 
 	private static final String portV = "V", dup_suffix = "_dup", portM = "M", portT = "T";
 
@@ -386,6 +386,8 @@ public class Transformer {
 
 					graph.addConnection(r1, flop, "rV");
 
+					graph.addInput(r1);
+
 					rbits = rbits + 1;
 
 				}
@@ -398,6 +400,8 @@ public class Transformer {
 
 					graph.addConnection(r2, flop, "rD");
 
+					graph.addInput(r2);
+
 					rbits = rbits + 1;
 
 				}
@@ -407,6 +411,7 @@ public class Transformer {
 		}
 
 		for (Vertex flop : DFFxs) {
+
 			// additional fix
 
 			// if flop has no V connection then change it to DFFx2

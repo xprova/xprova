@@ -7,10 +7,12 @@ read examples/simple_1.v
 
 augment
 
-write output/simple_1_aug.v
-
-read output/simple_1_aug.v
-
 expand
 
+write output/simple_1_aug.v
+
 dot -t=fng -e=SB,RB,CK -v=resetn,reset,clk1,clk2,clk,rst,CK,RS --pdf output/netlist.pdf
+
+assert x |-> #3 n3
+
+prove

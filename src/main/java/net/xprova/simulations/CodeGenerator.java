@@ -108,8 +108,8 @@ public class CodeGenerator {
 			graph.addVertex(nextFF);
 			graph.addVertex(nextQ);
 
-			Vertex clk = graph.getVertex("clk");
-			Vertex rst = graph.getVertex("rst");
+			Vertex clk = graph.getVertex("clk1");
+			Vertex rst = graph.getVertex("reset");
 
 			graph.addConnection(clk, nextFF, "CK");
 			graph.addConnection(rst, nextFF, "RS");
@@ -426,6 +426,36 @@ public class CodeGenerator {
 		processed.addAll(qNets);
 		processed.addAll(inpNets);
 
+		for (Vertex v : graph.getModulesByType("TIE0")) {
+
+			Vertex vd = graph.getNet(v, "y");
+
+			processed.add(vd);
+
+			assigns.add(String.format("{PREFIX1}%s{POSTFIX1} = 0;", jNetNames.get(vd)));
+
+		}
+
+		for (Vertex v : graph.getModulesByType("TIE1")) {
+
+			Vertex vd = graph.getNet(v, "y");
+
+			processed.add(vd);
+
+			assigns.add(String.format("{PREFIX1}%s{POSTFIX1} = -1;", jNetNames.get(vd)));
+
+		}
+
+		for (Vertex v : graph.getModulesByType("TIEX")) {
+
+			Vertex vd = graph.getNet(v, "y");
+
+			processed.add(vd);
+
+			assigns.add(String.format("{PREFIX1}%s{POSTFIX1} = 0xf0f0f0f0;", jNetNames.get(vd)));
+
+		}
+
 		toVisit = netGraph.bfs(processed, 1, false);
 
 		while (!toVisit.isEmpty()) {
@@ -439,6 +469,8 @@ public class CodeGenerator {
 			final String strNOT = "{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};";
 			final String strXOR = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});";
 			final String strWIRE_NG_INTERNAL = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
+			final String strMUX2 = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} & ~{PREFIX2}%s{POSTFIX2}) | ({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});";
+			final String strX2H = "{PREFIX1}%s{POSTFIX1} = (({PREFIX2}%s{POSTFIX2} != 0) & ({PREFIX2}%s{POSTFIX2} != -1)) ? -1 : 0 ;";
 
 			for (Vertex n : toVisit) {
 
@@ -460,6 +492,7 @@ public class CodeGenerator {
 
 				String net1 = inputs.size() > 0 ? jNetNames.get(inputs.get(0)) : "";
 				String net2 = inputs.size() > 1 ? jNetNames.get(inputs.get(1)) : "";
+				String net3 = inputs.size() > 2 ? jNetNames.get(inputs.get(2)) : "";
 
 				if ("DFF".equals(driver.subtype))
 					continue;
@@ -492,9 +525,17 @@ public class CodeGenerator {
 
 					line = String.format(strWIRE_NG_INTERNAL, nNameJ, net1);
 
+				} else if ("MUX2".equals(driver.subtype)) {
+
+					line = String.format(strMUX2, nNameJ, net1, net3, net2, net3);
+
+				} else if ("X2H".equals(driver.subtype)) {
+
+					line = String.format(strX2H, nNameJ, net1, net1);
+
 				} else {
 
-					throw new Exception("unrecognized gate");
+					throw new Exception("unrecognized gate " + driver.subtype);
 
 				}
 

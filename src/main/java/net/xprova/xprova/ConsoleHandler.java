@@ -1177,24 +1177,34 @@ public class ConsoleHandler {
 	}
 
 	@Command
+	public void test1() {
+
+		for (Vertex v : current.getInputs())
+			System.out.println(v);
+
+	}
+
+	@Command
 	public void expand() throws Exception {
 
-		// current.expand(current.getVertex("ff3"), designs.get("DFFx"));
-		// current.expand(current.getVertex("ff4"), designs.get("DFFx_V"));
-		// current.expand(current.getVertex("t1"), designs.get("Test"));
+		for (Vertex d : current.getModulesByType("DFFx")) {
 
-		NetlistGraph mod = getVariationDFFx(designs.get("DFFx"), true, true, true);
+			boolean V = current.getNet(d, "V") != null;
+			boolean M = current.getNet(d, "M") != null;
+			boolean T = current.getNet(d, "T") != null;
 
-		designs.put("mod", mod);
+			NetlistGraph mod = getVariationDFFx(designs.get("DFFx"), V, M, T);
 
-		current = mod;
+			current.expand(d, mod);
+
+		}
 
 	}
 
 	private NetlistGraph getVariationDFFx(NetlistGraph DFFx, boolean V, boolean M, boolean T) throws Exception {
 
 		if (M & !V)
-			throw new Exception ("invalid model specification: any variation with port M must have port V");
+			throw new Exception("invalid model specification: any variation with port M must have port V");
 
 		NetlistGraph model = new NetlistGraph(DFFx);
 
@@ -1230,7 +1240,6 @@ public class ConsoleHandler {
 		include.put("V", V);
 		include.put("rD", V);
 		include.put("rV", M);
-
 
 		for (Entry<String, Boolean> entry : include.entrySet()) {
 
