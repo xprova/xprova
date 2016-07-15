@@ -13,6 +13,6 @@ write output/simple_1_aug.v
 
 dot -t=fng -e=SB,RB,CK -v=resetn,reset,clk1,clk2,clk,rst,CK,RS --pdf output/netlist.pdf
 
-assert x |-> #3 n3
+assert x |-> #2 ~y
 
 prove

@@ -1236,6 +1236,7 @@ public class ConsoleHandler {
 		include.put("x2h", V);
 		include.put("and1", M);
 		include.put("xor1", T);
+		include.put("t", T);
 
 		include.put("V", V);
 		include.put("rD", V);

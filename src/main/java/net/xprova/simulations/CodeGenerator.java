@@ -492,7 +492,6 @@ public class CodeGenerator {
 
 				String net1 = inputs.size() > 0 ? jNetNames.get(inputs.get(0)) : "";
 				String net2 = inputs.size() > 1 ? jNetNames.get(inputs.get(1)) : "";
-				String net3 = inputs.size() > 2 ? jNetNames.get(inputs.get(2)) : "";
 
 				if ("DFF".equals(driver.subtype))
 					continue;
@@ -527,7 +526,11 @@ public class CodeGenerator {
 
 				} else if ("MUX2".equals(driver.subtype)) {
 
-					line = String.format(strMUX2, nNameJ, net1, net3, net2, net3);
+					String netA = jNetNames.get(graph.getNet(driver, "a"));
+					String netB = jNetNames.get(graph.getNet(driver, "b"));
+					String netS = jNetNames.get(graph.getNet(driver, "s"));
+
+					line = String.format(strMUX2, nNameJ, netA, netS, netB, netS);
 
 				} else if ("X2H".equals(driver.subtype)) {
 

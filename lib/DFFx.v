@@ -12,6 +12,7 @@ module DFFx (CK, RS, D, Q, T, M, V, rD, rV);
 
 	DFF d (.CK(CK), .RS(RS), .D(inpD), .Q(Q)); // always
 	DFF m (.CK(CK), .RS(RS), .D(inpM), .Q(isM)); // when M
+	DFF t (.CK(CK), .RS(RS), .D(inpT), .Q(isT)); // when T
 
 	// note: M -> V
 
@@ -19,6 +20,6 @@ module DFFx (CK, RS, D, Q, T, M, V, rD, rV);
 
 	AND and1 (.y(inpM), .a(isV), .b(rV)); // when M
 
-	XOR xor1 (.y(isT), .a(inpD), .b(Q)); // when T
+	XOR xor1 (.y(inpT), .a(inpD), .b(Q)); // when T
 
 endmodule
