@@ -973,6 +973,10 @@ public class ConsoleHandler {
 
 		assertDesignLoaded();
 
+		NetlistGraph current2 = new NetlistGraph(current);
+
+		(new Transformer(current2, defsFF)).expandDFFx();
+
 		String invokeArgs = line.hasOption("nocounter") ? "" : "gen-counter-example";
 
 		String templateResourceFile = "template1.j";
@@ -993,7 +997,7 @@ public class ConsoleHandler {
 
 		String templateCode = loadResourceString(templateResourceFile);
 
-		CodeGenerator cg = new CodeGenerator(current, assumptions, assertions);
+		CodeGenerator cg = new CodeGenerator(current2, assumptions, assertions);
 
 		ArrayList<String> lines = cg.generate(templateCode);
 
@@ -1155,7 +1159,15 @@ public class ConsoleHandler {
 		assertions.add(new Property(pStr));
 	}
 
-	@Command(description = "print a list of design properties (assumptions and assertions)")
+	//@formatter:off
+	@Command(
+		description = "print a list of design properties",
+		help = {
+			"Usage:",
+			"  props",
+		}
+	)
+	//@formatter:on
 	public void props(String args[]) throws Exception {
 
 		if (assumptions.size() + assertions.size() > 0) {
@@ -1173,101 +1185,31 @@ public class ConsoleHandler {
 			out.println("no properties defined");
 
 		}
-
 	}
 
-	@Command
-	public void test1() {
+	//@formatter:off
+	@Command(
+		description = "substitute cells with designs",
+		help = {
+			"Usage:",
+			"  report -r",
+			"  report <cell_type>",
+		}
+	)
+	//@formatter:on
+	public void expand(String args[]) throws Exception {
 
-		for (Vertex v : current.getInputs())
-			System.out.println(v);
+		String cmd = args.length > 0 ? args[0] : "";
 
-	}
+		if ("DFFx".equals(cmd)) {
 
-	@Command
-	public void expand() throws Exception {
+			(new Transformer(current, defsFF)).expandDFFx();
 
-		for (Vertex d : current.getModulesByType("DFFx")) {
-
-			boolean V = current.getNet(d, "V") != null;
-			boolean M = current.getNet(d, "M") != null;
-			boolean T = current.getNet(d, "T") != null;
-
-			NetlistGraph mod = getVariationDFFx(designs.get("DFFx"), V, M, T);
-
-			current.expand(d, mod);
+			return;
 
 		}
 
-	}
-
-	private NetlistGraph getVariationDFFx(NetlistGraph DFFx, boolean V, boolean M, boolean T) throws Exception {
-
-		if (M & !V)
-			throw new Exception("invalid model specification: any variation with port M must have port V");
-
-		NetlistGraph model = new NetlistGraph(DFFx);
-
-		if (!V) {
-
-			// connect D vertex to flip-flop D directly
-
-			Vertex D = model.getVertex("D");
-			Vertex d = model.getVertex("d");
-			Vertex inpD = model.getVertex("inpD");
-			Vertex xor1 = model.getVertex("xor1");
-
-			model.removeConnection(inpD, d);
-			model.removeConnection(inpD, xor1);
-
-			model.addConnection(D, d, "D");
-			model.addConnection(D, xor1, "a");
-
-		}
-
-		HashMap<String, Boolean> include = new HashMap<String, Boolean>();
-
-		include.put("tiex1", M || T);
-		include.put("mux1", V);
-		include.put("mux2", M);
-		include.put("mux3", T);
-		include.put("d", true);
-		include.put("m", M);
-		include.put("x2h", V);
-		include.put("and1", M);
-		include.put("xor1", T);
-		include.put("t", T);
-
-		include.put("V", V);
-		include.put("rD", V);
-		include.put("rV", M);
-
-		for (Entry<String, Boolean> entry : include.entrySet()) {
-
-			if (!entry.getValue()) {
-
-				Vertex v = model.getVertex(entry.getKey());
-
-				model.removeVertex(v);
-
-			}
-
-		}
-
-		// remove undriven non-input nets
-
-		HashSet<Vertex> nonIO = model.getNets();
-
-		nonIO.removeAll(model.getInputs());
-
-		for (Vertex n : nonIO) {
-
-			if (model.getSources(n).size() < 1)
-				model.removeVertex(n);
-
-		}
-
-		return model;
+		// TODO: implement -r
 
 	}
 

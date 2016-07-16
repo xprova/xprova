@@ -1,13 +1,10 @@
 library load lib/xprova.v
 
-read lib/DFFx.v
 read examples/simple_1.v
 
 :s examples/flopdefs.xp
 
 augment
-
-expand
 
 write output/simple_1_aug.v
 

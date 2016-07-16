@@ -2,11 +2,14 @@ package net.xprova.xprova;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import net.xprova.graph.Graph;
+import net.xprova.netlist.GateLibrary;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
+import net.xprova.verilogparser.VerilogParser;
 
 public class Transformer {
 
@@ -452,6 +455,100 @@ public class Transformer {
 			String part2 = net.substring(k, k2 + 1);
 
 			return part1 + postfix + part2;
+
+		}
+
+	}
+
+	private NetlistGraph getVariationDFFx(NetlistGraph DFFx, boolean V, boolean M, boolean T) throws Exception {
+
+		if (M & !V)
+			throw new Exception("invalid model specification: any variation with port M must have port V");
+
+		NetlistGraph model = new NetlistGraph(DFFx);
+
+		if (!V) {
+
+			// connect D vertex to flip-flop D directly
+
+			Vertex D = model.getVertex("D");
+			Vertex d = model.getVertex("d");
+			Vertex inpD = model.getVertex("inpD");
+			Vertex xor1 = model.getVertex("xor1");
+
+			model.removeConnection(inpD, d);
+			model.removeConnection(inpD, xor1);
+
+			model.addConnection(D, d, "D");
+			model.addConnection(D, xor1, "a");
+
+		}
+
+		HashMap<String, Boolean> include = new HashMap<String, Boolean>();
+
+		include.put("tiex1", M || T);
+		include.put("mux1", V);
+		include.put("mux2", M);
+		include.put("mux3", T);
+		include.put("d", true);
+		include.put("m", M);
+		include.put("x2h", V);
+		include.put("and1", M);
+		include.put("xor1", T);
+		include.put("t", T);
+
+		include.put("V", V);
+		include.put("rD", V);
+		include.put("rV", M);
+
+		for (Entry<String, Boolean> entry : include.entrySet()) {
+
+			if (!entry.getValue()) {
+
+				Vertex v = model.getVertex(entry.getKey());
+
+				model.removeVertex(v);
+
+			}
+
+		}
+
+		// remove undriven non-input nets
+
+		HashSet<Vertex> nonIO = model.getNets();
+
+		nonIO.removeAll(model.getInputs());
+
+		for (Vertex n : nonIO) {
+
+			if (model.getSources(n).size() < 1)
+				model.removeVertex(n);
+
+		}
+
+		return model;
+
+	}
+
+	public void expandDFFx() throws Exception {
+
+		String xprovaLibFile = "lib/xprova.v";
+
+		String DFFxFile = "lib/DFFx.v";
+
+		GateLibrary xprovaLib = new GateLibrary(VerilogParser.parseFile(xprovaLibFile));
+
+		NetlistGraph DFFx = new NetlistGraph(VerilogParser.parseFile(DFFxFile, xprovaLib).get(0));
+
+		for (Vertex d : graph.getModulesByType("DFFx")) {
+
+			boolean V = graph.getNet(d, "V") != null;
+			boolean M = graph.getNet(d, "M") != null;
+			boolean T = graph.getNet(d, "T") != null;
+
+			NetlistGraph mod = getVariationDFFx(DFFx, V, M, T);
+
+			graph.expand(d, mod);
 
 		}
 
