@@ -24,7 +24,7 @@ public class CodeSimulator {
 
 		boolean generateCounterExample = true;
 
-		boolean runGtkwave = true;
+		boolean runGtkwave = false;
 
 		File vcdFile = null;
 
@@ -32,13 +32,13 @@ public class CodeSimulator {
 
 			String a = args[i];
 
-			if ("-no-counter".equals(a))
+			if ("--no-counter".equals(a))
 				generateCounterExample = false;
 
-			if ("-vcd".equals(a))
+			if ("--vcd".equals(a))
 				vcdFile = new File(args[i + 1]);
 
-			if ("-gtkwave".equals(a))
+			if ("--gtkwave".equals(a))
 				runGtkwave = true;
 
 		}
@@ -590,7 +590,7 @@ public class CodeSimulator {
 		vcdLines.add("$dumpvars");
 
 		for (int i = 0; i < sigNames.size(); i++)
-			vcdLines.add(String.format("x%s\n", (char) ('a' + i)));
+			vcdLines.add(String.format("x%s", (char) ('a' + i)));
 
 		vcdLines.add("$end");
 
@@ -674,30 +674,6 @@ public class CodeSimulator {
 				e.printStackTrace();
 
 				throw new Exception("unable to run gtkwave, make sure it is installed and setup in PATH");
-
-			}
-
-			try {
-
-				proc.waitFor();
-
-			} catch (InterruptedException e) {
-
-				throw new Exception("error while waiting for gtkwave to terminate");
-			}
-
-			if (proc.exitValue() != 0) {
-
-				BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
-				String s = null;
-
-				System.out.println("gtkwave stderr:");
-
-				while ((s = stdError.readLine()) != null)
-					System.out.println(s);
-
-				throw new Exception("gtkwave terminated with exit code = " + proc.exitValue());
 
 			}
 

@@ -939,31 +939,37 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(description = "attempt to prove assertions")
+	//@formatter:off
+	@Command(
+		description = "run formal verification",
+		help = {
+			"Usage:",
+			"  prove [--vcd <file>] [--gtkwave]",
+			"",
+			"Options:",
+			"  -v --vcd <file>  export counter-example to vcd file",
+			"  -g --gtkwave     open counter-example using gtkwave",
+		}
+	)
+	//@formatter:on
 	public void prove(String args[]) throws Exception {
 
-		// options:
-		// --printcode
-		// --norun
-
 		// parse command input
-
-		Option optPrintCode = Option.builder().desc("print generated code").required(false).longOpt("printcode")
-				.build();
-
-		Option optNoRun = Option.builder().desc("do not execute generated code").required(false).longOpt("norun")
-				.build();
 
 		Option optNoCounter = Option.builder().desc("do not print counter-example (if found)").required(false)
 				.longOpt("nocounter").build();
 
+		Option optVcd = Option.builder("v").longOpt("vcd").hasArg().build();
+
+		Option optGtkwave = Option.builder("g").longOpt("gtkwave").build();
+
 		Options options = new Options();
 
-		options.addOption(optPrintCode);
-
-		options.addOption(optNoRun);
-
 		options.addOption(optNoCounter);
+
+		options.addOption(optVcd);
+
+		options.addOption(optGtkwave);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -977,7 +983,9 @@ public class ConsoleHandler {
 
 		(new Transformer(current2, defsFF)).expandDFFx();
 
-		String invokeArgs = line.hasOption("nocounter") ? "" : "gen-counter-example";
+		String gtkwaveArg = line.hasOption("g") ? "--gtkwave" : "";
+
+		String vcdArg = line.hasOption("vcd") ? "--vcd " + line.getOptionValue("vcd") : "";
 
 		String templateResourceFile = "template1.j";
 
@@ -991,7 +999,7 @@ public class ConsoleHandler {
 
 		String cmd = "javac " + javaFile.getAbsolutePath();
 
-		String cmd2 = String.format("java -classpath %s %s %s", tempDir.getAbsolutePath(), classFileStr, invokeArgs);
+		String cmd2 = String.format("java -classpath %s %s %s %s", tempDir.getAbsolutePath(), classFileStr, gtkwaveArg, vcdArg);
 
 		// generate code
 
@@ -1000,13 +1008,6 @@ public class ConsoleHandler {
 		CodeGenerator cg = new CodeGenerator(current2, assumptions, assertions);
 
 		ArrayList<String> lines = cg.generate(templateCode);
-
-		if (line.hasOption("printcode")) {
-
-			for (String l : lines)
-				out.println(l);
-
-		}
 
 		if (!line.hasOption("norun")) {
 
