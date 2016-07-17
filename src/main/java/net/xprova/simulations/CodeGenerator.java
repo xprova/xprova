@@ -97,11 +97,45 @@ public class CodeGenerator {
 
 		Vertex netQ = graph.getVertex(netName);
 
-		Vertex driver = graph.getSourceModule(netQ);
+		Vertex clk = null, reset = null;
 
-		Vertex clk = graph.getNet(driver, "CK");
+		if (graph.getInputs().contains(netQ)) {
 
-		Vertex reset = graph.getNet(driver, "RS");
+			// TODO: fix ugly hack used here
+
+			// when adding a chain of flip-flops to hold the past values
+			// of an input net, the clk and reset pins of this net's virtual
+			// driver must be specified by the user (i.e. the user must specifiy
+			// the clock to which this input net is timed)
+
+			// atm the code below will extract a random DFF instance and use
+			// its CK and RS connections. This should work fine for the time
+			// being
+			// but will need to be revised when support for simulating multiple
+			// clocks is implemented
+
+			Vertex flop = graph.getModulesByType("DFF").iterator().next();
+
+			clk = graph.getNet(flop, "CK");
+
+			reset = graph.getNet(flop, "RS");
+
+		} else {
+
+			Vertex driver = graph.getSourceModule(netQ);
+
+			clk = graph.getNet(driver, "CK");
+
+			reset = graph.getNet(driver, "RS");
+
+			if (clk == null || reset == null) {
+
+				throw new Exception(String.format("could not determine clk and reset pins for driver of net <%s>",
+						netQ.toString()));
+
+			}
+
+		}
 
 		for (int i = 1; i <= n; i++) {
 
