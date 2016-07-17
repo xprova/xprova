@@ -1,10 +1,10 @@
-module top (clk, rst, ena, count);
+module counter (clk, rst, ena, count);
 
 	input clk, rst, ena;
 
-	output [5:0] count;
+	output [7:0] count;
 
-	reg [5:0] count;
+	reg [7:0] count;
 
 	always @(posedge clk or posedge rst) begin
 

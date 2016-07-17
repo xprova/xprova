@@ -1,30 +1,9 @@
-#assert ~(count[1] & @2 count[2] & @3 count[3])
+library load lib/xprova.v
 
-# assert ~(count[1] ##4 ~count[1])
+synth examples/counter.v output/synth.v
 
-assert ena |=> ($stable(count[4]))
+read output/synth.v
 
-props
-
-library load examples/gate_library_mini.v
-
-synth examples/assertion-test6.v output/synth.v
-
-read -m top output/synth.v
-
-write output/synth_renamed.v
+assert ~count[5]
 
 prove
-#--nocounter
-
-:quit
-
-dot --type=fg --ignore-edges=SB,RB,CK --ignore-vertices=resetn,reset,clk1,clk2,clk,rst output/netlist.dot
-
-:! dot -Tpdf output/netlist.dot -o output/netlist.pdf
-
-flop define QDFFRSBX1 CK RS D
-flop define DFF CK RS D
-flop define DFFx CK RS D
-
-augment

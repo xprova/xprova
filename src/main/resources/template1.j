@@ -1,7 +1,5 @@
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +22,7 @@ public class CodeSimulator {
 
 		boolean generateCounterExample = true;
 
-		boolean runGtkwave = false;
+		boolean runGtkwave = true;
 
 		File vcdFile = null;
 
@@ -66,7 +64,6 @@ public class CodeSimulator {
 	public int getResetState() {
 
 		// return {RESET_STATE};
-		return 0x0; // {EXPANDED}
 
 	}
 
@@ -76,7 +73,6 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// final int STATE_BUF_SIZE = 1 << {STATE_BIT_COUNT};
-		final int STATE_BUF_SIZE = 1 << 9; // {EXPANDED}
 		//@formatter:on
 
 		final int DISCOVERED_BUF_SIZE = 100000;
@@ -89,36 +85,15 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// int stateBitCount = {STATE_BIT_COUNT};
-		int stateBitCount = 9; // {EXPANDED}
 		// int inputBitCount = {INPUT_BIT_COUNT};
-		int inputBitCount = 4; // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
 		// int {STATE_BIT} = -(initial >> {STATE_BIT_INDEX} & 1);
-		int n_1_x_19 = -(initial >> 0 & 1); // {EXPANDED}
-		int n_2_x_10 = -(initial >> 1 & 1); // {EXPANDED}
-		int nff2_isT_25 = -(initial >> 2 & 1); // {EXPANDED}
-		int nff3_isM_13 = -(initial >> 3 & 1); // {EXPANDED}
-		int nn1_17 = -(initial >> 4 & 1); // {EXPANDED}
-		int nn2_14 = -(initial >> 5 & 1); // {EXPANDED}
-		int nn3_23 = -(initial >> 6 & 1); // {EXPANDED}
-		int nn4_18 = -(initial >> 7 & 1); // {EXPANDED}
-		int ny_16 = -(initial >> 8 & 1); // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
 		// int {NON_STATE_BIT};
-		int nff2_inpT_11; // {EXPANDED}
-		int nff2_x_20; // {EXPANDED}
-		int nff3_inpD_1; // {EXPANDED}
-		int nff3_inpM_9; // {EXPANDED}
-		int nff3_isV_4; // {EXPANDED}
-		int nff3_x_6; // {EXPANDED}
-		int nff4_inpD_5; // {EXPANDED}
-		int nff4_isV_12; // {EXPANDED}
-		int nn2_dup1_24; // {EXPANDED}
-		int nn3_dup1_3; // {EXPANDED}
 		//@formatter:on
 
 		int[] toVisitArr = new int[1];
@@ -175,15 +150,6 @@ public class CodeSimulator {
 
 				//@formatter:off
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
-				n_1_x_19 = -(state >> 0 & 1); // {EXPANDED}
-				n_2_x_10 = -(state >> 1 & 1); // {EXPANDED}
-				nff2_isT_25 = -(state >> 2 & 1); // {EXPANDED}
-				nff3_isM_13 = -(state >> 3 & 1); // {EXPANDED}
-				nn1_17 = -(state >> 4 & 1); // {EXPANDED}
-				nn2_14 = -(state >> 5 & 1); // {EXPANDED}
-				nn3_23 = -(state >> 6 & 1); // {EXPANDED}
-				nn4_18 = -(state >> 7 & 1); // {EXPANDED}
-				ny_16 = -(state >> 8 & 1); // {EXPANDED}
 				//@formatter:on
 
 				int inputPermutes = 1 << (inputBitCount);
@@ -192,39 +158,16 @@ public class CodeSimulator {
 
 					//@formatter:off
 					// int {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
-					int nr_0__15 = -(in >> 0 & 1); // {EXPANDED}
-					int nr_1__22 = -(in >> 1 & 1); // {EXPANDED}
-					int nr_2__0 = -(in >> 2 & 1); // {EXPANDED}
-					int nx_7 = -(in >> 3 & 1); // {EXPANDED}
 					//@formatter:on
 
 					//@formatter:off
 					// {COMB_ASSIGN}
-					nff2_x_20 = 0xf0f0f0f0; // {EXPANDED}
-					nff3_x_6 = 0xf0f0f0f0; // {EXPANDED}
-					nn3_dup1_3 = (nn3_23 & ~nff3_isM_13) | (nff3_x_6 & nff3_isM_13); // {EXPANDED}
-					nn2_dup1_24 = (nn2_14 & ~nff2_isT_25) | (nff2_x_20 & nff2_isT_25); // {EXPANDED}
-					nff2_inpT_11 = (nn2_14 ^ nn1_17); // {EXPANDED}
-					nff4_isV_12 = ((nn3_dup1_3 != 0) & (nn3_dup1_3 != -1)) ? -1 : 0 ; // {EXPANDED}
-					nff3_isV_4 = ((nn2_dup1_24 != 0) & (nn2_dup1_24 != -1)) ? -1 : 0 ; // {EXPANDED}
-					nff4_inpD_5 = (nn3_23 & ~nff4_isV_12) | (nr_2__0 & nff4_isV_12); // {EXPANDED}
-					nff3_inpD_1 = (nn2_14 & ~nff3_isV_4) | (nr_1__22 & nff3_isV_4); // {EXPANDED}
-					nff3_inpM_9 = nff3_isV_4 & nr_0__15; // {EXPANDED}
 					//@formatter:on
 
 					int nxState = 0;
 
 					//@formatter:off
 					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
-					nxState |= nx_7 & (1 << 0); // {EXPANDED}
-					nxState |= n_1_x_19 & (1 << 1); // {EXPANDED}
-					nxState |= nff2_inpT_11 & (1 << 2); // {EXPANDED}
-					nxState |= nff3_inpM_9 & (1 << 3); // {EXPANDED}
-					nxState |= nx_7 & (1 << 4); // {EXPANDED}
-					nxState |= nn1_17 & (1 << 5); // {EXPANDED}
-					nxState |= nff3_inpD_1 & (1 << 6); // {EXPANDED}
-					nxState |= nff4_inpD_5 & (1 << 7); // {EXPANDED}
-					nxState |= nn4_18 & (1 << 8); // {EXPANDED}
 					//@formatter:on
 
 					if (parentState[nxState] == UNDISCOVERED) {
@@ -244,7 +187,6 @@ public class CodeSimulator {
 
 					// all_assumptions &= {ASSUMPTION};
 					// all_assertions &= {ASSERTION};
-					all_assertions &= (~n_2_x_10 | (~ny_16)); // {EXPANDED}
 
 					if (all_assumptions == -1 && all_assertions == 0) {
 
@@ -317,33 +259,10 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// result.add("{STATE_BIT_ORG}");
-		result.add("@1 x"); // {EXPANDED}
-		result.add("@2 x"); // {EXPANDED}
-		result.add("ff2_isT"); // {EXPANDED}
-		result.add("ff3_isM"); // {EXPANDED}
-		result.add("n1"); // {EXPANDED}
-		result.add("n2"); // {EXPANDED}
-		result.add("n3"); // {EXPANDED}
-		result.add("n4"); // {EXPANDED}
-		result.add("y"); // {EXPANDED}
 
 		// result.add("{INPUT_BIT_ORG}");
-		result.add("r[0]"); // {EXPANDED}
-		result.add("r[1]"); // {EXPANDED}
-		result.add("r[2]"); // {EXPANDED}
-		result.add("x"); // {EXPANDED}
 
 		// result.add("{NON_STATE_BIT_ORG}");
-		result.add("ff2_inpT"); // {EXPANDED}
-		result.add("ff2_x"); // {EXPANDED}
-		result.add("ff3_inpD"); // {EXPANDED}
-		result.add("ff3_inpM"); // {EXPANDED}
-		result.add("ff3_isV"); // {EXPANDED}
-		result.add("ff3_x"); // {EXPANDED}
-		result.add("ff4_inpD"); // {EXPANDED}
-		result.add("ff4_isV"); // {EXPANDED}
-		result.add("n2_dup1"); // {EXPANDED}
-		result.add("n3_dup1"); // {EXPANDED}
 		//@formatter:on
 
 		return result;
@@ -353,7 +272,6 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// return {STATE_BIT_COUNT};
-		return 9; // {EXPANDED}
 		//@formatter:on
 	}
 
@@ -361,7 +279,6 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// return {INPUT_BIT_COUNT};
-		return 4; // {EXPANDED}
 		//@formatter:on
 	}
 
@@ -436,80 +353,25 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// int[] {STATE_BIT} = new int[cycles];
-		int[] n_1_x_19 = new int[cycles]; // {EXPANDED}
-		int[] n_2_x_10 = new int[cycles]; // {EXPANDED}
-		int[] nff2_isT_25 = new int[cycles]; // {EXPANDED}
-		int[] nff3_isM_13 = new int[cycles]; // {EXPANDED}
-		int[] nn1_17 = new int[cycles]; // {EXPANDED}
-		int[] nn2_14 = new int[cycles]; // {EXPANDED}
-		int[] nn3_23 = new int[cycles]; // {EXPANDED}
-		int[] nn4_18 = new int[cycles]; // {EXPANDED}
-		int[] ny_16 = new int[cycles]; // {EXPANDED}
 
 		// int[] {INPUT_BIT} = new int[cycles];
-		int[] nr_0__15 = new int[cycles]; // {EXPANDED}
-		int[] nr_1__22 = new int[cycles]; // {EXPANDED}
-		int[] nr_2__0 = new int[cycles]; // {EXPANDED}
-		int[] nx_7 = new int[cycles]; // {EXPANDED}
 
 		// {STATE_BIT}[0] = -(initial >> {STATE_BIT_INDEX} & 1);
-		n_1_x_19[0] = -(initial >> 0 & 1); // {EXPANDED}
-		n_2_x_10[0] = -(initial >> 1 & 1); // {EXPANDED}
-		nff2_isT_25[0] = -(initial >> 2 & 1); // {EXPANDED}
-		nff3_isM_13[0] = -(initial >> 3 & 1); // {EXPANDED}
-		nn1_17[0] = -(initial >> 4 & 1); // {EXPANDED}
-		nn2_14[0] = -(initial >> 5 & 1); // {EXPANDED}
-		nn3_23[0] = -(initial >> 6 & 1); // {EXPANDED}
-		nn4_18[0] = -(initial >> 7 & 1); // {EXPANDED}
-		ny_16[0] = -(initial >> 8 & 1); // {EXPANDED}
 
 		// int[] {NON_STATE_BIT} = new int[cycles];
-		int[] nff2_inpT_11 = new int[cycles]; // {EXPANDED}
-		int[] nff2_x_20 = new int[cycles]; // {EXPANDED}
-		int[] nff3_inpD_1 = new int[cycles]; // {EXPANDED}
-		int[] nff3_inpM_9 = new int[cycles]; // {EXPANDED}
-		int[] nff3_isV_4 = new int[cycles]; // {EXPANDED}
-		int[] nff3_x_6 = new int[cycles]; // {EXPANDED}
-		int[] nff4_inpD_5 = new int[cycles]; // {EXPANDED}
-		int[] nff4_isV_12 = new int[cycles]; // {EXPANDED}
-		int[] nn2_dup1_24 = new int[cycles]; // {EXPANDED}
-		int[] nn3_dup1_3 = new int[cycles]; // {EXPANDED}
 		//@formatter:on
 
 		for (int i = 0; i < cycles; i++) {
 
 			//@formatter:off
 			// {INPUT_BIT}[i] = -(inputs[i] >> {INPUT_BIT_INDEX} & 1);
-			nr_0__15[i] = -(inputs[i] >> 0 & 1); // {EXPANDED}
-			nr_1__22[i] = -(inputs[i] >> 1 & 1); // {EXPANDED}
-			nr_2__0[i] = -(inputs[i] >> 2 & 1); // {EXPANDED}
-			nx_7[i] = -(inputs[i] >> 3 & 1); // {EXPANDED}
 
 			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
-			nff2_x_20[i] = 0xf0f0f0f0; // {EXPANDED}
-			nff3_x_6[i] = 0xf0f0f0f0; // {EXPANDED}
-			nn3_dup1_3[i] = (nn3_23[i] & ~nff3_isM_13[i]) | (nff3_x_6[i] & nff3_isM_13[i]); // {EXPANDED}
-			nn2_dup1_24[i] = (nn2_14[i] & ~nff2_isT_25[i]) | (nff2_x_20[i] & nff2_isT_25[i]); // {EXPANDED}
-			nff2_inpT_11[i] = (nn2_14[i] ^ nn1_17[i]); // {EXPANDED}
-			nff4_isV_12[i] = ((nn3_dup1_3[i] != 0) & (nn3_dup1_3[i] != -1)) ? -1 : 0 ; // {EXPANDED}
-			nff3_isV_4[i] = ((nn2_dup1_24[i] != 0) & (nn2_dup1_24[i] != -1)) ? -1 : 0 ; // {EXPANDED}
-			nff4_inpD_5[i] = (nn3_23[i] & ~nff4_isV_12[i]) | (nr_2__0[i] & nff4_isV_12[i]); // {EXPANDED}
-			nff3_inpD_1[i] = (nn2_14[i] & ~nff3_isV_4[i]) | (nr_1__22[i] & nff3_isV_4[i]); // {EXPANDED}
-			nff3_inpM_9[i] = nff3_isV_4[i] & nr_0__15[i]; // {EXPANDED}
 
 			if (i < cycles-1) {
 
 				//@formatter:off
 				// {STATE_BIT}[i+1] |= {NEXT_STATE_BIT}[i];
-				n_1_x_19[i+1] |= nx_7[i]; // {EXPANDED}
-				n_2_x_10[i+1] |= n_1_x_19[i]; // {EXPANDED}
-				nff2_isT_25[i+1] |= nff2_inpT_11[i]; // {EXPANDED}
-				nff3_isM_13[i+1] |= nff3_inpM_9[i]; // {EXPANDED}
-				nn1_17[i+1] |= nx_7[i]; // {EXPANDED}
-				nn2_14[i+1] |= nn1_17[i]; // {EXPANDED}
-				nn3_23[i+1] |= nff3_inpD_1[i]; // {EXPANDED}
-				nn4_18[i+1] |= nff4_inpD_5[i]; // {EXPANDED}
-				ny_16[i+1] |= nn4_18[i]; // {EXPANDED}
 				//@formatter:on
 
 			}
@@ -520,33 +382,10 @@ public class CodeSimulator {
 
 		//@formatter:off
 		// waveforms.add({STATE_BIT});
-		waveforms.add(n_1_x_19); // {EXPANDED}
-		waveforms.add(n_2_x_10); // {EXPANDED}
-		waveforms.add(nff2_isT_25); // {EXPANDED}
-		waveforms.add(nff3_isM_13); // {EXPANDED}
-		waveforms.add(nn1_17); // {EXPANDED}
-		waveforms.add(nn2_14); // {EXPANDED}
-		waveforms.add(nn3_23); // {EXPANDED}
-		waveforms.add(nn4_18); // {EXPANDED}
-		waveforms.add(ny_16); // {EXPANDED}
 
 		// waveforms.add({INPUT_BIT});
-		waveforms.add(nr_0__15); // {EXPANDED}
-		waveforms.add(nr_1__22); // {EXPANDED}
-		waveforms.add(nr_2__0); // {EXPANDED}
-		waveforms.add(nx_7); // {EXPANDED}
 
 		// waveforms.add({NON_STATE_BIT});
-		waveforms.add(nff2_inpT_11); // {EXPANDED}
-		waveforms.add(nff2_x_20); // {EXPANDED}
-		waveforms.add(nff3_inpD_1); // {EXPANDED}
-		waveforms.add(nff3_inpM_9); // {EXPANDED}
-		waveforms.add(nff3_isV_4); // {EXPANDED}
-		waveforms.add(nff3_x_6); // {EXPANDED}
-		waveforms.add(nff4_inpD_5); // {EXPANDED}
-		waveforms.add(nff4_isV_12); // {EXPANDED}
-		waveforms.add(nn2_dup1_24); // {EXPANDED}
-		waveforms.add(nn3_dup1_3); // {EXPANDED}
 		//@formatter:on
 
 		return waveforms;
@@ -570,7 +409,15 @@ public class CodeSimulator {
 
 		for (int i = 0; i < sigNames.size(); i++) {
 
-			sigNames.set(i, sigNames.get(i).replace(" ", "-"));
+			String s = sigNames.get(i);
+
+			if (s.startsWith("@"))
+				s = "prop-" + s.replace(" ", "-");
+
+			if (s.startsWith("\\"))
+				s = s.substring(1);
+
+			sigNames.set(i, s);
 
 		}
 
@@ -608,7 +455,16 @@ public class CodeSimulator {
 
 				if (newVal != oldVal) {
 
-					vcdLines.add(String.format("%d%s", newVal == -1 ? 1 : 0, (char) ('a' + i)));
+					String newValStr;
+
+					if (newVal == -1)
+						newValStr = "1";
+					else if (newVal == 0)
+						newValStr = "0";
+					else
+						newValStr = "x";
+
+					vcdLines.add(String.format("%s%s", newValStr, (char) ('a' + i)));
 
 				}
 
@@ -636,10 +492,31 @@ public class CodeSimulator {
 
 			// prepare gtkwave tcl script content
 
+			// gtkwave has an issue with adding array bits
+			// as a walk-around add the array name instead
+			// of the individual bits
+
 			tclLines.add("set sigList [list]");
 
-			for (String s : sigNames)
+			for (String s : sigNames) {
+
+				if (!s.startsWith("\\") && s.contains("[")) {
+
+					if (s.contains("[0]")) {
+
+						s = s.replaceAll("\\[\\d+\\]", "");
+
+					} else {
+
+						continue;
+
+					}
+
+				}
+
+
 				tclLines.add(String.format("lappend sigList {%s}", s));
+			}
 
 			tclLines.add("set num_added [ gtkwave::addSignalsFromList $sigList ]");
 
@@ -663,11 +540,9 @@ public class CodeSimulator {
 
 			final Runtime rt = Runtime.getRuntime();
 
-			Process proc;
-
 			try {
 
-				proc = rt.exec(cmd);
+				rt.exec(cmd);
 
 			} catch (IOException e) {
 
