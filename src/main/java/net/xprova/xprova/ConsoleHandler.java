@@ -1057,17 +1057,19 @@ public class ConsoleHandler {
 
 			Process proc2 = rt.exec(cmd2);
 
-			proc.waitFor();
-
 			BufferedReader stdInput2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
 
 			BufferedReader stdError2 = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
 
-			while ((s = stdError2.readLine()) != null)
-				out.println(s);
+			while (proc2.isAlive()) {
 
-			while ((s = stdInput2.readLine()) != null)
-				out.println(s);
+				while ((s = stdInput2.readLine()) != null)
+					out.println(s);
+
+				while ((s = stdError2.readLine()) != null)
+					out.println(s);
+
+			}
 
 		}
 

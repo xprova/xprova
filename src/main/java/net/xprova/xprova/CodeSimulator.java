@@ -1,7 +1,9 @@
 package net.xprova.xprova;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,18 +16,52 @@ public class CodeSimulator {
 
 	public static void main(String args[]) throws Exception {
 
+		// usage:
+		// codesimulator [-no-counter]
+		// codesimulator [-vcd <file>] [-gtkwave]
+
 		CodeSimulator sim1 = new CodeSimulator();
 
 		int initial = sim1.getResetState();
 
 		boolean generateCounterExample = true;
 
-		System.out.println(generateCounterExample);
+		boolean runGtkwave = true;
+
+		File vcdFile = null;
+
+		for (int i = 0; i < args.length; i++) {
+
+			String a = args[i];
+
+			if ("-no-counter".equals(a))
+				generateCounterExample = false;
+
+			if ("-vcd".equals(a))
+				vcdFile = new File(args[i + 1]);
+
+			if ("-gtkwave".equals(a))
+				runGtkwave = true;
+
+		}
+
+		if (runGtkwave && vcdFile == null) {
+
+			File tempDir = new File(System.getProperty("java.io.tmpdir"));
+
+			vcdFile = new File(tempDir, "counter-example.vcd");
+		}
+
+		if (!generateCounterExample && (vcdFile != null)) {
+
+			throw new Exception("Command line argument -no-counter is incompatible with -vcd and -gtkwave");
+
+		}
 
 		int[] counterExample = sim1.exploreSpace(initial);
 
 		if (counterExample != null && generateCounterExample)
-			sim1.simulate(initial, counterExample);
+			sim1.simulate(initial, counterExample, vcdFile, runGtkwave);
 
 	}
 
@@ -331,7 +367,7 @@ public class CodeSimulator {
 		//@formatter:on
 	}
 
-	public void simulate(int initial, int[] inputs) throws FileNotFoundException {
+	public void simulate(int initial, int[] inputs, File vcdFile, boolean runGtkwave) throws Exception {
 
 		ArrayList<String> sigNames = getSignalNames();
 
@@ -384,7 +420,15 @@ public class CodeSimulator {
 
 		}
 
-		generateVCD(sigNames, waveforms);
+		System.out.println();
+
+		System.out.flush();
+
+		if (vcdFile != null) {
+
+			generateVCD(sigNames, waveforms, vcdFile, runGtkwave);
+
+		}
 
 	}
 
@@ -517,35 +561,46 @@ public class CodeSimulator {
 		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
 	}
 
-	private void generateVCD(ArrayList<String> sigNames, ArrayList<int[]> waveforms) throws FileNotFoundException {
+	private void generateVCD(ArrayList<String> sigNames, ArrayList<int[]> waveforms, File vcdFile, boolean runGtkwave)
+			throws Exception {
 
-		ArrayList<String> lines = new ArrayList<String>();
+		ArrayList<String> vcdLines = new ArrayList<String>();
 
-		PrintStream out = System.out;
+		ArrayList<String> tclLines = new ArrayList<String>();
 
-		lines.add("$timescale 1ns $end");
+		// rename signals with spaces
 
-		lines.add("$scope module logic $end");
+		for (int i = 0; i < sigNames.size(); i++) {
+
+			sigNames.set(i, sigNames.get(i).replace(" ", "-"));
+
+		}
+
+		// prepare vcd file content
+
+		vcdLines.add("$timescale 1ns $end");
+
+		vcdLines.add("$scope module logic $end");
 
 		for (int i = 0; i < sigNames.size(); i++)
-			lines.add(String.format("$var wire 1 %s %s $end", (char) ('a' + i), sigNames.get(i).replace(" ", "-")));
+			vcdLines.add(String.format("$var wire 1 %s %s $end", (char) ('a' + i), sigNames.get(i)));
 
-		lines.add("$upscope $end");
+		vcdLines.add("$upscope $end");
 
-		lines.add("$enddefinitions $end");
+		vcdLines.add("$enddefinitions $end");
 
-		lines.add("$dumpvars");
+		vcdLines.add("$dumpvars");
 
 		for (int i = 0; i < sigNames.size(); i++)
-			lines.add(String.format("x%s\n", (char) ('a' + i)));
+			vcdLines.add(String.format("x%s\n", (char) ('a' + i)));
 
-		lines.add("$end");
+		vcdLines.add("$end");
 
 		int cycles = waveforms.get(0).length;
 
 		for (int j = 0; j < cycles; j++) {
 
-			lines.add(String.format("#%d", j));
+			vcdLines.add(String.format("#%d", j));
 
 			for (int i = 0; i < sigNames.size(); i++) {
 
@@ -555,7 +610,7 @@ public class CodeSimulator {
 
 				if (newVal != oldVal) {
 
-					lines.add(String.format("%d%s", newVal == -1 ? 1 : 0, (char) ('a' + i)));
+					vcdLines.add(String.format("%d%s", newVal == -1 ? 1 : 0, (char) ('a' + i)));
 
 				}
 
@@ -563,36 +618,92 @@ public class CodeSimulator {
 
 		}
 
-		lines.add(String.format("#%d", cycles));
-		lines.add(String.format("#%d", cycles + 1));
+		vcdLines.add(String.format("#%d", cycles));
+		vcdLines.add(String.format("#%d", cycles + 1));
 
-		// writing to file
+		// writing vcd file
 
-//		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
 
-		File tempDir = new File("C:\\gtkwave-3.3.71-bin-win32\\gtkwave\\bin");
+		System.out.println("Saving waveform data to " + vcdFile.getAbsolutePath() + " ...");
 
-		File javaFile = new File(tempDir, "counter.vcd");
+		PrintStream fout = new PrintStream(vcdFile);
 
-		out.println("Saving code to " + javaFile.getAbsolutePath() + " ...");
-
-		PrintStream fout = new PrintStream(javaFile);
-
-		for (String l : lines)
+		for (String l : vcdLines)
 			fout.println(l);
 
 		fout.close();
 
-		// write tcl script for gtkwave:
+		if (runGtkwave) {
 
-//		set clk48 [list]
-//		lappend clk48 "n1"
-//		lappend clk48 "n2"
-//		set num_added [ gtkwave::addSignalsFromList $clk48 ]
+			// prepare gtkwave tcl script content
 
-		//  ./gtkwave.exe counter.vcd -S test.tcl
+			tclLines.add("set sigList [list]");
 
+			for (String s : sigNames)
+				tclLines.add(String.format("lappend sigList {%s}", s));
 
+			tclLines.add("set num_added [ gtkwave::addSignalsFromList $sigList ]");
+
+			// write tcl script
+
+			File tclFile = new File(tempDir, "counter-example-show.tcl");
+
+			System.out.println("Saving gtkwave tcl script to " + tclFile.getAbsolutePath() + " ...");
+
+			PrintStream fout2 = new PrintStream(tclFile);
+
+			for (String l : tclLines)
+				fout2.println(l);
+
+			fout2.close();
+
+			// run gtkwave
+
+			String cmd = String.format("gtkwave \"%s\" -S \"%s\"", vcdFile.getAbsolutePath(),
+					tclFile.getAbsolutePath());
+
+			final Runtime rt = Runtime.getRuntime();
+
+			Process proc;
+
+			try {
+
+				proc = rt.exec(cmd);
+
+			} catch (IOException e) {
+
+				e.printStackTrace();
+
+				throw new Exception("unable to run gtkwave, make sure it is installed and setup in PATH");
+
+			}
+
+			try {
+
+				proc.waitFor();
+
+			} catch (InterruptedException e) {
+
+				throw new Exception("error while waiting for gtkwave to terminate");
+			}
+
+			if (proc.exitValue() != 0) {
+
+				BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+				String s = null;
+
+				System.out.println("gtkwave stderr:");
+
+				while ((s = stdError.readLine()) != null)
+					System.out.println(s);
+
+				throw new Exception("gtkwave terminated with exit code = " + proc.exitValue());
+
+			}
+
+		}
 
 	}
 
