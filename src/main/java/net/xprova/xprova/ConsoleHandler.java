@@ -124,10 +124,11 @@ public class ConsoleHandler {
 		description = "read verilog file (gate-level netlist)",
 		help = {
 			"Usage:",
-			"  read [-m module] <verilog_file>",
+			"  read [-m <module>] [-b] <verilog_file>",
 			"",
 			"Options:",
-			"  -m module : specify top module (first in file be default)"
+			"  -m <module>      specify top module (first in file be default)",
+			"  -b --behavioral  read behavioral design (synthesize in background using yosys)"
 		}
 	)
 	//@formatter:on
@@ -135,12 +136,15 @@ public class ConsoleHandler {
 
 		// parse command input
 
-		Option optModule = Option.builder("m").desc("name of module").hasArg().argName("MODULE").required(false)
-				.build();
+		Option optModule = Option.builder("m").hasArg().build();
+
+		Option optBehav = Option.builder("b").longOpt("behavioral").build();
 
 		Options options = new Options();
 
 		options.addOption(optModule);
+
+		options.addOption(optBehav);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -167,6 +171,22 @@ public class ConsoleHandler {
 
 		} else {
 
+			if (line.hasOption("b")) {
+
+				File tempDir = new File(System.getProperty("java.io.tmpdir"));
+
+				File tempFile = new File(tempDir, "synth.v");
+
+				String synthFile = tempFile.getAbsolutePath();
+
+				out.printf("Synthesizing behavioral design to %s ...\n", synthFile);
+
+				(new SynthesisEngine()).synthesis(verilogFile, synthFile, out);
+
+				verilogFile = synthFile;
+
+			}
+
 			ArrayList<Netlist> nls = VerilogParser.parseFile(verilogFile, lib);
 
 			HashMap<String, Netlist> newNLs = new HashMap<String, Netlist>();
@@ -183,7 +203,7 @@ public class ConsoleHandler {
 
 			for (Netlist nl : nls) {
 
-				out.printf("Parsing design <%s> in file <%s> ...\n", nl.name, verilogFile);
+				out.printf("Parsing design <%s> in file %s ...\n", nl.name, verilogFile);
 
 				newDesigns.add(new NetlistGraph(nl));
 
@@ -999,7 +1019,8 @@ public class ConsoleHandler {
 
 		String cmd = "javac " + javaFile.getAbsolutePath();
 
-		String cmd2 = String.format("java -classpath %s %s %s %s", tempDir.getAbsolutePath(), classFileStr, gtkwaveArg, vcdArg);
+		String cmd2 = String.format("java -classpath %s %s %s %s", tempDir.getAbsolutePath(), classFileStr, gtkwaveArg,
+				vcdArg);
 
 		// generate code
 

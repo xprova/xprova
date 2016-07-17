@@ -97,6 +97,12 @@ public class CodeGenerator {
 
 		Vertex netQ = graph.getVertex(netName);
 
+		Vertex driver = graph.getSourceModule(netQ);
+
+		Vertex clk = graph.getNet(driver, "CK");
+
+		Vertex reset = graph.getNet(driver, "RS");
+
 		for (int i = 1; i <= n; i++) {
 
 			String nextNextName = String.format(delayFormat, i, netName);
@@ -108,11 +114,8 @@ public class CodeGenerator {
 			graph.addVertex(nextFF);
 			graph.addVertex(nextQ);
 
-			Vertex clk = graph.getVertex("clk1");
-			Vertex rst = graph.getVertex("reset");
-
 			graph.addConnection(clk, nextFF, "CK");
-			graph.addConnection(rst, nextFF, "RS");
+			graph.addConnection(reset, nextFF, "RS");
 			graph.addConnection(netQ, nextFF, "D");
 			graph.addConnection(nextFF, nextQ, "Q");
 

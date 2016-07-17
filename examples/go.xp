@@ -1,9 +1,7 @@
 library load lib/xprova.v
 
-synth examples/counter.v output/synth.v
+read -b examples/counter.v
 
-read output/synth.v
-
-assert ~count[5]
+assert count[5] |=> count[4]
 
 prove
