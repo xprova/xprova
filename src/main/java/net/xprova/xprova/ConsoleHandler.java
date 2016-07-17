@@ -1185,30 +1185,73 @@ public class ConsoleHandler {
 
 	//@formatter:off
 	@Command(
-		description = "print a list of design properties",
+		description = "manage design properties",
 		help = {
 			"Usage:",
-			"  props",
+			"  props list",
+			"  props clear <num>"
 		}
 	)
 	//@formatter:on
 	public void props(String args[]) throws Exception {
 
-		if (assumptions.size() + assertions.size() > 0) {
+		String cmd = args.length > 0 ? args[0] : "";
 
-			out.println("Properties:");
+		if ("list".equals(cmd)) {
 
-			for (Property p : assumptions)
-				out.println("* assumption : " + p);
+			if (assumptions.size() + assertions.size() > 0) {
 
-			for (Property p : assertions)
-				out.println("* assertion  : " + p);
+				out.println("Properties:");
 
-		} else {
+				int i = 1;
 
-			out.println("no properties defined");
+				for (Property p : assumptions)
+					out.printf("  [%d] Assumption : %s\n", i++, p);
+
+				for (Property p : assertions)
+					out.printf("  [%d] Assertion  : %s\n", i++, p);
+
+			} else {
+
+				out.println("no properties defined");
+
+			}
+
+			return;
+
+		} else if ("clear".equals(cmd) && args.length > 1) {
+
+			if ("all".equals(args[1])) {
+
+				assumptions.clear();
+
+				assertions.clear();
+
+			} else {
+
+				int n = Integer.valueOf(args[1]);
+
+				if (n < 1 || n > (assumptions.size() + assertions.size())) {
+
+					throw new Exception("invalid property index");
+				}
+
+				if (n > assumptions.size()) {
+
+					assertions.remove(n - assumptions.size() - 1);
+
+				} else {
+
+					assumptions.remove(n - 1);
+
+				}
+
+			}
+
+			return;
 
 		}
+
 	}
 
 	//@formatter:off

@@ -22,7 +22,7 @@ public class CodeSimulator {
 
 		boolean generateCounterExample = true;
 
-		boolean runGtkwave = true;
+		boolean runGtkwave = false;
 
 		File vcdFile = null;
 

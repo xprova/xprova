@@ -4,4 +4,4 @@ read -b examples/counter.v
 
 assert count[5] |=> count[4]
 
-prove
+prove -g
