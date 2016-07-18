@@ -473,7 +473,6 @@ public class CodeSimulator {
 		}
 
 		vcdLines.add(String.format("#%d", cycles));
-		vcdLines.add(String.format("#%d", cycles + 1));
 
 		// writing vcd file
 
