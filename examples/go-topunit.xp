@@ -1,0 +1,7 @@
+library load lib/xprova.v
+
+#read examples/assign-test2.v
+
+read C:\cygwin64\tmp\synth.v
+
+#dot --pdf output/netlist.pdf
