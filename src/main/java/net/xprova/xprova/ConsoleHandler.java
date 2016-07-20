@@ -646,7 +646,7 @@ public class ConsoleHandler {
 			"Usage:",
 			"  design list",
 			"  design current <name>",
-			"  design rm <name>"
+			"  design remove (*|<name>)"
 		}
 	)
 	//@formatter:on
@@ -702,9 +702,21 @@ public class ConsoleHandler {
 
 				}
 
-			} else if (cmd.equals("rm") && args.length > 1) {
+			} else if (cmd.equals("remove") && args.length > 1) {
 
 				String designName = args[1];
+
+				if (designName.equals("*")) {
+
+					designs.clear();
+
+					current = null;
+
+					out.println("Removed all designs");
+
+					return;
+
+				}
 
 				NetlistGraph d = designs.get(designName);
 
