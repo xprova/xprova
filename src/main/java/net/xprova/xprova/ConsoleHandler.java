@@ -1182,7 +1182,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "synth" }, description = "synthesize behavioral verilog design using yosys")
+	//@formatter:off
+	@Command(
+		aliases = {"synth"},
+		description = "synthesize behavioral verilog design using yosys",
+		help = {
+			"Usage:",
+			"  synth <input> <output>"
+		}
+	)
+	//@formatter:on
 	public void synth(String args[]) throws Exception {
 
 		// TODO: implement the following switches
@@ -1197,7 +1206,15 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(description = "add an assumption for formal verification")
+	//@formatter:off
+	@Command(
+		description = "add an assumption for formal verification",
+		help = {
+			"Usage:",
+			"  assume <property>",
+		}
+	)
+	//@formatter:on
 	public void assume(String args[]) throws Exception {
 
 		String pStr = String.join(" ", args);
@@ -1205,7 +1222,16 @@ public class ConsoleHandler {
 		assumptions.add(new Property(pStr));
 	}
 
-	@Command(aliases = { "assert" }, description = "add an assertion for formal verification")
+	//@formatter:off
+	@Command(
+		aliases = {"assert"},
+		description = "add an assertion for formal verification",
+		help = {
+			"Usage:",
+			"  assert <property>",
+		}
+	)
+	//@formatter:on
 	public void assertp(String args[]) throws Exception {
 
 		String pStr = String.join(" ", args);
