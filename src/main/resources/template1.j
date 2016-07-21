@@ -313,6 +313,11 @@ public class CodeSimulator {
 
 		for (int j = 0; j < waveforms.size(); j++) {
 
+			boolean isHidden = sigNames.get(j).charAt(0) == '*';
+
+			if (isHidden)
+				continue;
+
 			if (j == getStateBitCount())
 				System.out.println();
 

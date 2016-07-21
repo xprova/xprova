@@ -548,7 +548,20 @@ public class Transformer {
 
 			NetlistGraph mod = getVariationDFFx(DFFx, V, M, T);
 
-			graph.expand(d, mod);
+			HashMap<Vertex, Vertex> corr = graph.expand(d, mod);
+
+			// after expanding, prepend an asterisk to names of internal
+			// nets (to mark them as hidden in counter-example waveforms)F
+
+			for (Entry<Vertex, Vertex> entry : corr.entrySet()) {
+
+				Vertex n1 = entry.getKey();
+				Vertex n2 = entry.getValue();
+
+				if (!"input".equals(n1.type) && !"output".equals(n1.type))
+					n2.name = "*" + n2.name;
+
+			}
 
 		}
 
