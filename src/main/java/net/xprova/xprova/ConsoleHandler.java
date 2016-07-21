@@ -646,7 +646,7 @@ public class ConsoleHandler {
 			"Usage:",
 			"  design list",
 			"  design current <name>",
-			"  design rm <name>"
+			"  design remove (*|<name>)"
 		}
 	)
 	//@formatter:on
@@ -702,9 +702,21 @@ public class ConsoleHandler {
 
 				}
 
-			} else if (cmd.equals("rm") && args.length > 1) {
+			} else if (cmd.equals("remove") && args.length > 1) {
 
 				String designName = args[1];
+
+				if (designName.equals("*")) {
+
+					designs.clear();
+
+					current = null;
+
+					out.println("Removed all designs");
+
+					return;
+
+				}
 
 				NetlistGraph d = designs.get(designName);
 
@@ -897,16 +909,28 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(description = "rename nets or modules")
+	//@formatter:off
+	@Command(
+		description = "rename nets or modules",
+		help = {
+			"Usage:",
+			"  rename [--ignore net1,net2 ...] [--format net%d] nets",
+			"  rename [--ignore mod1,mod2 ...] [--format mod%s%d] modules",
+			"  rename [--format _%s_%d_] splitarr",
+			"",
+			"Options:",
+			"  -i --ignore item1,item2 ...  exclude nets/modules from renaming",
+			"  -f --format %s%d ...         specify renaming format (%s = module type or array name, %d = index)"
+		}
+	)
+	//@formatter:on
 	public void rename(String args[]) throws Exception {
 
 		// parse input
 
-		Option optIgnore = Option.builder().desc("list of nets/modules to ignore").hasArg().argName("IGNORE")
-				.required(false).longOpt("ignore").build();
+		Option optIgnore = Option.builder("i").hasArg().required(false).longOpt("ignore").build();
 
-		Option optFormat = Option.builder().desc("naming format").hasArg().argName("FORMAT").required(false)
-				.longOpt("format").build();
+		Option optFormat = Option.builder("f").hasArg().required(false).longOpt("format").build();
 
 		Options options = new Options();
 
@@ -925,7 +949,13 @@ public class ConsoleHandler {
 
 		if (args.length > 0) {
 
-			String cmd = args[0];
+			// use first non-empty argument as file name
+
+			String cmd = "";
+
+			for (String str : line.getArgList())
+				if (!str.isEmpty())
+					cmd = str.trim();
 
 			if ("modules".equals(cmd)) {
 
@@ -1152,7 +1182,16 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(aliases = { "synth" }, description = "synthesize behavioral verilog design using yosys")
+	//@formatter:off
+	@Command(
+		aliases = {"synth"},
+		description = "synthesize behavioral verilog design using yosys",
+		help = {
+			"Usage:",
+			"  synth <input> <output>"
+		}
+	)
+	//@formatter:on
 	public void synth(String args[]) throws Exception {
 
 		// TODO: implement the following switches
@@ -1167,7 +1206,15 @@ public class ConsoleHandler {
 
 	}
 
-	@Command(description = "add an assumption for formal verification")
+	//@formatter:off
+	@Command(
+		description = "add an assumption for formal verification",
+		help = {
+			"Usage:",
+			"  assume <property>",
+		}
+	)
+	//@formatter:on
 	public void assume(String args[]) throws Exception {
 
 		String pStr = String.join(" ", args);
@@ -1175,7 +1222,16 @@ public class ConsoleHandler {
 		assumptions.add(new Property(pStr));
 	}
 
-	@Command(aliases = { "assert" }, description = "add an assertion for formal verification")
+	//@formatter:off
+	@Command(
+		aliases = {"assert"},
+		description = "add an assertion for formal verification",
+		help = {
+			"Usage:",
+			"  assert <property>",
+		}
+	)
+	//@formatter:on
 	public void assertp(String args[]) throws Exception {
 
 		String pStr = String.join(" ", args);
