@@ -536,7 +536,7 @@ public class Transformer {
 
 		String DFFxFile = "lib/DFFx.v";
 
-		GateLibrary xprovaLib = new GateLibrary(VerilogParser.parseFile(xprovaLibFile));
+		GateLibrary xprovaLib = new GateLibrary(VerilogParser.parseFile(xprovaLibFile, null));
 
 		NetlistGraph DFFx = new NetlistGraph(VerilogParser.parseFile(DFFxFile, xprovaLib).get(0));
 
