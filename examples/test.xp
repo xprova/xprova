@@ -1,0 +1,17 @@
+library load lib/xprova.v
+
+#synth examples/topunit.v output/topunit_synth.v
+
+depen output/topunit_synth.v
+
+:q
+
+library load lib/xprova.v
+
+read examples/top-mod1.v
+
+:q
+
+write output/temp1.v
+
+dot --pdf output/netlist.pdf

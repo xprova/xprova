@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -1333,6 +1334,26 @@ public class ConsoleHandler {
 		}
 
 		// TODO: implement -r
+
+	}
+
+	@Command
+	public void depen(String file) throws Exception {
+
+		HashMap<String, HashSet<String>> dependencies = VerilogParser.getDependencies(file);
+
+		ArrayList<TreeSet<String>> hierarchy = DependencyTree.depen(dependencies);
+
+		System.out.println("Design dependencies (bottom to top):");
+
+		for (int i=0; i<hierarchy.size(); i++) {
+
+			System.out.printf("Level %d:\n", i);
+
+			for (String s : hierarchy.get(i))
+				System.out.println("  - " + s);
+
+		}
 
 	}
 
