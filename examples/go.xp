@@ -1,7 +1,13 @@
 library load lib/xprova.v
 
-read -b examples/counter.v
+read -b examples/topunit.v
 
-assert count[5] |=> count[4]
+design current topunit
 
-prove -g
+dot -e=ST,RS,CK --pdf output/netlist.pdf
+
+assume data_out[3]
+
+assert ~valid
+
+prove 
