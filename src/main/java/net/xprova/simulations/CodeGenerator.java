@@ -125,6 +125,14 @@ public class CodeGenerator {
 
 			Vertex driver = graph.getSourceModule(netQ);
 
+			while (driver.subtype.equals(VerilogParser.CASSIGN_MOD)) {
+
+				Vertex dn = graph.getSources(driver).iterator().next();
+
+				driver = graph.getSourceModule(dn);
+
+			}
+
 			clk = graph.getNet(driver, "CK");
 
 			reset = graph.getNet(driver, "RS");
