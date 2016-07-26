@@ -29,7 +29,7 @@ public class TransformerTest  {
 				+ "module NOT (y, a); input a; output y; endmodule\n"
 				+ "module DFF (CK, RS, D, Q); input CK, RS, D; output Q; endmodule\n";
 
-		gates = VerilogParser.parseString(gateStrs);
+		gates = VerilogParser.parseString(gateStrs, null);
 
 		defsFF = new HashMap<String, FlipFlop>();
 
