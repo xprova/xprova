@@ -13,6 +13,7 @@ import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
 import net.xprova.propertylanguage.Property;
+import net.xprova.verilogparser.VerilogParser;
 
 public class CodeGenerator {
 
@@ -505,7 +506,7 @@ public class CodeGenerator {
 			final String strNOR = "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2});";
 			final String strNOT = "{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};";
 			final String strXOR = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});";
-			final String strWIRE_NG_INTERNAL = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
+			final String strCASSIGN = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
 			final String strMUX2 = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} & ~{PREFIX2}%s{POSTFIX2}) | ({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});";
 			final String strX2H = "{PREFIX1}%s{POSTFIX1} = (({PREFIX2}%s{POSTFIX2} != 0) & ({PREFIX2}%s{POSTFIX2} != -1)) ? -1 : 0 ;";
 
@@ -557,9 +558,9 @@ public class CodeGenerator {
 
 					line = String.format(strXOR, nNameJ, net1, net2);
 
-				} else if ("WIRE_NG_INTERNAL".equals(driver.subtype)) {
+				} else if (VerilogParser.CASSIGN_MOD.equals(driver.subtype)) {
 
-					line = String.format(strWIRE_NG_INTERNAL, nNameJ, net1);
+					line = String.format(strCASSIGN, nNameJ, net1);
 
 				} else if ("MUX2".equals(driver.subtype)) {
 
