@@ -433,7 +433,7 @@ public class CodeSimulator {
 		vcdLines.add("$scope module logic $end");
 
 		for (int i = 0; i < sigNames.size(); i++)
-			vcdLines.add(String.format("$var wire 1 %s %s $end", (char) ('a' + i), sigNames.get(i)));
+			vcdLines.add(String.format("$var wire 1 %s %s $end", getIdentifierVCD(i), sigNames.get(i)));
 
 		vcdLines.add("$upscope $end");
 
@@ -442,7 +442,7 @@ public class CodeSimulator {
 		vcdLines.add("$dumpvars");
 
 		for (int i = 0; i < sigNames.size(); i++)
-			vcdLines.add(String.format("x%s", (char) ('a' + i)));
+			vcdLines.add(String.format("x%s", getIdentifierVCD(i)));
 
 		vcdLines.add("$end");
 
@@ -469,7 +469,7 @@ public class CodeSimulator {
 					else
 						newValStr = "x";
 
-					vcdLines.add(String.format("%s%s", newValStr, (char) ('a' + i)));
+					vcdLines.add(String.format("%s%s", newValStr, getIdentifierVCD(i)));
 
 				}
 
@@ -557,6 +557,32 @@ public class CodeSimulator {
 			}
 
 		}
+
+	}
+
+	private String getIdentifierVCD(int i) {
+
+		String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+		int n = chars.length();
+
+		int length = 4;
+
+		String result = "";
+
+		for (int j=0; j<length; j++) {
+
+			int d = i % n;
+
+			result = chars.charAt(d) + result;
+
+			i = (i - d) / n;
+
+			if (i==0)
+				break;
+		}
+
+		return result;
 
 	}
 

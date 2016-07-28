@@ -10,4 +10,4 @@ assume data_out[3]
 
 assert ~valid
 
-prove 
+prove -g
