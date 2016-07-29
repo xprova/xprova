@@ -449,7 +449,7 @@ public class Property {
 
 		addDelayRecur(root, -minDelay);
 
-		root.print();
+//		root.print();
 		//
 		// System.out.println("max delay = " + getMaxDelay(root));
 		//
