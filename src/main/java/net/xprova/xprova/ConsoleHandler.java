@@ -202,11 +202,13 @@ public class ConsoleHandler {
 
 			ArrayList<NetlistGraph> newDesigns = new ArrayList<NetlistGraph>();
 
+			out.printf("Reading file <%s> ...\n", verilogFile);
+
 			for (Netlist nl : nls) {
 
-				out.printf("Parsing design <%s> in file %s ...\n", nl.name, verilogFile);
-
 				newDesigns.add(new NetlistGraph(nl));
+
+				out.printf("Parsed design <%s>\n", nl.name, verilogFile);
 
 			}
 
