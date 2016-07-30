@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -13,28 +14,28 @@ public class CodeSimulator {
 	public static void main(String args[]) throws Exception {
 
 		// usage:
-		// codesimulator [-no-counter]
-		// codesimulator [-vcd <file>] [-gtkwave]
+		// codesimulator [--print] [--vcd <file>] [--txt <file>] [--gtkwave]
 
 		CodeSimulator sim1 = new CodeSimulator();
 
 		int initial = sim1.getResetState();
 
-		boolean generateCounterExample = true;
+		boolean runGtkwave = false, printCounter = false;
 
-		boolean runGtkwave = false;
-
-		File vcdFile = null;
+		File vcdFile = null, txtFile = null;
 
 		for (int i = 0; i < args.length; i++) {
 
 			String a = args[i];
 
-			if ("--no-counter".equals(a))
-				generateCounterExample = false;
+			if ("--print".equals(a))
+				printCounter = true;
 
 			if ("--vcd".equals(a))
 				vcdFile = new File(args[i + 1]);
+
+			if ("--txt".equals(a))
+				txtFile = new File(args[i + 1]);
 
 			if ("--gtkwave".equals(a))
 				runGtkwave = true;
@@ -48,16 +49,18 @@ public class CodeSimulator {
 			vcdFile = new File(tempDir, "counter-example.vcd");
 		}
 
-		if (!generateCounterExample && (vcdFile != null)) {
-
-			throw new Exception("Command line argument -no-counter is incompatible with -vcd and -gtkwave");
-
-		}
-
 		int[] counterExample = sim1.exploreSpace(initial);
 
-		if (counterExample != null && generateCounterExample)
-			sim1.simulate(initial, counterExample, vcdFile, runGtkwave);
+		if (counterExample != null) {
+
+			sim1.simulate(initial, counterExample, vcdFile, txtFile, printCounter, runGtkwave);
+
+			// 100 is a special return code for finding a counter-example but
+			// terminating successfully
+
+			System.exit(100);
+
+		}
 
 	}
 
@@ -282,7 +285,8 @@ public class CodeSimulator {
 		//@formatter:on
 	}
 
-	public void simulate(int initial, int[] inputs, File vcdFile, boolean runGtkwave) throws Exception {
+	public void simulate(int initial, int[] inputs, File vcdFile, File txtFile, boolean printCounter,
+			boolean runGtkwave) throws Exception {
 
 		ArrayList<String> sigNames = getSignalNames();
 
@@ -302,53 +306,59 @@ public class CodeSimulator {
 
 		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
 
-		System.out.printf(strFmt, "Cycle");
+		// printing to console & files
 
-		for (int i = 0; i < cycles; i++)
-			System.out.printf("%d", i % 10);
+		if (printCounter) {
 
-		System.out.println();
+			System.out.printf(strFmt, "Cycle");
 
-		System.out.println();
+			for (int i = 0; i < cycles; i++)
+				System.out.printf("%d", i % 10);
 
-		for (int j = 0; j < waveforms.size(); j++) {
+			System.out.println();
 
-			boolean isHidden = sigNames.get(j).charAt(0) == '*';
+			System.out.println();
 
-			if (isHidden)
-				continue;
+			for (int j = 0; j < waveforms.size(); j++) {
 
-			if (j == getStateBitCount())
+				boolean isHidden = sigNames.get(j).charAt(0) == '*';
+
+				if (isHidden)
+					continue;
+
+				if (j == getStateBitCount())
+					System.out.println();
+
+				int[] sig = waveforms.get(j);
+
+				System.out.printf(strFmt, sigNames.get(j));
+
+				for (int i = 0; i < cycles; i++) {
+
+					if (sig[i] == H)
+						System.out.printf("1");
+					else if (sig[i] == L)
+						System.out.printf("0");
+					else
+						System.out.printf("X");
+
+				}
+
 				System.out.println();
-
-			int[] sig = waveforms.get(j);
-
-			System.out.printf(strFmt, sigNames.get(j));
-
-			for (int i = 0; i < cycles; i++) {
-
-				if (sig[i] == H)
-					System.out.printf("1");
-				else if (sig[i] == L)
-					System.out.printf("0");
-				else
-					System.out.printf("X");
 
 			}
 
 			System.out.println();
 
+			System.out.flush();
+
 		}
 
-		System.out.println();
-
-		System.out.flush();
-
-		if (vcdFile != null) {
-
+		if (vcdFile != null)
 			generateVCD(sigNames, waveforms, vcdFile, runGtkwave);
 
-		}
+		if (txtFile != null)
+			generateTextFile(sigNames, waveforms, txtFile);
 
 	}
 
@@ -401,6 +411,59 @@ public class CodeSimulator {
 		String bitFmt = String.format("%%%ds", digits);
 
 		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
+	}
+
+	private void generateTextFile(ArrayList<String> sigNames, ArrayList<int[]> waveforms, File txtFile)
+			throws FileNotFoundException {
+
+		// prepare file content
+
+		ArrayList<String> lines = new ArrayList<String>();
+
+		int maxSigName = 0;
+
+		for (String s : sigNames)
+			maxSigName = s.length() > maxSigName ? s.length() : maxSigName;
+
+		String strFmt = String.format("%%%ds : ", maxSigName);
+
+		for (int i = 0; i < sigNames.size(); i++) {
+
+			String l = String.format(strFmt, sigNames.get(i));
+
+			StringBuilder sb = new StringBuilder(l);
+
+			int[] sigWaveform = waveforms.get(i);
+
+			for (int j = 0; j < sigWaveform.length; j++) {
+
+				int v = sigWaveform[j];
+
+				if (v == -1)
+					sb.append("1");
+				else if (v == 0)
+					sb.append("0");
+				else
+					sb.append("x");
+
+			}
+
+			lines.add(sb.toString());
+
+		}
+
+		// write to file
+
+		System.out
+				.println("Saving counter-example waveform data (plain-text) to " + txtFile.getAbsolutePath() + " ...");
+
+		PrintStream fout = new PrintStream(txtFile);
+
+		for (String l : lines)
+			fout.println(l);
+
+		fout.close();
+
 	}
 
 	private void generateVCD(ArrayList<String> sigNames, ArrayList<int[]> waveforms, File vcdFile, boolean runGtkwave)
@@ -483,7 +546,7 @@ public class CodeSimulator {
 
 		File tempDir = new File(System.getProperty("java.io.tmpdir"));
 
-		System.out.println("Saving waveform data to " + vcdFile.getAbsolutePath() + " ...");
+		System.out.println("Saving counter-example waveform data (VCD) to " + vcdFile.getAbsolutePath() + " ...");
 
 		PrintStream fout = new PrintStream(vcdFile);
 
@@ -517,7 +580,6 @@ public class CodeSimulator {
 					}
 
 				}
-
 
 				tclLines.add(String.format("lappend sigList {%s}", s));
 			}
@@ -570,7 +632,7 @@ public class CodeSimulator {
 
 		String result = "";
 
-		for (int j=0; j<length; j++) {
+		for (int j = 0; j < length; j++) {
 
 			int d = i % n;
 
@@ -578,7 +640,7 @@ public class CodeSimulator {
 
 			i = (i - d) / n;
 
-			if (i==0)
+			if (i == 0)
 				break;
 		}
 
