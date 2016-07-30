@@ -14,22 +14,19 @@ public class CodeSimulator {
 	public static void main(String args[]) throws Exception {
 
 		// usage:
-		// codesimulator [--print] [--vcd <file>] [--txt <file>] [--gtkwave]
+		// codesimulator [--vcd <file>] [--txt <file>] [--gtkwave]
 
 		CodeSimulator sim1 = new CodeSimulator();
 
 		int initial = sim1.getResetState();
 
-		boolean runGtkwave = false, printCounter = false;
+		boolean runGtkwave = false;
 
 		File vcdFile = null, txtFile = null;
 
 		for (int i = 0; i < args.length; i++) {
 
 			String a = args[i];
-
-			if ("--print".equals(a))
-				printCounter = true;
 
 			if ("--vcd".equals(a))
 				vcdFile = new File(args[i + 1]);
@@ -53,7 +50,7 @@ public class CodeSimulator {
 
 		if (counterExample != null) {
 
-			sim1.simulate(initial, counterExample, vcdFile, txtFile, printCounter, runGtkwave);
+			sim1.simulate(initial, counterExample, vcdFile, txtFile, runGtkwave);
 
 			// 100 is a special return code for finding a counter-example but
 			// terminating successfully
@@ -285,8 +282,7 @@ public class CodeSimulator {
 		//@formatter:on
 	}
 
-	public void simulate(int initial, int[] inputs, File vcdFile, File txtFile, boolean printCounter,
-			boolean runGtkwave) throws Exception {
+	public void simulate(int initial, int[] inputs, File vcdFile, File txtFile, boolean runGtkwave) throws Exception {
 
 		ArrayList<String> sigNames = getSignalNames();
 
@@ -305,54 +301,6 @@ public class CodeSimulator {
 		// run simulation
 
 		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
-
-		// printing to console & files
-
-		if (printCounter) {
-
-			System.out.printf(strFmt, "Cycle");
-
-			for (int i = 0; i < cycles; i++)
-				System.out.printf("%d", i % 10);
-
-			System.out.println();
-
-			System.out.println();
-
-			for (int j = 0; j < waveforms.size(); j++) {
-
-				boolean isHidden = sigNames.get(j).charAt(0) == '*';
-
-				if (isHidden)
-					continue;
-
-				if (j == getStateBitCount())
-					System.out.println();
-
-				int[] sig = waveforms.get(j);
-
-				System.out.printf(strFmt, sigNames.get(j));
-
-				for (int i = 0; i < cycles; i++) {
-
-					if (sig[i] == H)
-						System.out.printf("1");
-					else if (sig[i] == L)
-						System.out.printf("0");
-					else
-						System.out.printf("X");
-
-				}
-
-				System.out.println();
-
-			}
-
-			System.out.println();
-
-			System.out.flush();
-
-		}
 
 		if (vcdFile != null)
 			generateVCD(sigNames, waveforms, vcdFile, runGtkwave);
