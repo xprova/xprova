@@ -1,3 +1,5 @@
+package net.xprova.xprova;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -51,6 +53,7 @@ public class CodeSimulator {
 
 	}
 
+	@SuppressWarnings("unused")
 	public int[] exploreSpace(int initial) throws Exception {
 
 		// method parameters:
@@ -269,20 +272,6 @@ public class CodeSimulator {
 	public void simulate(int initial, int[] inputs, File txtFile) throws Exception {
 
 		ArrayList<String> sigNames = getSignalNames();
-
-		int cycles = inputs.length;
-
-		// determine longest signal name
-		// (for pretty printing)
-
-		int maxL = 0;
-
-		for (String s : sigNames)
-			maxL = s.length() > maxL ? s.length() : maxL;
-
-		String strFmt = String.format("%%%ds : ", maxL + 2);
-
-		// run simulation
 
 		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
 
