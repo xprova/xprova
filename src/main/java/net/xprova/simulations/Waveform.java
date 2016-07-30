@@ -51,22 +51,26 @@ public class Waveform {
 
 		for (String sig : sigNames) {
 
-			int[] sigData = waveforms.get(sig);
+			if (isVisible(sig)) {
 
-			System.out.printf(strFmt, sig);
+				int[] sigData = waveforms.get(sig);
 
-			for (int i = 0; i < cycles; i++) {
+				System.out.printf(strFmt, sig);
 
-				if (sigData[i] == H)
-					out.printf("1");
-				else if (sigData[i] == L)
-					out.printf("0");
-				else
-					out.printf("X");
+				for (int i = 0; i < cycles; i++) {
+
+					if (sigData[i] == H)
+						out.printf("1");
+					else if (sigData[i] == L)
+						out.printf("0");
+					else
+						out.printf("X");
+
+				}
+
+				out.println();
 
 			}
-
-			out.println();
 
 		}
 	}
@@ -146,8 +150,7 @@ public class Waveform {
 
 	}
 
-	public void writeVCDFile(String file, boolean runGtkwave)
-			throws Exception {
+	public void writeVCDFile(String file, boolean runGtkwave) throws Exception {
 
 		File vcdFile = new File(file);
 
@@ -251,21 +254,25 @@ public class Waveform {
 
 			for (String s : sigNamesVCD) {
 
-				if (!s.startsWith("\\") && s.contains("[")) {
+				if (isVisible(s)) {
 
-					if (s.contains("[0]")) {
+					if (!s.startsWith("\\") && s.contains("[")) {
 
-						s = s.replaceAll("\\[\\d+\\]", "");
+						if (s.contains("[0]")) {
 
-					} else {
+							s = s.replaceAll("\\[\\d+\\]", "");
 
-						continue;
+						} else {
+
+							continue;
+
+						}
 
 					}
 
-				}
+					tclLines.add(String.format("lappend sigList {%s}", s));
 
-				tclLines.add(String.format("lappend sigList {%s}", s));
+				}
 			}
 
 			tclLines.add("set num_added [ gtkwave::addSignalsFromList $sigList ]");
@@ -327,6 +334,25 @@ public class Waveform {
 		} while (i > 0);
 
 		return result;
+
+	}
+
+	private boolean isVisible(String signal) {
+
+		// determines which signals are printed to console or written to file
+
+		// TODO: replace heuristics used here with better rules
+
+		if (signal.contains(".clk"))
+			return false;
+
+		if (signal.contains(".rst"))
+			return false;
+
+		if (signal.startsWith("_") && signal.endsWith("_"))
+			return false;
+
+		return true;
 
 	}
 
