@@ -1001,6 +1001,7 @@ public class ConsoleHandler {
 			"  prove [--vcd <file>] [--gtkwave]",
 			"",
 			"Options:",
+			"  -p --print       print counter-example to console",
 			"  -v --vcd <file>  export counter-example to vcd file",
 			"  -t --txt <file>  export counter-example to plain-text file",
 			"  -g --gtkwave     open counter-example using gtkwave",
@@ -1018,6 +1019,8 @@ public class ConsoleHandler {
 
 		Option optTxt = Option.builder("t").longOpt("txt").hasArg().build();
 
+		Option optPrint = Option.builder("p").longOpt("print").build();
+
 		Option optGtkwave = Option.builder("g").longOpt("gtkwave").build();
 
 		Options options = new Options();
@@ -1027,6 +1030,8 @@ public class ConsoleHandler {
 		options.addOption(optVcd);
 
 		options.addOption(optTxt);
+
+		options.addOption(optPrint);
 
 		options.addOption(optGtkwave);
 
@@ -1044,28 +1049,23 @@ public class ConsoleHandler {
 
 		(new Transformer(current2, defsFF)).expandDFFx();
 
-		String gtkwaveArg = line.hasOption("g") ? "--gtkwave" : "";
-
-		String vcdArg = line.hasOption("vcd") ? "--vcd " + line.getOptionValue("vcd") : "";
-
 		String templateResourceFile = "template1.j";
 
 		String javaFileStr = "CodeSimulator.java";
 
 		String classFileStr = "CodeSimulator";
 
-		String cFile = "counter.txt";
+		String defTXT = (new File(tempDir, "counter-example.txt")).getAbsolutePath();
 
-		String counterExampleFile = line.getOptionValue("txt", new File(tempDir, cFile).getAbsolutePath());
+		String txtFile = line.getOptionValue("txt", defTXT);
 
-		String txtArg = "--txt " + counterExampleFile;
+		String txtArg = "--txt " + txtFile;
 
 		File javaFile = new File(tempDir, javaFileStr);
 
 		String cmd = "javac " + javaFile.getAbsolutePath();
 
-		String cmd2 = String.format("java -classpath %s %s %s %s %s", tempDir.getAbsolutePath(), classFileStr, gtkwaveArg,
-				vcdArg, txtArg);
+		String cmd2 = String.format("java -classpath %s %s %s", tempDir.getAbsolutePath(), classFileStr, txtArg);
 
 		// generate code
 
@@ -1142,11 +1142,31 @@ public class ConsoleHandler {
 
 			if (proc2.exitValue() == 100) {
 
-				Waveform counter = new Waveform();
+				boolean runGtkwave = line.hasOption("g");
 
-				counter.readTextFile(counterExampleFile);
+				boolean printToConsole = line.hasOption("p");
 
-				counter.print(System.out);
+				boolean writeVCD = line.hasOption("v");
+
+				String defVCD = (new File(tempDir, "counter-example.vcd")).getAbsolutePath();
+
+				String vcdFile = line.getOptionValue("v", defVCD);
+
+				boolean loadCounter = runGtkwave || printToConsole || writeVCD;
+
+				if (loadCounter) {
+
+					Waveform counter = new Waveform();
+
+					counter.readTextFile(txtFile);
+
+					if (printToConsole)
+						counter.print(System.out);
+
+					if (runGtkwave || writeVCD)
+						counter.writeVCDFile(vcdFile, runGtkwave);
+
+				}
 
 			}
 
@@ -1372,7 +1392,7 @@ public class ConsoleHandler {
 
 		System.out.println("Design dependencies (bottom to top):");
 
-		for (int i=0; i<hierarchy.size(); i++) {
+		for (int i = 0; i < hierarchy.size(); i++) {
 
 			System.out.printf("Level %d:\n", i);
 

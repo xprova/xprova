@@ -3,6 +3,7 @@ package net.xprova.simulations;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,7 @@ public class Waveform {
 
 	private ArrayList<String> sigNames;
 
-	private HashMap<String, int[]> sigWaveforms;
+	private HashMap<String, int[]> waveforms;
 
 	private int cycles;
 
@@ -25,7 +26,7 @@ public class Waveform {
 
 		sigNames = new ArrayList<String>();
 
-		sigWaveforms = new HashMap<String, int[]>();
+		waveforms = new HashMap<String, int[]>();
 
 		cycles = 0;
 	}
@@ -50,7 +51,7 @@ public class Waveform {
 
 		for (String sig : sigNames) {
 
-			int[] sigData = sigWaveforms.get(sig);
+			int[] sigData = waveforms.get(sig);
 
 			System.out.printf(strFmt, sig);
 
@@ -80,7 +81,7 @@ public class Waveform {
 
 			sigNames = new ArrayList<String>();
 
-			sigWaveforms = new HashMap<String, int[]>();
+			waveforms = new HashMap<String, int[]>();
 
 			cycles = 0;
 
@@ -120,7 +121,7 @@ public class Waveform {
 
 						sigNames.add(sigName);
 
-						sigWaveforms.put(sigName, sigData);
+						waveforms.put(sigName, sigData);
 
 						cycles = cycles == 0 ? n : cycles;
 
@@ -142,6 +143,190 @@ public class Waveform {
 			throw new Exception("file + " + f.getAbsolutePath() + " does not exist");
 
 		}
+
+	}
+
+	public void writeVCDFile(String file, boolean runGtkwave)
+			throws Exception {
+
+		File vcdFile = new File(file);
+
+		ArrayList<String> vcdLines = new ArrayList<String>();
+
+		ArrayList<String> tclLines = new ArrayList<String>();
+
+		// rename signals with spaces
+
+		ArrayList<String> sigNamesVCD = new ArrayList<String>();
+
+		for (int i = 0; i < sigNames.size(); i++) {
+
+			String s = sigNames.get(i);
+
+			if (s.startsWith("@"))
+				s = "prop-" + s.replace(" ", "-");
+
+			if (s.startsWith("\\"))
+				s = s.substring(1);
+
+			sigNamesVCD.add(s);
+
+		}
+
+		// prepare vcd file content
+
+		vcdLines.add("$timescale 1ns $end");
+
+		vcdLines.add("$scope module logic $end");
+
+		for (int i = 0; i < sigNames.size(); i++)
+			vcdLines.add(String.format("$var wire 1 %s %s $end", getIdentifierVCD(i), sigNamesVCD.get(i)));
+
+		vcdLines.add("$upscope $end");
+
+		vcdLines.add("$enddefinitions $end");
+
+		vcdLines.add("$dumpvars");
+
+		for (int i = 0; i < sigNames.size(); i++)
+			vcdLines.add(String.format("x%s", getIdentifierVCD(i)));
+
+		vcdLines.add("$end");
+
+		for (int j = 0; j < cycles; j++) {
+
+			vcdLines.add(String.format("#%d", j));
+
+			for (int i = 0; i < sigNames.size(); i++) {
+
+				int[] sigWaveform = waveforms.get(sigNames.get(i));
+
+				int newVal = sigWaveform[j];
+
+				int oldVal = j > 0 ? sigWaveform[j - 1] : newVal + 1;
+
+				if (newVal != oldVal) {
+
+					String newValStr;
+
+					if (newVal == -1)
+						newValStr = "1";
+					else if (newVal == 0)
+						newValStr = "0";
+					else
+						newValStr = "x";
+
+					vcdLines.add(String.format("%s%s", newValStr, getIdentifierVCD(i)));
+
+				}
+
+			}
+
+		}
+
+		vcdLines.add(String.format("#%d", cycles));
+
+		// writing vcd file
+
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+
+		System.out.println("Saving counter-example waveform data (VCD) to " + vcdFile.getAbsolutePath() + " ...");
+
+		PrintStream fout = new PrintStream(vcdFile);
+
+		for (String l : vcdLines)
+			fout.println(l);
+
+		fout.close();
+
+		if (runGtkwave) {
+
+			// prepare gtkwave tcl script content
+
+			// gtkwave has an issue with adding array bits
+			// as a walk-around add the array name instead
+			// of the individual bits
+
+			tclLines.add("set sigList [list]");
+
+			for (String s : sigNamesVCD) {
+
+				if (!s.startsWith("\\") && s.contains("[")) {
+
+					if (s.contains("[0]")) {
+
+						s = s.replaceAll("\\[\\d+\\]", "");
+
+					} else {
+
+						continue;
+
+					}
+
+				}
+
+				tclLines.add(String.format("lappend sigList {%s}", s));
+			}
+
+			tclLines.add("set num_added [ gtkwave::addSignalsFromList $sigList ]");
+
+			// write tcl script
+
+			File tclFile = new File(tempDir, "counter-example-show.tcl");
+
+			System.out.println("Saving gtkwave tcl script to " + tclFile.getAbsolutePath() + " ...");
+
+			PrintStream fout2 = new PrintStream(tclFile);
+
+			for (String l : tclLines)
+				fout2.println(l);
+
+			fout2.close();
+
+			// run gtkwave
+
+			String cmd = String.format("gtkwave \"%s\" -S \"%s\"", vcdFile.getAbsolutePath(),
+					tclFile.getAbsolutePath());
+
+			final Runtime rt = Runtime.getRuntime();
+
+			try {
+
+				rt.exec(cmd);
+
+			} catch (IOException e) {
+
+				e.printStackTrace();
+
+				throw new Exception("unable to run gtkwave, make sure it is installed and setup in PATH");
+
+			}
+
+		}
+
+	}
+
+	private String getIdentifierVCD(int i) {
+
+		// maps an integer to a valid VCD identifier
+
+		String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+		int n = chars.length();
+
+		String result = "";
+
+		do {
+
+			int d = i % n;
+
+			result = chars.charAt(d) + result;
+
+			i = (i - d) / n;
+
+		} while (i > 0);
+
+		return result;
 
 	}
 
