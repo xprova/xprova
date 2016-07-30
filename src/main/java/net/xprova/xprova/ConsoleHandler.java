@@ -35,6 +35,7 @@ import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
 import net.xprova.propertylanguage.Property;
 import net.xprova.simulations.CodeGenerator;
+import net.xprova.simulations.Waveform;
 import net.xprova.verilogparser.VerilogParser;
 
 public class ConsoleHandler {
@@ -1001,6 +1002,7 @@ public class ConsoleHandler {
 			"",
 			"Options:",
 			"  -v --vcd <file>  export counter-example to vcd file",
+			"  -t --txt <file>  export counter-example to plain-text file",
 			"  -g --gtkwave     open counter-example using gtkwave",
 		}
 	)
@@ -1014,6 +1016,8 @@ public class ConsoleHandler {
 
 		Option optVcd = Option.builder("v").longOpt("vcd").hasArg().build();
 
+		Option optTxt = Option.builder("t").longOpt("txt").hasArg().build();
+
 		Option optGtkwave = Option.builder("g").longOpt("gtkwave").build();
 
 		Options options = new Options();
@@ -1022,6 +1026,8 @@ public class ConsoleHandler {
 
 		options.addOption(optVcd);
 
+		options.addOption(optTxt);
+
 		options.addOption(optGtkwave);
 
 		CommandLineParser parser = new DefaultParser();
@@ -1029,6 +1035,8 @@ public class ConsoleHandler {
 		CommandLine line = parser.parse(options, args);
 
 		// code:
+
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
 
 		assertDesignLoaded();
 
@@ -1046,14 +1054,18 @@ public class ConsoleHandler {
 
 		String classFileStr = "CodeSimulator";
 
-		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+		String cFile = "counter.txt";
+
+		String counterExampleFile = line.getOptionValue("txt", new File(tempDir, cFile).getAbsolutePath());
+
+		String txtArg = "--txt " + counterExampleFile;
 
 		File javaFile = new File(tempDir, javaFileStr);
 
 		String cmd = "javac " + javaFile.getAbsolutePath();
 
-		String cmd2 = String.format("java -classpath %s %s %s %s", tempDir.getAbsolutePath(), classFileStr, gtkwaveArg,
-				vcdArg);
+		String cmd2 = String.format("java -classpath %s %s %s %s %s", tempDir.getAbsolutePath(), classFileStr, gtkwaveArg,
+				vcdArg, txtArg);
 
 		// generate code
 
@@ -1123,6 +1135,18 @@ public class ConsoleHandler {
 
 				while ((s = stdError2.readLine()) != null)
 					out.println(s);
+
+			}
+
+			// check exist status
+
+			if (proc2.exitValue() == 100) {
+
+				Waveform counter = new Waveform();
+
+				counter.readTextFile(counterExampleFile);
+
+				counter.print(System.out);
 
 			}
 
@@ -1356,6 +1380,17 @@ public class ConsoleHandler {
 				System.out.println("  - " + s);
 
 		}
+
+	}
+
+	@Command
+	public void testWaveform() throws Exception {
+
+		Waveform w = new Waveform();
+
+		w.readTextFile("d:\\counter.txt");
+
+		w.print(System.out);
 
 	}
 

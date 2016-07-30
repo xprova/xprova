@@ -1,3 +1,7 @@
+#testWaveform
+
+#:q
+
 library load lib/xprova.v
 
 read -b examples/topunit.v
@@ -10,4 +14,4 @@ assume data_out[3]
 
 assert ~valid
 
-prove -g
+prove
