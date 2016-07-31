@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class Waveform {
@@ -22,20 +23,20 @@ public class Waveform {
 
 	private static final int M = 0xf0f0f0f0;
 
-	public Waveform() {
+	// public interface
 
-		sigNames = new ArrayList<String>();
+	public Waveform(String textFile) throws Exception {
 
-		waveforms = new HashMap<String, int[]>();
-
-		cycles = 0;
+		readTextFile(textFile);
 	}
 
 	public void print(PrintStream out) {
 
 		int maxL = 0;
 
-		for (String s : sigNames)
+		ArrayList<String> visibleSignals = getVisibleSignals();
+
+		for (String s : visibleSignals)
 			maxL = s.length() > maxL ? s.length() : maxL;
 
 		String strFmt = String.format("%%%ds : ", maxL + 2);
@@ -49,7 +50,7 @@ public class Waveform {
 
 		out.println();
 
-		for (String sig : sigNames) {
+		for (String sig : visibleSignals) {
 
 			if (isVisible(sig)) {
 
@@ -68,74 +69,6 @@ public class Waveform {
 			}
 
 		}
-	}
-
-	public void readTextFile(String file) throws Exception {
-
-		File f = new File(file);
-
-		if (f.exists()) {
-
-			BufferedReader br = new BufferedReader(new FileReader(f));
-
-			sigNames = new ArrayList<String>();
-
-			waveforms = new HashMap<String, int[]>();
-
-			cycles = 0;
-
-			try {
-
-				while (true) {
-
-					String line = br.readLine();
-
-					if (line == null)
-						break;
-
-					if (!line.isEmpty()) {
-
-						int k = line.indexOf(" : ");
-
-						String sigName = line.substring(0, k).trim();
-
-						String sigDataStr = line.substring(k + 3);
-
-						int n = sigDataStr.length();
-
-						int[] sigData = new int[n];
-
-						for (int j = 0; j < n; j++) {
-
-							sigData[j] = getBitValue(sigDataStr.charAt(j));
-
-						}
-
-						sigNames.add(sigName);
-
-						waveforms.put(sigName, sigData);
-
-						cycles = cycles == 0 ? n : cycles;
-
-						if (cycles != n)
-							throw new Exception("signal " + sigName + " had a different number of cycles");
-
-					}
-
-				}
-
-			} finally {
-
-				br.close();
-
-			}
-
-		} else {
-
-			throw new Exception("file + " + f.getAbsolutePath() + " does not exist");
-
-		}
-
 	}
 
 	public void writeVCDFile(String file, boolean runGtkwave) throws Exception {
@@ -159,13 +92,11 @@ public class Waveform {
 
 		vcdLines.add("$timescale 1ns $end");
 
-		vcdLines.add("$scope module logic $end");
+		vcdLines.add("$scope module top $end");
 
 		for (String signal : vcdSignals) {
 
-			String signalStrip = signal.charAt(0) == '\\' ? signal.substring(1) : signal;
-
-			vcdLines.add(String.format("$var wire 1 %s %s $end", vcdIDs.get(signal), signalStrip));
+			vcdLines.add(String.format("$var wire 1 %s %s $end", vcdIDs.get(signal), getSignalNameVCD(signal)));
 
 		}
 
@@ -245,9 +176,11 @@ public class Waveform {
 
 				}
 
-				String signalStrip = s.charAt(0) == '\\' ? s.substring(1) : s;
+				s = getSignalNameVCD(s);
 
-				tclLines.add(String.format("lappend sigList {%s}", signalStrip));
+				s = s.contains(".") ? s : "top.".concat(s);
+
+				tclLines.add(String.format("lappend sigList {%s}", s));
 
 			}
 
@@ -271,6 +204,8 @@ public class Waveform {
 			String cmd = String.format("gtkwave \"%s\" -S \"%s\"", vcdFile.getAbsolutePath(),
 					tclFile.getAbsolutePath());
 
+			System.out.println(cmd);
+
 			final Runtime rt = Runtime.getRuntime();
 
 			try {
@@ -288,6 +223,8 @@ public class Waveform {
 		}
 
 	}
+
+	// internal
 
 	private String getIdentifierVCD(int i) {
 
@@ -315,11 +252,79 @@ public class Waveform {
 
 	private ArrayList<String> getVisibleSignals() {
 
+		// return a (sorted) list of signals to include in console printouts and
+		// vcd files
+
 		ArrayList<String> result = new ArrayList<String>();
 
 		for (String s : sigNames)
 			if (isVisible(s))
 				result.add(s);
+
+		return sortSignals(result);
+
+	}
+
+	private ArrayList<String> sortSignals(ArrayList<String> signals) {
+
+		// This is a basic sort routine except that it reverses the order of bit
+		// array signals, for example when passed the array:
+		// [c, b[0], b[1], b[2], a]
+		// this method returns:
+		// [a, b[2], b[1], b[0], c]
+
+		// This is mainly to improve counter-example console printout and also
+		// to workaround Gtkwave interpreting lower array bits as the MSB
+
+		// first create a copy of the input list and sort it
+
+		ArrayList<String> sigNames = new ArrayList<String>(signals);
+
+		Collections.sort(sigNames);
+
+		// now split signals into groups by array name, for example
+		// signal "a" -> array name "a"
+		// signal "b[0]" -> array name "b"
+		// signal "b[1]" -> array name "b"
+		// signal "b[2]" -> array name "b"
+		// signal "c" -> array name "c"
+
+		ArrayList<ArrayList<String>> signalGroups = new ArrayList<ArrayList<String>>();
+
+		String currentArrayName = "";
+
+		for (String s : sigNames) {
+
+			int k = s.indexOf('[');
+
+			String sigArrayName = k > -1 ? s.substring(0, k) : s;
+
+			if (!sigArrayName.equals(currentArrayName)) {
+
+				signalGroups.add(new ArrayList<String>());
+
+				currentArrayName = sigArrayName;
+			}
+
+			signalGroups.get(signalGroups.size() - 1).add(s);
+
+		}
+
+		// Finally go through the groups and add their content (in reverse
+		// order) to a new list. Non-array signals are in a group each so
+		// reversing won't affect them while array signals will be added in
+		// reverse order.
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		for (ArrayList<String> group : signalGroups) {
+
+			Collections.sort(group, Collections.reverseOrder());
+
+			for (String s : group)
+				result.add(s);
+
+		}
 
 		return result;
 
@@ -337,9 +342,11 @@ public class Waveform {
 		if (signal.contains(".rst"))
 			return false;
 
+		// yosys internal nets:
 		if (signal.startsWith("_") && signal.endsWith("_"))
 			return false;
 
+		// property nets:
 		if (signal.startsWith("@"))
 			return false;
 
@@ -378,6 +385,97 @@ public class Waveform {
 		} else {
 
 			return M;
+
+		}
+
+	}
+
+	private String getSignalNameVCD(String sigName) {
+
+		// returns slightly reworded signal name to workaround few vcd/gtkwave
+		// signal naming issues
+
+		// atm this only strips leading slashes
+
+		String vcdSignal = sigName.charAt(0) == '\\' ? sigName.substring(1) : sigName;
+
+		return vcdSignal;
+
+	}
+
+	private void readTextFile(String file) throws Exception {
+
+		// text file must be in the format:
+
+		// signal1 : 010101
+		// signal2 : 110011
+
+		// i.e. each line is a signal name followed by the string " : " and then
+		// a series of 0/1/x chars
+
+		// all signals must have the same number of cycles
+
+		File f = new File(file);
+
+		if (f.exists()) {
+
+			BufferedReader br = new BufferedReader(new FileReader(f));
+
+			sigNames = new ArrayList<String>();
+
+			waveforms = new HashMap<String, int[]>();
+
+			cycles = 0;
+
+			try {
+
+				while (true) {
+
+					String line = br.readLine();
+
+					if (line == null)
+						break;
+
+					if (!line.isEmpty()) {
+
+						int k = line.indexOf(" : ");
+
+						String sigName = line.substring(0, k).trim();
+
+						String sigDataStr = line.substring(k + 3);
+
+						int n = sigDataStr.length();
+
+						int[] sigData = new int[n];
+
+						for (int j = 0; j < n; j++) {
+
+							sigData[j] = getBitValue(sigDataStr.charAt(j));
+
+						}
+
+						sigNames.add(sigName);
+
+						waveforms.put(sigName, sigData);
+
+						cycles = cycles == 0 ? n : cycles;
+
+						if (cycles != n)
+							throw new Exception("signal " + sigName + " had a different number of cycles");
+
+					}
+
+				}
+
+			} finally {
+
+				br.close();
+
+			}
+
+		} else {
+
+			throw new Exception("file + " + f.getAbsolutePath() + " does not exist");
 
 		}
 

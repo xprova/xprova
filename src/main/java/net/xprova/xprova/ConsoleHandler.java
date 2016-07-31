@@ -1156,9 +1156,7 @@ public class ConsoleHandler {
 
 				if (loadCounter) {
 
-					Waveform counter = new Waveform();
-
-					counter.readTextFile(txtFile);
+					Waveform counter = new Waveform(txtFile);
 
 					if (printToConsole)
 						counter.print(System.out);
@@ -1400,17 +1398,6 @@ public class ConsoleHandler {
 				System.out.println("  - " + s);
 
 		}
-
-	}
-
-	@Command
-	public void testWaveform() throws Exception {
-
-		Waveform w = new Waveform();
-
-		w.readTextFile("d:\\counter.txt");
-
-		w.print(System.out);
 
 	}
 
