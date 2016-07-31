@@ -68,12 +68,7 @@ public class ConsoleHandler {
 
 	}
 
-	private void assertDesignLoaded() throws Exception {
-
-		if (current == null)
-			throw new Exception("no design is loaded");
-
-	}
+	// Commands:
 
 	//@formatter:off
 	@Command(
@@ -445,53 +440,6 @@ public class ConsoleHandler {
 
 	}
 
-	private void combineVertices(String prefix, HashSet<Vertex> selectedVertices, NetlistGraph effectiveNetlist,
-			Graph<Vertex> sg) throws Exception {
-
-		HashSet<Vertex> grp1 = new HashSet<Vertex>();
-
-		HashSet<String> grp1_types = new HashSet<String>();
-
-		Vertex comb = null;
-
-		int n = prefix.length();
-
-		for (Vertex v : selectedVertices) {
-
-			String upToNCharacters = v.name.substring(0, Math.min(v.name.length(), n));
-
-			if (upToNCharacters.equals(prefix)) {
-
-				grp1.add(v);
-
-				grp1_types.add(v.subtype);
-
-				comb = v;
-
-			}
-
-		}
-
-		if (!grp1.isEmpty()) {
-
-			grp1.remove(comb);
-
-			selectedVertices.removeAll(grp1);
-
-			comb.name = prefix;
-
-			if (grp1_types.size() > 1) {
-
-				comb.subtype = "BLOCK";
-
-			}
-
-			sg.combineVertices(comb, grp1);
-
-		}
-
-	}
-
 	//@formatter:off
 	@Command(
 		aliases = { "augment"},
@@ -737,155 +685,6 @@ public class ConsoleHandler {
 
 	}
 
-	private void reportClockDomains() throws Exception {
-
-		Transformer t1 = new Transformer(current, defsFF);
-
-		HashSet<Vertex> clks = t1.getClocks();
-
-		String strFormat = "%20s %14s\n";
-
-		out.printf("Found %d clock domain(s):\n\n", clks.size());
-
-		out.print(String.format(strFormat, "Clock Domain Net", "  FFs"));
-		out.print(String.format(strFormat, "----------------", "-----"));
-
-		for (Vertex clk : clks) {
-
-			int count = t1.getDomainFlops(clk).size();
-
-			out.print(String.format(strFormat, clk, count));
-
-		}
-
-	}
-
-	private void reportCrossoverPaths() {
-
-		String strFormat = "%20s -> %20s";
-
-		ArrayList<String> paths = new ArrayList<String>();
-
-		HashSet<Vertex> flops = current.getModulesByTypes(defsFF.keySet());
-
-		Graph<Vertex> ffGraph = current.reduce(flops);
-
-		for (Vertex src : flops) {
-
-			for (Vertex dst : ffGraph.getDestinations(src)) {
-
-				Vertex clk1 = current.getNet(src, defsFF.get(src.subtype).clkPort);
-				Vertex clk2 = current.getNet(dst, defsFF.get(dst.subtype).clkPort);
-
-				if (clk1 != clk2)
-					paths.add(String.format(strFormat, src, dst));
-
-			}
-
-		}
-
-		Collections.sort(paths);
-
-		// output
-
-		out.printf("Found %d crossover paths:\n\n", paths.size());
-
-		for (String p : paths) {
-
-			out.println(p);
-
-		}
-
-	}
-
-	private void renameModules(HashSet<String> ignored, String strFormat) {
-
-		// rename modules
-
-		List<Vertex> sortedMods = new ArrayList<Vertex>(current.getModules());
-
-		Collections.sort(sortedMods, new Comparator<Vertex>() {
-
-			@Override
-			public int compare(Vertex arg0, Vertex arg1) {
-
-				return arg0.name.compareTo(arg1.name);
-			}
-
-		});
-
-		HashMap<String, Integer> modCounts = new HashMap<String, Integer>();
-
-		for (Vertex v : sortedMods) {
-
-			if (!ignored.contains(v.name)) {
-
-				String lowerMod = v.subtype.toLowerCase();
-
-				Integer c = modCounts.get(lowerMod);
-
-				c = (c == null) ? 1 : c + 1;
-
-				v.name = String.format(strFormat, lowerMod, c);
-
-				modCounts.put(lowerMod, c);
-
-			}
-
-		}
-
-	}
-
-	private void renameNets(HashSet<String> ignored, String strFormat) {
-
-		// renames internal (i.e. non-port) nets
-
-		// rename nets
-
-		int netCount = 0;
-
-		HashSet<Vertex> nonIO = current.getNets();
-
-		nonIO.removeAll(current.getIONets());
-
-		List<Vertex> nonIOList = new ArrayList<Vertex>(nonIO);
-
-		Collections.sort(nonIOList, new Comparator<Vertex>() {
-
-			@Override
-			public int compare(Vertex arg0, Vertex arg1) {
-
-				return arg0.name.compareTo(arg1.name);
-			}
-
-		});
-
-		for (Vertex n : nonIOList) {
-
-			if (!ignored.contains(n.name)) {
-
-				String jNetName = n.name;
-
-				// to obtain a Java-friendly variable name,
-				// replace all non-word chars with underscores
-				jNetName = jNetName.replaceAll("[\\W]+", "_");
-
-				netCount += 1;
-
-				String nn = strFormat;
-
-				nn = nn.replace("%d", "" + netCount);
-
-				nn = nn.replace("%s", "" + jNetName);
-
-				n.name = nn;
-
-			}
-
-		}
-
-	}
-
 	//@formatter:off
 	@Command(
 		description = "rename nets or modules",
@@ -1106,61 +905,6 @@ public class ConsoleHandler {
 
 	}
 
-	private static String loadResourceString(String file) {
-
-		Scanner s = null;
-
-		String bannerFileContent;
-
-		try {
-
-			final InputStream stream;
-
-			stream = Console.class.getClassLoader().getResourceAsStream(file);
-
-			s = new Scanner(stream);
-
-			bannerFileContent = s.useDelimiter("\\Z").next();
-
-		} catch (Exception e) {
-
-			bannerFileContent = "<could not load internal file>\n";
-
-		} finally {
-
-			if (s != null)
-				s.close();
-
-		}
-
-		return bannerFileContent;
-
-	}
-
-	private void splitArr(String netNameFormat) {
-
-		for (Vertex v : current.getNets()) {
-
-			int k1 = v.name.indexOf("[");
-			int k2 = v.name.indexOf("]");
-
-			String name = v.name;
-
-			int bit = 0;
-
-			if (k1 != -1 && k2 != -1) {
-
-				name = v.name.substring(0, k1);
-
-				bit = Integer.valueOf(v.name.substring(k1 + 1, k2));
-
-				v.name = String.format(netNameFormat, name, bit);
-			}
-
-		}
-
-	}
-
 	//@formatter:off
 	@Command(
 		aliases = {"synth"},
@@ -1335,6 +1079,8 @@ public class ConsoleHandler {
 
 	}
 
+	// Internal Methods:
+
 	private int executeProgram(String cmd, boolean showOutput, boolean waitFor) throws Exception {
 
 		final Runtime rt = Runtime.getRuntime();
@@ -1372,6 +1118,264 @@ public class ConsoleHandler {
 		} else {
 
 			return 0;
+		}
+
+	}
+
+	private void assertDesignLoaded() throws Exception {
+
+		if (current == null)
+			throw new Exception("no design is loaded");
+
+	}
+
+	private void reportClockDomains() throws Exception {
+
+		Transformer t1 = new Transformer(current, defsFF);
+
+		HashSet<Vertex> clks = t1.getClocks();
+
+		String strFormat = "%20s %14s\n";
+
+		out.printf("Found %d clock domain(s):\n\n", clks.size());
+
+		out.print(String.format(strFormat, "Clock Domain Net", "  FFs"));
+		out.print(String.format(strFormat, "----------------", "-----"));
+
+		for (Vertex clk : clks) {
+
+			int count = t1.getDomainFlops(clk).size();
+
+			out.print(String.format(strFormat, clk, count));
+
+		}
+
+	}
+
+	private void reportCrossoverPaths() {
+
+		String strFormat = "%20s -> %20s";
+
+		ArrayList<String> paths = new ArrayList<String>();
+
+		HashSet<Vertex> flops = current.getModulesByTypes(defsFF.keySet());
+
+		Graph<Vertex> ffGraph = current.reduce(flops);
+
+		for (Vertex src : flops) {
+
+			for (Vertex dst : ffGraph.getDestinations(src)) {
+
+				Vertex clk1 = current.getNet(src, defsFF.get(src.subtype).clkPort);
+				Vertex clk2 = current.getNet(dst, defsFF.get(dst.subtype).clkPort);
+
+				if (clk1 != clk2)
+					paths.add(String.format(strFormat, src, dst));
+
+			}
+
+		}
+
+		Collections.sort(paths);
+
+		// output
+
+		out.printf("Found %d crossover paths:\n\n", paths.size());
+
+		for (String p : paths) {
+
+			out.println(p);
+
+		}
+
+	}
+
+	private void renameModules(HashSet<String> ignored, String strFormat) {
+
+		// rename modules
+
+		List<Vertex> sortedMods = new ArrayList<Vertex>(current.getModules());
+
+		Collections.sort(sortedMods, new Comparator<Vertex>() {
+
+			@Override
+			public int compare(Vertex arg0, Vertex arg1) {
+
+				return arg0.name.compareTo(arg1.name);
+			}
+
+		});
+
+		HashMap<String, Integer> modCounts = new HashMap<String, Integer>();
+
+		for (Vertex v : sortedMods) {
+
+			if (!ignored.contains(v.name)) {
+
+				String lowerMod = v.subtype.toLowerCase();
+
+				Integer c = modCounts.get(lowerMod);
+
+				c = (c == null) ? 1 : c + 1;
+
+				v.name = String.format(strFormat, lowerMod, c);
+
+				modCounts.put(lowerMod, c);
+
+			}
+
+		}
+
+	}
+
+	private void renameNets(HashSet<String> ignored, String strFormat) {
+
+		// renames internal (i.e. non-port) nets
+
+		// rename nets
+
+		int netCount = 0;
+
+		HashSet<Vertex> nonIO = current.getNets();
+
+		nonIO.removeAll(current.getIONets());
+
+		List<Vertex> nonIOList = new ArrayList<Vertex>(nonIO);
+
+		Collections.sort(nonIOList, new Comparator<Vertex>() {
+
+			@Override
+			public int compare(Vertex arg0, Vertex arg1) {
+
+				return arg0.name.compareTo(arg1.name);
+			}
+
+		});
+
+		for (Vertex n : nonIOList) {
+
+			if (!ignored.contains(n.name)) {
+
+				String jNetName = n.name;
+
+				// to obtain a Java-friendly variable name,
+				// replace all non-word chars with underscores
+				jNetName = jNetName.replaceAll("[\\W]+", "_");
+
+				netCount += 1;
+
+				String nn = strFormat;
+
+				nn = nn.replace("%d", "" + netCount);
+
+				nn = nn.replace("%s", "" + jNetName);
+
+				n.name = nn;
+
+			}
+
+		}
+
+	}
+
+	private static String loadResourceString(String file) {
+
+		Scanner s = null;
+
+		String bannerFileContent;
+
+		try {
+
+			final InputStream stream;
+
+			stream = Console.class.getClassLoader().getResourceAsStream(file);
+
+			s = new Scanner(stream);
+
+			bannerFileContent = s.useDelimiter("\\Z").next();
+
+		} catch (Exception e) {
+
+			bannerFileContent = "<could not load internal file>\n";
+
+		} finally {
+
+			if (s != null)
+				s.close();
+
+		}
+
+		return bannerFileContent;
+
+	}
+
+	private void splitArr(String netNameFormat) {
+
+		for (Vertex v : current.getNets()) {
+
+			int k1 = v.name.indexOf("[");
+			int k2 = v.name.indexOf("]");
+
+			String name = v.name;
+
+			int bit = 0;
+
+			if (k1 != -1 && k2 != -1) {
+
+				name = v.name.substring(0, k1);
+
+				bit = Integer.valueOf(v.name.substring(k1 + 1, k2));
+
+				v.name = String.format(netNameFormat, name, bit);
+			}
+
+		}
+
+	}
+
+	private void combineVertices(String prefix, HashSet<Vertex> selectedVertices, NetlistGraph effectiveNetlist,
+			Graph<Vertex> sg) throws Exception {
+
+		HashSet<Vertex> grp1 = new HashSet<Vertex>();
+
+		HashSet<String> grp1_types = new HashSet<String>();
+
+		Vertex comb = null;
+
+		int n = prefix.length();
+
+		for (Vertex v : selectedVertices) {
+
+			String upToNCharacters = v.name.substring(0, Math.min(v.name.length(), n));
+
+			if (upToNCharacters.equals(prefix)) {
+
+				grp1.add(v);
+
+				grp1_types.add(v.subtype);
+
+				comb = v;
+
+			}
+
+		}
+
+		if (!grp1.isEmpty()) {
+
+			grp1.remove(comb);
+
+			selectedVertices.removeAll(grp1);
+
+			comb.name = prefix;
+
+			if (grp1_types.size() > 1) {
+
+				comb.subtype = "BLOCK";
+
+			}
+
+			sg.combineVertices(comb, grp1);
+
 		}
 
 	}
