@@ -271,10 +271,10 @@ public class ConsoleHandler {
 			"Options:",
 			"  -e --ignore-edges e1,e2,...     exclude edges from graph",
 			"  -v --ignore-vertices v1,v2,...  exclude vertices from graph",
-			"  --to <flipflop>                 export sub-graph of flipflop and its combinational logic",
+			"  -o --to <flipflop>              export sub-graph of flipflop and its combinational logic",
 			"  -t --type fng                   include (f)lip-flops, (n)ets and/or (g)ates",
 			"  -c --combine v1,v2,...          combine group of vertices into a single vertex",
-			"  --pdf                           output a PDF file directly (requires DOT)"
+			"  -p --pdf                        output a PDF file directly (requires DOT)"
 		}
 	)
 	//@formatter:on
@@ -282,33 +282,26 @@ public class ConsoleHandler {
 
 		// parse command input
 
-		Option optIgnoreEdges = Option.builder("e").hasArg().argName("IGNORE_EDGES").required(false)
-				.longOpt("ignore-edges").build();
+		Option[] opts = {
 
-		Option optIgnoreVertices = Option.builder("v").hasArg().argName("IGNORE_VERTICES").required(false)
-				.longOpt("ignore-vertices").build();
+				Option.builder("e").hasArg().longOpt("ignore-edges").build(),
 
-		Option optType = Option.builder("t").longOpt("type").hasArg().build();
+				Option.builder("v").hasArg().longOpt("ignore-vertices").build(),
 
-		Option optTo = Option.builder().longOpt("to").hasArg().build();
+				Option.builder("t").longOpt("type").hasArg().build(),
 
-		Option optCombine = Option.builder("c").longOpt("combine").hasArg().build();
+				Option.builder("o").longOpt("to").hasArg().build(),
 
-		Option optPDF = Option.builder().longOpt("pdf").build();
+				Option.builder("c").longOpt("combine").hasArg().build(),
+
+				Option.builder("p").longOpt("pdf").build(),
+
+		};
 
 		Options options = new Options();
 
-		options.addOption(optIgnoreEdges);
-
-		options.addOption(optIgnoreVertices);
-
-		options.addOption(optType);
-
-		options.addOption(optTo);
-
-		options.addOption(optCombine);
-
-		options.addOption(optPDF);
+		for (Option opt : opts)
+			options.addOption(opt);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -437,29 +430,9 @@ public class ConsoleHandler {
 
 			// invoke DOT
 
-			final Runtime rt = Runtime.getRuntime();
+			int dotExitCode = executeProgram(cmd, true, true);
 
-			Process proc = rt.exec(cmd);
-
-			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-			BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
-			String s;
-
-			while ((s = stdError.readLine()) != null)
-				out.println(s);
-
-			while ((s = stdInput.readLine()) != null)
-				out.println(s);
-
-			stdInput.close();
-
-			stdError.close();
-
-			proc.waitFor();
-
-			if (proc.exitValue() != 0) {
+			if (dotExitCode != 0) {
 
 				throw new Exception("Error while attempting to convert dot file to pdf using DOT");
 
@@ -1086,29 +1059,9 @@ public class ConsoleHandler {
 
 		out.println("Compiling ...");
 
-		final Runtime rt = Runtime.getRuntime();
+		int compileExitCode = executeProgram(cmd, true, true);
 
-		Process proc = rt.exec(cmd);
-
-		BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-		BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
-		String s;
-
-		while ((s = stdError.readLine()) != null)
-			out.println(s);
-
-		while ((s = stdInput.readLine()) != null)
-			out.println(s);
-
-		stdInput.close();
-
-		stdError.close();
-
-		proc.waitFor();
-
-		if (proc.exitValue() != 0) {
+		if (compileExitCode != 0) {
 
 			throw new Exception("Compilation failed");
 
@@ -1118,25 +1071,9 @@ public class ConsoleHandler {
 
 		out.println("Executing compiled code ...");
 
-		Process proc2 = rt.exec(cmd2);
+		int genExitCode = executeProgram(cmd2, true, true);
 
-		BufferedReader stdInput2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
-
-		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
-
-		while (proc2.isAlive()) {
-
-			while ((s = stdInput2.readLine()) != null)
-				out.println(s);
-
-			while ((s = stdError2.readLine()) != null)
-				out.println(s);
-
-		}
-
-		// check exist status
-
-		if (proc2.exitValue() == 100) {
+		if (genExitCode == 100) {
 
 			boolean runGtkwave = line.hasOption("g");
 
@@ -1394,6 +1331,47 @@ public class ConsoleHandler {
 			for (String s : hierarchy.get(i))
 				System.out.println("  - " + s);
 
+		}
+
+	}
+
+	private int executeProgram(String cmd, boolean showOutput, boolean waitFor) throws Exception {
+
+		final Runtime rt = Runtime.getRuntime();
+
+		Process proc = rt.exec(cmd);
+
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+		BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+		String s;
+
+		do {
+
+			while ((s = stdError.readLine()) != null)
+				if (showOutput)
+					out.println(s);
+
+			while ((s = stdInput.readLine()) != null)
+				if (showOutput)
+					out.println(s);
+
+		} while (proc.isAlive() && waitFor);
+
+		stdInput.close();
+
+		stdError.close();
+
+		if (waitFor) {
+
+			proc.waitFor();
+
+			return proc.exitValue();
+
+		} else {
+
+			return 0;
 		}
 
 	}
