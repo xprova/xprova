@@ -998,13 +998,15 @@ public class ConsoleHandler {
 		description = "run formal verification",
 		help = {
 			"Usage:",
-			"  prove [--vcd <file>] [--gtkwave]",
+			"  prove [--print] [--vcd <file>] [--txt <file>] [--gtkwave]",
+			"        [--signals sig1,sig2...]",
 			"",
 			"Options:",
 			"  -p --print       print counter-example to console",
 			"  -v --vcd <file>  export counter-example to vcd file",
 			"  -t --txt <file>  export counter-example to plain-text file",
 			"  -g --gtkwave     open counter-example using gtkwave",
+			"  -s --signals     list of signals to include in counter-example"
 		}
 	)
 	//@formatter:on
@@ -1012,28 +1014,24 @@ public class ConsoleHandler {
 
 		// parse command input
 
-		Option optNoCounter = Option.builder().desc("do not print counter-example (if found)").required(false)
-				.longOpt("nocounter").build();
+		Option[] opts = {
 
-		Option optVcd = Option.builder("v").longOpt("vcd").hasArg().build();
+				Option.builder("v").longOpt("vcd").hasArg().build(),
 
-		Option optTxt = Option.builder("t").longOpt("txt").hasArg().build();
+				Option.builder("t").longOpt("txt").hasArg().build(),
 
-		Option optPrint = Option.builder("p").longOpt("print").build();
+				Option.builder("s").longOpt("signals").hasArg().build(),
 
-		Option optGtkwave = Option.builder("g").longOpt("gtkwave").build();
+				Option.builder("p").longOpt("print").build(),
+
+				Option.builder("g").longOpt("gtkwave").build()
+
+		};
 
 		Options options = new Options();
 
-		options.addOption(optNoCounter);
-
-		options.addOption(optVcd);
-
-		options.addOption(optTxt);
-
-		options.addOption(optPrint);
-
-		options.addOption(optGtkwave);
+		for (Option o : opts)
+			options.addOption(o);
 
 		CommandLineParser parser = new DefaultParser();
 
@@ -1075,96 +1073,95 @@ public class ConsoleHandler {
 
 		ArrayList<String> lines = cg.generate(templateCode);
 
-		if (!line.hasOption("norun")) {
+		out.println("Saving code to " + javaFile.getAbsolutePath() + " ...");
 
-			out.println("Saving code to " + javaFile.getAbsolutePath() + " ...");
+		PrintStream fout = new PrintStream(javaFile);
 
-			PrintStream fout = new PrintStream(javaFile);
+		for (String l : lines)
+			fout.println(l);
 
-			for (String l : lines)
-				fout.println(l);
+		fout.close();
 
-			fout.close();
+		// compile using javac
 
-			// compile using javac
+		out.println("Compiling ...");
 
-			out.println("Compiling ...");
+		final Runtime rt = Runtime.getRuntime();
 
-			final Runtime rt = Runtime.getRuntime();
+		Process proc = rt.exec(cmd);
 
-			Process proc = rt.exec(cmd);
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 
-			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 
-			BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+		String s;
 
-			String s;
+		while ((s = stdError.readLine()) != null)
+			out.println(s);
 
-			while ((s = stdError.readLine()) != null)
+		while ((s = stdInput.readLine()) != null)
+			out.println(s);
+
+		stdInput.close();
+
+		stdError.close();
+
+		proc.waitFor();
+
+		if (proc.exitValue() != 0) {
+
+			throw new Exception("Compilation failed");
+
+		}
+
+		// run code
+
+		out.println("Executing compiled code ...");
+
+		Process proc2 = rt.exec(cmd2);
+
+		BufferedReader stdInput2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
+
+		BufferedReader stdError2 = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
+
+		while (proc2.isAlive()) {
+
+			while ((s = stdInput2.readLine()) != null)
 				out.println(s);
 
-			while ((s = stdInput.readLine()) != null)
+			while ((s = stdError2.readLine()) != null)
 				out.println(s);
 
-			stdInput.close();
+		}
 
-			stdError.close();
+		// check exist status
 
-			proc.waitFor();
+		if (proc2.exitValue() == 100) {
 
-			if (proc.exitValue() != 0) {
+			boolean runGtkwave = line.hasOption("g");
 
-				throw new Exception("Compilation failed");
+			boolean printToConsole = line.hasOption("p");
 
-			}
+			boolean writeVCD = line.hasOption("v");
 
-			// run code
+			String defVCD = (new File(tempDir, "counter-example.vcd")).getAbsolutePath();
 
-			out.println("Executing compiled code ...");
+			String vcdFile = line.getOptionValue("v", defVCD);
 
-			Process proc2 = rt.exec(cmd2);
+			boolean loadCounter = runGtkwave || printToConsole || writeVCD;
 
-			BufferedReader stdInput2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
+			if (loadCounter) {
 
-			BufferedReader stdError2 = new BufferedReader(new InputStreamReader(proc2.getErrorStream()));
+				Waveform counter = new Waveform(txtFile);
 
-			while (proc2.isAlive()) {
+				if (line.hasOption('s'))
+					counter.selectSignals(line.getOptionValue('s').split(","));
 
-				while ((s = stdInput2.readLine()) != null)
-					out.println(s);
+				if (printToConsole)
+					counter.print(System.out);
 
-				while ((s = stdError2.readLine()) != null)
-					out.println(s);
-
-			}
-
-			// check exist status
-
-			if (proc2.exitValue() == 100) {
-
-				boolean runGtkwave = line.hasOption("g");
-
-				boolean printToConsole = line.hasOption("p");
-
-				boolean writeVCD = line.hasOption("v");
-
-				String defVCD = (new File(tempDir, "counter-example.vcd")).getAbsolutePath();
-
-				String vcdFile = line.getOptionValue("v", defVCD);
-
-				boolean loadCounter = runGtkwave || printToConsole || writeVCD;
-
-				if (loadCounter) {
-
-					Waveform counter = new Waveform(txtFile);
-
-					if (printToConsole)
-						counter.print(System.out);
-
-					if (runGtkwave || writeVCD)
-						counter.writeVCDFile(vcdFile, runGtkwave);
-
-				}
+				if (runGtkwave || writeVCD)
+					counter.writeVCDFile(vcdFile, runGtkwave);
 
 			}
 

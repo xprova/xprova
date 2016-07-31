@@ -12,6 +12,6 @@ design current topunit
 
 assume data_out[3]
 
-assert ~valid
+assert ~(valid ## ~valid)
 
-prove -g -p
+prove -g -p -s=ack,busy,data,data_in,data_out,send,stb,valid

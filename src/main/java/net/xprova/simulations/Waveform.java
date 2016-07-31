@@ -8,12 +8,15 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Waveform {
 
 	private ArrayList<String> sigNames;
 
 	private HashMap<String, int[]> waveforms;
+
+	private HashSet<String> selectedSignals;
 
 	private int cycles;
 
@@ -224,6 +227,15 @@ public class Waveform {
 
 	}
 
+	public void selectSignals(String[] selSignals) {
+
+		selectedSignals.clear();
+
+		for (String s : selSignals)
+			selectedSignals.add(s);
+
+	}
+
 	// internal
 
 	private String getIdentifierVCD(int i) {
@@ -295,9 +307,7 @@ public class Waveform {
 
 		for (String s : sigNames) {
 
-			int k = s.indexOf('[');
-
-			String sigArrayName = k > -1 ? s.substring(0, k) : s;
+			String sigArrayName = getArrayName(s);
 
 			if (!sigArrayName.equals(currentArrayName)) {
 
@@ -330,6 +340,18 @@ public class Waveform {
 
 	}
 
+	private String getArrayName(String signal) {
+
+		// returns array name of signal, for example
+		// "a" -> "a"
+		// "b[0]" -> "b"
+
+		int k = signal.indexOf('[');
+
+		return k > -1 ? signal.substring(0, k) : signal;
+
+	}
+
 	private boolean isVisible(String signal) {
 
 		// determines which signals are printed to console or written to file
@@ -348,6 +370,9 @@ public class Waveform {
 
 		// property nets:
 		if (signal.startsWith("@"))
+			return false;
+
+		if (!selectedSignals.contains(getArrayName(signal)))
 			return false;
 
 		return true;
@@ -423,6 +448,8 @@ public class Waveform {
 
 			sigNames = new ArrayList<String>();
 
+			selectedSignals = new HashSet<String>();
+
 			waveforms = new HashMap<String, int[]>();
 
 			cycles = 0;
@@ -466,6 +493,8 @@ public class Waveform {
 					}
 
 				}
+
+				selectedSignals.addAll(sigNames);
 
 			} finally {
 
