@@ -59,12 +59,7 @@ public class Waveform {
 
 				for (int i = 0; i < cycles; i++) {
 
-					if (sigData[i] == H)
-						out.printf("1");
-					else if (sigData[i] == L)
-						out.printf("0");
-					else
-						out.printf("X");
+					out.printf(getBitStr(sigData[i]));
 
 				}
 
@@ -112,14 +107,7 @@ public class Waveform {
 
 						for (int j = 0; j < n; j++) {
 
-							char c = sigDataStr.charAt(j);
-
-							if (c == '1')
-								sigData[j] = H;
-							else if (c == '0')
-								sigData[j] = L;
-							else
-								sigData[j] = M;
+							sigData[j] = getBitValue(sigDataStr.charAt(j));
 
 						}
 
@@ -160,21 +148,12 @@ public class Waveform {
 
 		// rename signals with spaces
 
-		ArrayList<String> sigNamesVCD = new ArrayList<String>();
+		ArrayList<String> vcdSignals = getVisibleSignals();
 
-		for (int i = 0; i < sigNames.size(); i++) {
+		HashMap<String, String> vcdIDs = new HashMap<String, String>();
 
-			String s = sigNames.get(i);
-
-			if (s.startsWith("@"))
-				s = "prop-" + s.replace(" ", "-");
-
-			if (s.startsWith("\\"))
-				s = s.substring(1);
-
-			sigNamesVCD.add(s);
-
-		}
+		for (String s : vcdSignals)
+			vcdIDs.put(s, getIdentifierVCD(vcdIDs.size()));
 
 		// prepare vcd file content
 
@@ -182,8 +161,13 @@ public class Waveform {
 
 		vcdLines.add("$scope module logic $end");
 
-		for (int i = 0; i < sigNames.size(); i++)
-			vcdLines.add(String.format("$var wire 1 %s %s $end", getIdentifierVCD(i), sigNamesVCD.get(i)));
+		for (String signal : vcdSignals) {
+
+			String signalStrip = signal.charAt(0) == '\\' ? signal.substring(1) : signal;
+
+			vcdLines.add(String.format("$var wire 1 %s %s $end", vcdIDs.get(signal), signalStrip));
+
+		}
 
 		vcdLines.add("$upscope $end");
 
@@ -191,8 +175,8 @@ public class Waveform {
 
 		vcdLines.add("$dumpvars");
 
-		for (int i = 0; i < sigNames.size(); i++)
-			vcdLines.add(String.format("x%s", getIdentifierVCD(i)));
+		for (String signal : vcdSignals)
+			vcdLines.add(String.format("x%s", vcdIDs.get(signal)));
 
 		vcdLines.add("$end");
 
@@ -200,9 +184,11 @@ public class Waveform {
 
 			vcdLines.add(String.format("#%d", j));
 
-			for (int i = 0; i < sigNames.size(); i++) {
+			for (int i = 0; i < vcdSignals.size(); i++) {
 
-				int[] sigWaveform = waveforms.get(sigNames.get(i));
+				String signal = vcdSignals.get(i);
+
+				int[] sigWaveform = waveforms.get(signal);
 
 				int newVal = sigWaveform[j];
 
@@ -210,16 +196,7 @@ public class Waveform {
 
 				if (newVal != oldVal) {
 
-					String newValStr;
-
-					if (newVal == -1)
-						newValStr = "1";
-					else if (newVal == 0)
-						newValStr = "0";
-					else
-						newValStr = "x";
-
-					vcdLines.add(String.format("%s%s", newValStr, getIdentifierVCD(i)));
+					vcdLines.add(String.format("%s%s", getBitStr(newVal), vcdIDs.get(signal)));
 
 				}
 
@@ -252,27 +229,26 @@ public class Waveform {
 
 			tclLines.add("set sigList [list]");
 
-			for (String s : sigNamesVCD) {
+			for (String s : vcdSignals) {
 
-				if (isVisible(s)) {
+				if (s.contains("[")) {
 
-					if (!s.startsWith("\\") && s.contains("[")) {
+					if (s.contains("[0]")) {
 
-						if (s.contains("[0]")) {
+						s = s.replaceAll("\\[\\d+\\]", "");
 
-							s = s.replaceAll("\\[\\d+\\]", "");
+					} else {
 
-						} else {
-
-							continue;
-
-						}
+						continue;
 
 					}
 
-					tclLines.add(String.format("lappend sigList {%s}", s));
-
 				}
+
+				String signalStrip = s.charAt(0) == '\\' ? s.substring(1) : s;
+
+				tclLines.add(String.format("lappend sigList {%s}", signalStrip));
+
 			}
 
 			tclLines.add("set num_added [ gtkwave::addSignalsFromList $sigList ]");
@@ -337,6 +313,18 @@ public class Waveform {
 
 	}
 
+	private ArrayList<String> getVisibleSignals() {
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		for (String s : sigNames)
+			if (isVisible(s))
+				result.add(s);
+
+		return result;
+
+	}
+
 	private boolean isVisible(String signal) {
 
 		// determines which signals are printed to console or written to file
@@ -352,7 +340,46 @@ public class Waveform {
 		if (signal.startsWith("_") && signal.endsWith("_"))
 			return false;
 
+		if (signal.startsWith("@"))
+			return false;
+
 		return true;
+
+	}
+
+	private String getBitStr(int b) {
+
+		if (b == H) {
+
+			return "1";
+
+		} else if (b == L) {
+
+			return "0";
+
+		} else {
+
+			return "x";
+
+		}
+
+	}
+
+	private int getBitValue(char b) {
+
+		if (b == '1') {
+
+			return H;
+
+		} else if (b == '0') {
+
+			return L;
+
+		} else {
+
+			return M;
+
+		}
 
 	}
 

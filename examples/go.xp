@@ -8,10 +8,10 @@ read -b examples/topunit.v
 
 design current topunit
 
-dot -e=ST,RS,CK --pdf output/netlist.pdf
+#dot -e=ST,RS,CK --pdf output/netlist.pdf
 
 assume data_out[3]
 
 assert ~valid
 
-prove -g
+prove -g -p
