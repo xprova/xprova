@@ -778,6 +778,7 @@ public class ConsoleHandler {
 			"  -v --vcd <file>  export counter-example to vcd file",
 			"  -t --txt <file>  export counter-example to plain-text file",
 			"  -g --gtkwave     open counter-example using gtkwave",
+			"  -w --wavejson    print counter-example in WaveJSON format",
 			"  -s --signals     list of signals to include in counter-example"
 		}
 	)
@@ -795,6 +796,8 @@ public class ConsoleHandler {
 				Option.builder("s").longOpt("signals").hasArg().build(),
 
 				Option.builder("p").longOpt("print").build(),
+
+				Option.builder("w").longOpt("wavejson").build(),
 
 				Option.builder("g").longOpt("gtkwave").build()
 
@@ -898,6 +901,9 @@ public class ConsoleHandler {
 
 				if (runGtkwave || writeVCD)
 					counter.writeVCDFile(vcdFile, runGtkwave);
+
+				if (line.hasOption('w'))
+					counter.printWaveJSON(System.out);
 
 			}
 

@@ -74,6 +74,56 @@ public class Waveform {
 		}
 	}
 
+	public void printWaveJSON(PrintStream out) {
+
+		ArrayList<String> wL = new ArrayList<String>();
+
+		ArrayList<String> signals = getVisibleSignals();
+
+		int maxL = 0;
+
+		for (String s : signals)
+			maxL = s.length() > maxL ? s.length() : maxL;
+
+		String strFmt = String.format("%%%ds", maxL + 2);
+
+		wL.add("{signal: [");
+
+		String dots = new String(new char[cycles - 1]).replace("\0", ".");
+
+		String s1 = String.format(strFmt, "'clk'");
+
+		wL.add(String.format("    {name: %s, wave: 'P%s'},", s1, dots));
+
+		for (String s : signals) {
+
+			int[] d = waveforms.get(s);
+
+			int prevBit = d[0] + 1;
+
+			StringBuilder sb = new StringBuilder();
+
+			for (int bit : d) {
+
+				sb.append(bit == prevBit ? "." : getBitStr(bit));
+
+				prevBit = bit;
+
+			}
+
+			String s2 = String.format(strFmt, "'" + s + "'");
+
+			wL.add(String.format("    {name: %s, wave: '%s'},", s2, sb.toString()));
+
+		}
+
+		wL.add("]}");
+
+		for (String s : wL)
+			out.println(s);
+
+	}
+
 	public void writeVCDFile(String file, boolean runGtkwave) throws Exception {
 
 		File vcdFile = new File(file);
@@ -81,8 +131,6 @@ public class Waveform {
 		ArrayList<String> vcdLines = new ArrayList<String>();
 
 		ArrayList<String> tclLines = new ArrayList<String>();
-
-		// rename signals with spaces
 
 		ArrayList<String> vcdSignals = getVisibleSignals();
 
@@ -97,11 +145,8 @@ public class Waveform {
 
 		vcdLines.add("$scope module top $end");
 
-		for (String signal : vcdSignals) {
-
+		for (String signal : vcdSignals)
 			vcdLines.add(String.format("$var wire 1 %s %s $end", vcdIDs.get(signal), getSignalNameVCD(signal)));
-
-		}
 
 		vcdLines.add("$upscope $end");
 
@@ -206,8 +251,6 @@ public class Waveform {
 
 			String cmd = String.format("gtkwave \"%s\" -S \"%s\"", vcdFile.getAbsolutePath(),
 					tclFile.getAbsolutePath());
-
-			System.out.println(cmd);
 
 			final Runtime rt = Runtime.getRuntime();
 
