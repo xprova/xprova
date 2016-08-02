@@ -13,6 +13,7 @@ import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
 import net.xprova.propertylanguage.Property;
+import net.xprova.propertylanguage.TreeNode;
 import net.xprova.verilogparser.VerilogParser;
 
 public class CodeGenerator {
@@ -61,6 +62,133 @@ public class CodeGenerator {
 
 	}
 
+	public CodeGenerator() {
+
+	}
+
+	public Vertex addProperty(NetlistGraph graph, TreeNode root) throws Exception {
+
+		if (root.delay < 0) {
+
+			throw new Exception("encountered node with negative delay in property expression");
+
+		} else if (root.delay > 0) {
+
+			int delay = root.delay;
+
+			root.delay = 0;
+
+			Vertex net = addProperty(graph, root);
+
+			// create chain of flip-flops
+
+			for (int i=0; i<delay; i++) {
+
+				String ffName = "dff" + graph.getVertexCount();
+
+				Vertex newFlop = new Vertex(ffName, VertexType.MODULE, "*DFF");
+
+				graph.addVertex(newFlop);
+
+				graph.addConnection(net, newFlop);
+
+				String inputName = "n" + graph.getVertexCount();
+
+				Vertex flopInput = new Vertex(inputName, VertexType.NET, "wire");
+
+				graph.addVertex(flopInput);
+
+				graph.addConnection(newFlop, flopInput);
+
+				net = flopInput;
+			}
+
+			return net;
+
+		} else if (root.isTerminal()) {
+
+			Vertex v = graph.getVertex(root.name);
+
+			if (v == null) {
+
+				throw new Exception("graph does not contain identifier " + root.name);
+
+			} else {
+
+				return v;
+
+			}
+
+		} else {
+
+			if (root.name.equals("(")) {
+
+				return addProperty(graph, root.children.get(0));
+
+			} else if (root.name.equals("&") || root.name.equals("|")) {
+
+				// AND/OR gate
+
+				String name = root.name.equals("&") ? "and" : "or";
+
+				String modType = root.name.equals("&") ? "*AND" : "*OR";
+
+				Vertex gate = new Vertex(name + graph.getVertexCount(), VertexType.MODULE, modType);
+
+				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
+
+				graph.addVertex(gate);
+
+				graph.addVertex(gateOutput);
+
+				graph.addConnection(gate, gateOutput);
+
+				for (TreeNode c : root.children) {
+
+					Vertex cInput = addProperty(graph, c);
+
+					graph.addConnection(cInput, gate);
+
+				}
+
+				return gateOutput;
+
+			} else if (root.name.equals("&") || root.name.equals("|") || root.name.equals("^")) {
+
+				// AND/OR gate
+
+				String name = root.name.equals("&") ? "and" : (root.name.equals("|") ? "or" : "xor");
+
+				String modType = root.name.equals("&") ? "*AND" : (root.name.equals("|") ? "*OR" : "*XOR");
+
+				Vertex gate = new Vertex(name + graph.getVertexCount(), VertexType.MODULE, modType);
+
+				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
+
+				graph.addVertex(gate);
+
+				graph.addVertex(gateOutput);
+
+				graph.addConnection(gate, gateOutput);
+
+				for (TreeNode c : root.children) {
+
+					Vertex cInput = addProperty(graph, c);
+
+					graph.addConnection(cInput, gate);
+
+				}
+
+				return gateOutput;
+
+			}
+
+			throw new Exception("property operator not yet implemented");
+
+		}
+
+	}
+
 	private void checkProperties(HashSet<Property> propertes) throws Exception {
 
 		for (Property p : propertes) {
@@ -106,7 +234,7 @@ public class CodeGenerator {
 
 			// when adding a chain of flip-flops to hold the past values
 			// of an input net, the clk and reset pins of this net's virtual
-			// driver must be specified by the user (i.e. the user must specifiy
+			// driver must be specified by the user (i.e. the user must specify
 			// the clock to which this input net is timed)
 
 			// atm the code below will extract a random DFF instance and use

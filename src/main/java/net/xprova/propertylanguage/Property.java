@@ -52,11 +52,11 @@ public class Property {
 
 	}
 
-	private int getMinDelay(TreeNode root) {
+	private int getMinDelay(TreeNode root, int parentDelay) {
 
 		if (root.isTerminal()) {
 
-			return root.delay;
+			return parentDelay + root.delay;
 
 		} else {
 
@@ -64,7 +64,7 @@ public class Property {
 
 			for (TreeNode n : root.children) {
 
-				int d = getMinDelay(n);
+				int d = getMinDelay(n, parentDelay + root.delay);
 
 				minDelay = d < minDelay ? d : minDelay;
 
@@ -198,7 +198,7 @@ public class Property {
 		for (TreeNode c : root.children)
 			rewriteSyntaticSugar(c);
 
-		// change (x |-> #n y) into (x |-> #n+1 y)
+		// change (x |=> #n y) into (x |-> #n+1 y)
 
 		if (root.name.equals(IMPLY_NEXT)) {
 
@@ -266,8 +266,6 @@ public class Property {
 		}
 
 		// $changed(x) into (x ^ #1 x)
-
-
 
 		if (root.name.equals(CHANGED)) {
 
@@ -445,19 +443,9 @@ public class Property {
 
 		flattenDelays(root, 0);
 
-		int minDelay = getMinDelay(root);
+		int minDelay = getMinDelay(root, 0);
 
 		addDelayRecur(root, -minDelay);
-
-//		root.print();
-		//
-		// System.out.println("max delay = " + getMaxDelay(root));
-		//
-		// addDelayRecur(root, -getMaxDelay(root));
-		//
-		// root.print();
-		//
-		// System.out.println("max delay = " + getMaxDelay(root));
 
 	}
 

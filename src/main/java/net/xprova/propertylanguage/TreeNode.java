@@ -74,10 +74,10 @@ public class TreeNode {
 		if (children != null) {
 
 			for (int i = 0; i < children.size() - 1; i++)
-				children.get(i).print(prefix + (isTail ? "    " : "\u00E2   "), false);
+				children.get(i).print(prefix + (isTail ? "    " : "\u2502   "), false);
 
 			if (children.size() > 0)
-				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u00E2   "), true);
+				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u2502   "), true);
 
 		}
 	}

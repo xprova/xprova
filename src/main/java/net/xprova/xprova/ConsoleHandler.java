@@ -31,11 +31,9 @@ import net.xprova.netlistgraph.Generator;
 import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.NetlistGraphDotFormatter;
 import net.xprova.netlistgraph.Vertex;
-import net.xprova.netlistgraph.VertexType;
 import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
 import net.xprova.propertylanguage.Property;
-import net.xprova.propertylanguage.TreeNode;
 import net.xprova.simulations.CodeGenerator;
 import net.xprova.simulations.Waveform;
 import net.xprova.verilogparser.VerilogParser;
@@ -1391,56 +1389,13 @@ public class ConsoleHandler {
 	@Command
 	public void synthProp() throws Exception {
 
+		CodeGenerator cg = new CodeGenerator();
+
 		for (Property p : assertions) {
+
 			p.printExpressionTree();
-			addProperty(current, p.root);
-		}
 
-	}
-
-	private Vertex addProperty(NetlistGraph graph, TreeNode root) throws Exception {
-
-		if (root.isTerminal()) {
-
-			Vertex v = graph.getVertex(root.name);
-
-			if (v == null)
-				throw new Exception("graph does not contain identifier " + root.name);
-			else
-				return v;
-
-		} else {
-
-			if (root.name.equals("(")) {
-
-				return addProperty(graph, root.children.get(0));
-
-			} else if (root.name.equals("&")) {
-
-				// AND gate
-
-				Vertex gate = new Vertex("and" + graph.getVertexCount(), VertexType.MODULE, "*AND");
-				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
-
-				graph.addVertex(gate);
-				graph.addVertex(gateOutput);
-
-				graph.addConnection(gate, gateOutput);
-
-				for (TreeNode c : root.children) {
-
-					Vertex cInput = addProperty(graph, c);
-
-					graph.addConnection(cInput, gate);
-
-				}
-
-				return gateOutput;
-
-			}
-
-			throw new Exception("property operator not yet implemented");
-
+			cg.addProperty(current, p.root);
 		}
 
 	}
