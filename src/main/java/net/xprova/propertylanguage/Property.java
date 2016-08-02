@@ -156,7 +156,7 @@ public class Property {
 	private void flattenDelays(TreeNode root, int parentDelay) {
 
 		// this function propagates delays down a tree, effectively
-		// mapping an expression like ((a & b) @ 1) to (a@1 & b@1)
+		// mapping an expression like (@1 (a & b)) to (@1 a & @1 b)
 
 		if (root.isTerminal()) {
 
@@ -170,6 +170,32 @@ public class Property {
 			root.delay = 0;
 
 		}
+
+	}
+
+	public void groupDelays(TreeNode root) {
+
+		if (root.isTerminal()) {
+
+			return;
+
+		} else {
+
+			for (TreeNode c : root.children)
+				groupDelays(c);
+
+		}
+
+		int minChildDelay = Integer.MAX_VALUE;
+
+		for (TreeNode c : root.children)
+			minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
+
+
+		for (TreeNode c : root.children)
+			c.delay -= minChildDelay;
+
+		root.delay += minChildDelay;
 
 	}
 

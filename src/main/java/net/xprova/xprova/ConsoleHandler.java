@@ -1395,6 +1395,8 @@ public class ConsoleHandler {
 
 			p.printExpressionTree();
 
+			p.groupDelays(p.root);
+
 			cg.addProperty(current, p.root);
 		}
 
