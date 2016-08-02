@@ -13,7 +13,7 @@ import net.xprova.propertylanguage.PropertyLanguageParser.PropertyContext;
 
 public class Property {
 
-	private final TreeNode root;
+	public final TreeNode root;
 
 	// these must be the same as their correspondents in grammar:
 	private final String NOT = "~";

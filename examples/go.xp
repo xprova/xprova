@@ -1,13 +1,18 @@
 library load lib/xprova.v
 
-read -b examples/topunit.v
+#read -b examples/topunit.v
 
-design current topunit
+#design current topunit
 
-#dot -e=ST,RS,CK --pdf output/netlist.pdf
+read -b examples/tiny.v
 
-assume data_out[3]
+#assume data_out[3]
 
-assert ~(valid ## ~valid)
+assert a & (b & c)
 
-prove -w -p -s=ack,busy,send,stb,valid
+synthProp
+
+dot -e=ST,RS,CK --pdf output/netlist.pdf
+
+
+#prove -w -p -s=ack,busy,send,stb,valid

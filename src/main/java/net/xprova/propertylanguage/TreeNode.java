@@ -6,7 +6,9 @@ import java.util.List;
 public class TreeNode {
 
 	public String name;
+
 	public int delay;
+
 	public List<TreeNode> children;
 
 	public TreeNode(String name, TreeNode child, int delay) {
@@ -72,10 +74,10 @@ public class TreeNode {
 		if (children != null) {
 
 			for (int i = 0; i < children.size() - 1; i++)
-				children.get(i).print(prefix + (isTail ? "    " : "\u00E2”‚   "), false);
+				children.get(i).print(prefix + (isTail ? "    " : "\u00E2   "), false);
 
 			if (children.size() > 0)
-				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u00E2”‚   "), true);
+				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u00E2   "), true);
 
 		}
 	}
