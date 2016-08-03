@@ -142,7 +142,7 @@ public class Property {
 
 			TreeNode c1 = root.children.get(0);
 
-			TreeNode not = new TreeNode(NOT, 0);
+			TreeNode not = TreeNode.build(NOT);
 
 			not.children.add(c1);
 
@@ -160,7 +160,7 @@ public class Property {
 
 			TreeNode c1 = root.children.get(0);
 
-			TreeNode c2 = new TreeNode(NOT, new TreeNode(c1), 1);
+			TreeNode c2 = TreeNode.build(NOT).child(new TreeNode(c1)).delay(1);
 
 			root.children.clear();
 
@@ -176,7 +176,7 @@ public class Property {
 
 			TreeNode c1 = root.children.get(0);
 
-			TreeNode c2 = new TreeNode(NOT, new TreeNode(c1), 0);
+			TreeNode c2 = TreeNode.build(NOT).child(new TreeNode(c1));
 
 			c1.delay += 1;
 
@@ -195,7 +195,7 @@ public class Property {
 
 			c2.delay += 1;
 
-			TreeNode xorN = new TreeNode(XOR, 0);
+			TreeNode xorN = TreeNode.build(XOR);
 
 			xorN.children.add(c1);
 			xorN.children.add(c2);
@@ -262,7 +262,7 @@ public class Property {
 
 			if (root.getPayload() instanceof AtomContext) {
 
-				return new TreeNode(root.getText(), null);
+				return TreeNode.build(root.getText());
 
 			} else {
 
@@ -278,7 +278,7 @@ public class Property {
 
 			children.add(parseAST(root.getChild(1)));
 
-			return new TreeNode(root.getChild(0).getText(), children);
+			return TreeNode.build(root.getChild(0).getText()).children(children);
 
 		}
 
@@ -289,7 +289,7 @@ public class Property {
 
 			children.add(parseAST(root.getChild(2)));
 
-			return new TreeNode(c0, children);
+			return TreeNode.build(c0).children(children);
 
 		}
 
@@ -298,7 +298,7 @@ public class Property {
 			for (int i = 0; i < root.getChildCount(); i += 2)
 				children.add(parseAST(root.getChild(i)));
 
-			return new TreeNode(c1, children);
+			return TreeNode.build(c1).children(children);
 
 		} else if (DOUBLE_HASH.equals(c1)) {
 
@@ -343,20 +343,20 @@ public class Property {
 
 			}
 
-			return new TreeNode(AND, children);
+			return TreeNode.build(AND).children(children);
 
 		} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
 
 			children.add(parseAST(root.getChild(0)));
 			children.add(parseAST(root.getChild(2)));
 
-			return new TreeNode(c1, children);
+			return  TreeNode.build(c1).children(children);
 
 		} else if (c0.equals(LPAREN)) {
 
 			children.add(parseAST(root.getChild(1)));
 
-			return new TreeNode(LPAREN, children);
+			return TreeNode.build(LPAREN).children(children);
 
 		} else if (c0.equals(AT)) {
 
@@ -364,7 +364,7 @@ public class Property {
 
 			int delay = Integer.valueOf(c1);
 
-			return new TreeNode(LPAREN, children, delay);
+			return TreeNode.build(LPAREN).children(children).delay(delay);
 
 		} else if (c0.equals(HASH)) {
 
@@ -372,7 +372,7 @@ public class Property {
 
 			int delay = -Integer.valueOf(c1);
 
-			return new TreeNode(LPAREN, children, delay);
+			return TreeNode.build(LPAREN).children(children).delay(delay);
 
 		}
 

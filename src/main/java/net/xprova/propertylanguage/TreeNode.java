@@ -11,34 +11,44 @@ public class TreeNode {
 
 	public List<TreeNode> children;
 
-	public TreeNode(String name, TreeNode child, int delay) {
+	public static TreeNode build(String name) {
 
-		this.name = name;
+		return new TreeNode(name);
+
+	}
+
+	public TreeNode delay(int delay) {
 
 		this.delay = delay;
+
+		return this;
+
+	}
+
+	public TreeNode child(TreeNode child) {
+
+		children = new ArrayList<TreeNode>();
+
+		children.add(child);
+
+		return this;
+
+	}
+
+	public TreeNode children(ArrayList<TreeNode> children) {
+
+		this.children = children;
+
+		return this;
+
+	}
+
+	public TreeNode(String name) {
+
+		this.name = name;
 
 		this.children = new ArrayList<TreeNode>();
 
-		children.add(child);
-	}
-
-	public TreeNode(String name, List<TreeNode> children) {
-
-		this(name, children, 0);
-	}
-
-	public TreeNode(String name, int delay) {
-
-		this(name, new ArrayList<TreeNode>(), delay);
-	}
-
-	public TreeNode(String name, List<TreeNode> children, int delay) {
-
-		this.name = name;
-
-		this.children = children == null ? new ArrayList<TreeNode>() : children;
-
-		this.delay = delay;
 	}
 
 	public TreeNode(TreeNode other) {
