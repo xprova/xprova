@@ -1,7 +1,6 @@
 package net.xprova.propertylanguage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -76,83 +75,6 @@ public class Property {
 
 	}
 
-	private void getIDsRecur(TreeNode root, ArrayList<String> ids) {
-
-		if (root.isTerminal()) {
-
-			ids.add(root.name);
-
-		} else {
-
-			for (TreeNode c : root.children)
-				getIDsRecur(c, ids);
-
-		}
-
-	}
-
-	private String getExprRecur(TreeNode root, ExpressionFormatter formatter, HashMap<String, String> identifierMap,
-			String delayFormat) {
-
-		// each non-ID expression is wrapped in parenthesis
-
-		// delay format specifies how identifiers with non-zero delays should be
-		// formatted
-		// e.g. "%s @%d" formats net1 with a delay of 3 as "net1 @3"
-
-		String r = (root.delay == 0) ? root.name : String.format(delayFormat, root.delay, root.name);
-
-		if (root.isTerminal()) {
-
-			return (identifierMap == null) ? r : identifierMap.get(r);
-
-		}
-
-		ArrayList<String> operands = new ArrayList<String>();
-
-		for (TreeNode c : root.children)
-			operands.add(getExprRecur(c, formatter, identifierMap, delayFormat));
-
-		if (r.equals(NOT)) {
-
-			return String.format("(%s)", formatter.getNOT(operands.get(0)));
-
-		} else if (r.equals(AND)) {
-
-			return String.format("(%s)", formatter.getAND(operands));
-
-		} else if (r.equals(OR)) {
-
-			return String.format("(%s)", formatter.getOR(operands));
-
-		} else if (r.equals(XOR)) {
-
-			return String.format("(%s)", formatter.getXOR(operands));
-
-		} else if (r.equals(EQ)) {
-
-			return String.format("(%s)", formatter.getEQ(operands.get(0), operands.get(1)));
-
-		} else if (r.equals(NEQ)) {
-
-			return String.format("(%s)", formatter.getNEQ(operands.get(0), operands.get(1)));
-
-		} else if (r.equals(IMPLY)) {
-
-			return String.format("(%s)", formatter.getIMPLY(operands.get(0), operands.get(1)));
-
-		} else if (r.equals(LPAREN)) {
-
-			return operands.get(0);
-
-		} else {
-
-			return "???";
-
-		}
-
-	}
-
 	private void flattenDelays(TreeNode root, int parentDelay) {
 
 		// this function propagates delays down a tree, effectively
@@ -173,7 +95,7 @@ public class Property {
 
 	}
 
-	public void groupDelays(TreeNode root) {
+	private void groupDelays(TreeNode root) {
 
 		if (root.isTerminal()) {
 
@@ -191,31 +113,10 @@ public class Property {
 		for (TreeNode c : root.children)
 			minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
 
-
 		for (TreeNode c : root.children)
 			c.delay -= minChildDelay;
 
 		root.delay += minChildDelay;
-
-	}
-
-	private void getDelaysRecur(TreeNode root, HashMap<String, Integer> delays) {
-
-		if (root.isTerminal()) {
-
-			int currentDelay = delays.getOrDefault(root.name, 0);
-
-			int d = root.delay > currentDelay ? root.delay : currentDelay;
-
-			if (d != 0)
-				delays.put(root.name, d);
-
-		} else {
-
-			for (TreeNode c : root.children)
-				getDelaysRecur(c, delays);
-
-		}
 
 	}
 
@@ -513,45 +414,9 @@ public class Property {
 
 		addDelayRecur(root, -minDelay);
 
-		printExpressionTree();
-
 		groupDelays(root);
 
-	}
-
-	public ArrayList<String> getIdentifiers() {
-
-		ArrayList<String> list = new ArrayList<String>();
-
-		getIDsRecur(root, list);
-
-		return list;
-
-	}
-
-	public String getExpression(ExpressionFormatter formatter, HashMap<String, String> identifierMap,
-			String delayFormat) {
-
-		return getExprRecur(root, formatter, identifierMap, delayFormat);
-
-	}
-
-	@Override
-	public String toString() {
-
-		return getExprRecur(root, new ExpressionFormatter(), null, "@%d %s");
-
-	}
-
-	public void printExpressionTree() {
-
 		root.print();
-
-	}
-
-	public void getDelays(HashMap<String, Integer> delays) {
-
-		getDelaysRecur(root, delays);
 
 	}
 
