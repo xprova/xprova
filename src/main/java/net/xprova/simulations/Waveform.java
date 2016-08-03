@@ -414,7 +414,7 @@ public class Waveform {
 			return false;
 
 		// property nets:
-		if (signal.startsWith("@"))
+		if (signal.startsWith("*"))
 			return false;
 
 		if (!selectedSignals.contains(signal))

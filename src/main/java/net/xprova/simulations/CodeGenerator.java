@@ -18,70 +18,79 @@ import net.xprova.verilogparser.VerilogParser;
 
 public class CodeGenerator {
 
-	public NetlistGraph graph = null;
+	// data structures:
+	//
+	// qNets: flip-flop q output nets
+	//
+	// inpNets: netlist inputs
+	//
+	// internalNets: nets that are not input, q or ignored
+	//
+	// flopMap:  map from flip-flop output (q) to input (d) nets
+	//
+	// jNetNames: Java-friendly net names
+	//
+	// assigns: combinations assignments
 
-	// flip-flop q output nets:
-	private TreeSet<Vertex> qNets;
+	private static TreeSet<Vertex> qNets, inpNets, internalNets;
 
-	// netlist inputs:
-	TreeSet<Vertex> inpNets = new TreeSet<Vertex>();
+	private static HashMap<Vertex, Vertex> flopMap;
 
-	// nets that are not input, q or ignored:
-	TreeSet<Vertex> internalNets = new TreeSet<Vertex>();
+	private static HashMap<Vertex, String> jNetNames;
 
-	// map: flip-flop output (q) -> input (d) nets
-	HashMap<Vertex, Vertex> flopMap;
+	private static ArrayList<String> assigns;
 
-	// Java-friendly net names
-	HashMap<Vertex, String> jNetNames;
+	private static int resetState;
 
-	private ArrayList<String> assigns;
+	private static Vertex addPropertyNet(NetlistGraph graph) {
 
-	public ArrayList<Vertex> assertionNets, assumptionNets;
+		// adds a net vertex with a unique name to graph
 
-	private int resetState;
+		int i = graph.getVertexCount();
 
-	public CodeGenerator(NetlistGraph graph, ArrayList<Property> assumptions, ArrayList<Property> assertions)
-			throws Exception {
+		String inputName;
 
-		this.graph = new NetlistGraph(graph);
+		do {
 
-		// this.assumptions = assumptions;
-		// this.assertions = assertions;
-		//
-		// HashSet<Property> properties = new HashSet<Property>();
-		//
-		// properties.addAll(assumptions);
-		// properties.addAll(assertions);
-		//
-		// assertionNets = new ArrayList<Vertex>();
-		//
-		// checkProperties(properties);
-		//
-		// addPropertyFlops(properties);
+			inputName = "*n" + i;
 
-		assumptionNets = new ArrayList<Vertex>();
+			i++;
 
-		assertionNets = new ArrayList<Vertex>();
+		} while (graph.getVertex(inputName) != null);
 
-		Vertex clk = new Vertex("clk_dummy", VertexType.NET, "input");
-		Vertex rst = new Vertex("rst_dummy", VertexType.NET, "input");
+		Vertex v = new Vertex(inputName, VertexType.NET, "wire");
 
-		this.graph.addVertex(clk);
-		this.graph.addVertex(rst);
+		graph.addVertex(v);
 
-		this.graph.addInput(clk);
-		this.graph.addInput(rst);
-
-		for (Property p : assumptions)
-			assumptionNets.add(addProperty(this.graph, p.root, clk, rst));
-
-		for (Property p : assertions)
-			assertionNets.add(addProperty(this.graph, p.root, clk, rst));
+		return v;
 
 	}
 
-	public Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst) throws Exception {
+	private static Vertex addPropertyModule(NetlistGraph graph, String subtype) {
+
+		// adds a module vertex with a unique name to graph
+
+		int i = graph.getVertexCount();
+
+		String inputName;
+
+		do {
+
+			inputName = "*" + subtype.toLowerCase() + i;
+
+			i++;
+
+		} while (graph.getVertex(inputName) != null);
+
+		Vertex v = new Vertex(inputName, VertexType.MODULE, subtype);
+
+		graph.addVertex(v);
+
+		return v;
+
+	}
+
+	private static Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst) throws Exception {
 
 		if (root.delay < 0) {
 
@@ -99,11 +108,9 @@ public class CodeGenerator {
 
 			for (int i = 0; i < delay; i++) {
 
-				String ffName = "dff" + graph.getVertexCount();
+				Vertex newFlop = addPropertyModule(graph, "DFF");
 
-				Vertex newFlop = new Vertex(ffName, VertexType.MODULE, "DFF");
-
-				graph.addVertex(newFlop);
+				Vertex flopOutput = addPropertyNet(graph);
 
 				graph.addConnection(net, newFlop, "D");
 
@@ -111,16 +118,12 @@ public class CodeGenerator {
 
 				graph.addConnection(rst, newFlop, "RS");
 
-				String inputName = "n" + graph.getVertexCount();
-
-				Vertex flopOutput = new Vertex(inputName, VertexType.NET, "wire");
-
-				graph.addVertex(flopOutput);
-
 				graph.addConnection(newFlop, flopOutput, "Q");
 
 				net = flopOutput;
 			}
+
+			root.delay = delay;
 
 			return net;
 
@@ -148,17 +151,11 @@ public class CodeGenerator {
 
 				// AND/OR gate
 
-				String name = root.name.equals("&") ? "and" : (root.name.equals("|") ? "or" : "xor");
-
 				String modType = root.name.equals("&") ? "AND" : (root.name.equals("|") ? "OR" : "XOR");
 
-				Vertex gate = new Vertex(name + graph.getVertexCount(), VertexType.MODULE, modType);
+				Vertex gate = addPropertyModule(graph, modType);
 
-				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
-
-				graph.addVertex(gate);
-
-				graph.addVertex(gateOutput);
+				Vertex gateOutput = addPropertyNet(graph);
 
 				graph.addConnection(gate, gateOutput);
 
@@ -176,13 +173,9 @@ public class CodeGenerator {
 
 				// inverter
 
-				Vertex gate = new Vertex("not" + graph.getVertexCount(), VertexType.MODULE, "NOT");
+				Vertex gate = addPropertyModule(graph, "NOT");
 
-				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
-
-				graph.addVertex(gate);
-
-				graph.addVertex(gateOutput);
+				Vertex gateOutput = addPropertyNet(graph);
 
 				graph.addConnection(gate, gateOutput);
 
@@ -200,9 +193,37 @@ public class CodeGenerator {
 
 	}
 
-	public ArrayList<String> generate(String templateCode) throws Exception {
+	public static ArrayList<String> generate(NetlistGraph source, ArrayList<Property> assumptions,
+			ArrayList<Property> assertions, String templateCode) throws Exception {
 
-		populateStructures();
+		// Step 1: Add properties to graph
+
+		NetlistGraph graph = new NetlistGraph(source);
+
+		ArrayList<Vertex> assumptionNets = new ArrayList<Vertex>();
+
+		ArrayList<Vertex> assertionNets = new ArrayList<Vertex>();
+
+		Vertex clk = new Vertex("*clk_prop", VertexType.NET, "input");
+		Vertex rst = new Vertex("*rst_prop", VertexType.NET, "input");
+
+		graph.addVertex(clk);
+		graph.addVertex(rst);
+
+		graph.addInput(clk);
+		graph.addInput(rst);
+
+		for (Property p : assumptions)
+			assumptionNets.add(addProperty(graph, p.root, clk, rst));
+
+		for (Property p : assertions)
+			assertionNets.add(addProperty(graph, p.root, clk, rst));
+
+		// Step 2 : Populate code generation structures
+
+		populateStructures(graph);
+
+		// Step 3 : Generate code
 
 		HashMap<String, String> netNameMapping = new HashMap<String, String>();
 
@@ -425,7 +446,7 @@ public class CodeGenerator {
 
 	}
 
-	private void populateStructures() throws Exception {
+	private static void populateStructures(NetlistGraph graph) throws Exception {
 
 		qNets = new TreeSet<Vertex>();
 
@@ -436,6 +457,8 @@ public class CodeGenerator {
 		flopMap = new HashMap<Vertex, Vertex>();
 
 		jNetNames = new HashMap<Vertex, String>();
+
+		assigns = new ArrayList<String>();
 
 		// flip-flop d input nets:
 		HashSet<Vertex> dNets = new HashSet<Vertex>();
@@ -491,8 +514,6 @@ public class CodeGenerator {
 		inNets.addAll(graph.getInputs());
 
 		// graph traversal:
-
-		assigns = new ArrayList<String>();
 
 		Graph<Vertex> netGraph = graph.reduce(graph.getNets());
 

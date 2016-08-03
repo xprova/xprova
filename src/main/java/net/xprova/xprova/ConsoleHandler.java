@@ -844,9 +844,7 @@ public class ConsoleHandler {
 
 		String templateCode = loadResourceString(templateResourceFile);
 
-		CodeGenerator cg = new CodeGenerator(current2, assumptions, assertions);
-
-		ArrayList<String> lines = cg.generate(templateCode);
+		ArrayList<String> lines = CodeGenerator.generate(current2, assumptions, assertions, templateCode);
 
 		out.println("Saving code to " + javaFile.getAbsolutePath() + " ...");
 
@@ -910,15 +908,6 @@ public class ConsoleHandler {
 			}
 
 		}
-
-		// temp debugging code:
-		// make the just-generated design the current design
-
-		designs.remove(current.getName());
-
-		designs.put(cg.graph.getName(), cg.graph);
-
-		current = cg.graph;
 
 	}
 
