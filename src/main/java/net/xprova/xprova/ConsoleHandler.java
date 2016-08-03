@@ -883,11 +883,13 @@ public class ConsoleHandler {
 
 			boolean writeVCD = line.hasOption("v");
 
+			boolean printWaveJSON = line.hasOption('w');
+
 			String defVCD = (new File(tempDir, "counter-example.vcd")).getAbsolutePath();
 
 			String vcdFile = line.getOptionValue("v", defVCD);
 
-			boolean loadCounter = runGtkwave || printToConsole || writeVCD;
+			boolean loadCounter = runGtkwave || printToConsole || writeVCD || printWaveJSON;
 
 			if (loadCounter) {
 
@@ -902,7 +904,7 @@ public class ConsoleHandler {
 				if (runGtkwave || writeVCD)
 					counter.writeVCDFile(vcdFile, runGtkwave);
 
-				if (line.hasOption('w'))
+				if (printWaveJSON)
 					counter.printWaveJSON(System.out);
 
 			}
