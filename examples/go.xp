@@ -10,11 +10,17 @@ read -b examples/tiny.v
 
 #assert (a ^ b ^ c) | d
 
-assert (c & d) | @2 (@1 a & b)
+#assert (c & d) | @2 (@1 a & b)
 
 #assert #2 a & b
 
-synthProp
+#synthProp
+
+assert ~(@2 a & c)
+
+#assert d
+
+prove -p
 
 dot -e=ST,RS,CK --pdf output/netlist.pdf
 

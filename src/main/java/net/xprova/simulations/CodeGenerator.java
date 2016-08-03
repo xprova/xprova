@@ -18,7 +18,7 @@ import net.xprova.verilogparser.VerilogParser;
 
 public class CodeGenerator {
 
-	private NetlistGraph graph = null;
+	public NetlistGraph graph = null;
 
 	// flip-flop q output nets:
 	private TreeSet<Vertex> qNets;
@@ -39,6 +39,8 @@ public class CodeGenerator {
 
 	private ArrayList<Property> assumptions, assertions;
 
+	public ArrayList<Vertex> assertionNets, assumptionNets;
+
 	private int resetState;
 
 	private final String delayFormat = "@%d %s";
@@ -48,25 +50,42 @@ public class CodeGenerator {
 
 		this.graph = new NetlistGraph(graph);
 
-		this.assumptions = assumptions;
-		this.assertions = assertions;
+		// this.assumptions = assumptions;
+		// this.assertions = assertions;
+		//
+		// HashSet<Property> properties = new HashSet<Property>();
+		//
+		// properties.addAll(assumptions);
+		// properties.addAll(assertions);
+		//
+		// assertionNets = new ArrayList<Vertex>();
+		//
+		// checkProperties(properties);
+		//
+		// addPropertyFlops(properties);
 
-		HashSet<Property> properties = new HashSet<Property>();
+		assumptionNets = new ArrayList<Vertex>();
 
-		properties.addAll(assumptions);
-		properties.addAll(assertions);
+		assertionNets = new ArrayList<Vertex>();
 
-		checkProperties(properties);
+		Vertex clk = new Vertex("clk_dummy", VertexType.NET, "input");
+		Vertex rst= new Vertex("rst_dummy", VertexType.NET, "input");
 
-		addPropertyFlops(properties);
+		this.graph.addVertex(clk);
+		this.graph.addVertex(rst);
+
+		this.graph.addInput(clk);
+		this.graph.addInput(rst);
+
+		for (Property p : assumptions)
+			assumptionNets.add(addProperty(this.graph, p.root, clk, rst));
+
+		for (Property p : assertions)
+			assertionNets.add(addProperty(this.graph, p.root, clk, rst));
 
 	}
 
-	public CodeGenerator() {
-
-	}
-
-	public Vertex addProperty(NetlistGraph graph, TreeNode root) throws Exception {
+	public Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst) throws Exception {
 
 		if (root.delay < 0) {
 
@@ -78,29 +97,33 @@ public class CodeGenerator {
 
 			root.delay = 0;
 
-			Vertex net = addProperty(graph, root);
+			Vertex net = addProperty(graph, root, clk, rst);
 
 			// create chain of flip-flops
 
-			for (int i=0; i<delay; i++) {
+			for (int i = 0; i < delay; i++) {
 
 				String ffName = "dff" + graph.getVertexCount();
 
-				Vertex newFlop = new Vertex(ffName, VertexType.MODULE, "*DFF");
+				Vertex newFlop = new Vertex(ffName, VertexType.MODULE, "DFF");
 
 				graph.addVertex(newFlop);
 
-				graph.addConnection(net, newFlop);
+				graph.addConnection(net, newFlop, "D");
+
+				graph.addConnection(clk, newFlop, "CK");
+
+				graph.addConnection(rst, newFlop, "RS");
 
 				String inputName = "n" + graph.getVertexCount();
 
-				Vertex flopInput = new Vertex(inputName, VertexType.NET, "wire");
+				Vertex flopOutput = new Vertex(inputName, VertexType.NET, "wire");
 
-				graph.addVertex(flopInput);
+				graph.addVertex(flopOutput);
 
-				graph.addConnection(newFlop, flopInput);
+				graph.addConnection(newFlop, flopOutput, "Q");
 
-				net = flopInput;
+				net = flopOutput;
 			}
 
 			return net;
@@ -123,35 +146,7 @@ public class CodeGenerator {
 
 			if (root.name.equals("(")) {
 
-				return addProperty(graph, root.children.get(0));
-
-			} else if (root.name.equals("&") || root.name.equals("|")) {
-
-				// AND/OR gate
-
-				String name = root.name.equals("&") ? "and" : "or";
-
-				String modType = root.name.equals("&") ? "*AND" : "*OR";
-
-				Vertex gate = new Vertex(name + graph.getVertexCount(), VertexType.MODULE, modType);
-
-				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
-
-				graph.addVertex(gate);
-
-				graph.addVertex(gateOutput);
-
-				graph.addConnection(gate, gateOutput);
-
-				for (TreeNode c : root.children) {
-
-					Vertex cInput = addProperty(graph, c);
-
-					graph.addConnection(cInput, gate);
-
-				}
-
-				return gateOutput;
+				return addProperty(graph, root.children.get(0), clk, rst);
 
 			} else if (root.name.equals("&") || root.name.equals("|") || root.name.equals("^")) {
 
@@ -159,7 +154,7 @@ public class CodeGenerator {
 
 				String name = root.name.equals("&") ? "and" : (root.name.equals("|") ? "or" : "xor");
 
-				String modType = root.name.equals("&") ? "*AND" : (root.name.equals("|") ? "*OR" : "*XOR");
+				String modType = root.name.equals("&") ? "AND" : (root.name.equals("|") ? "OR" : "XOR");
 
 				Vertex gate = new Vertex(name + graph.getVertexCount(), VertexType.MODULE, modType);
 
@@ -173,11 +168,31 @@ public class CodeGenerator {
 
 				for (TreeNode c : root.children) {
 
-					Vertex cInput = addProperty(graph, c);
+					Vertex cInput = addProperty(graph, c, clk, rst);
 
 					graph.addConnection(cInput, gate);
 
 				}
+
+				return gateOutput;
+
+			} else if (root.name.equals("~")) {
+
+				// inverter
+
+				Vertex gate = new Vertex("not" + graph.getVertexCount(), VertexType.MODULE, "NOT");
+
+				Vertex gateOutput = new Vertex("n" + graph.getVertexCount(), VertexType.NET, "wire");
+
+				graph.addVertex(gate);
+
+				graph.addVertex(gateOutput);
+
+				graph.addConnection(gate, gateOutput);
+
+				Vertex gateInput = addProperty(graph, root.children.get(0), clk, rst);
+
+				graph.addConnection(gateInput, gate);
 
 				return gateOutput;
 
@@ -484,9 +499,21 @@ public class CodeGenerator {
 
 					s = s.replaceFirst("//( )+", "");
 
-					for (Property as : assumptions) {
+					// for (Property as : assumptions) {
+					//
+					// String si = s.replace("{ASSUMPTION}",
+					// as.getExpression(formatter, netNameMapping,
+					// delayFormat));
+					//
+					// si += expandComment;
+					//
+					// lines.add(si);
+					//
+					// }
 
-						String si = s.replace("{ASSUMPTION}", as.getExpression(formatter, netNameMapping, delayFormat));
+					for (Vertex as : assumptionNets) {
+
+						String si = s.replace("{ASSUMPTION}", netNameMapping.get(as.name));
 
 						si += expandComment;
 
@@ -498,9 +525,21 @@ public class CodeGenerator {
 
 					s = s.replaceFirst("//( )+", "");
 
-					for (Property as : assertions) {
+					// for (Property as : assertions) {
+					//
+					// String si = s.replace("{ASSERTION}",
+					// as.getExpression(formatter, netNameMapping,
+					// delayFormat));
+					//
+					// si += expandComment;
+					//
+					// lines.add(si);
+					//
+					// }
 
-						String si = s.replace("{ASSERTION}", as.getExpression(formatter, netNameMapping, delayFormat));
+					for (Vertex as : assertionNets) {
+
+						String si = s.replace("{ASSERTION}", netNameMapping.get(as.name));
 
 						si += expandComment;
 

@@ -909,6 +909,15 @@ public class ConsoleHandler {
 
 		}
 
+		// temp debugging code:
+		// make the just-generated design the current design
+
+		designs.remove(current.getName());
+
+		designs.put(cg.graph.getName(), cg.graph);
+
+		current = cg.graph;
+
 	}
 
 	//@formatter:off
@@ -1382,22 +1391,6 @@ public class ConsoleHandler {
 
 			sg.combineVertices(comb, grp1);
 
-		}
-
-	}
-
-	@Command
-	public void synthProp() throws Exception {
-
-		CodeGenerator cg = new CodeGenerator();
-
-		for (Property p : assertions) {
-
-			p.printExpressionTree();
-
-			p.groupDelays(p.root);
-
-			cg.addProperty(current, p.root);
 		}
 
 	}

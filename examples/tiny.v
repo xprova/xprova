@@ -1,6 +1,5 @@
-module top (a, b, c, d);
+module top (a, c);
 
-	input a, b, c, d;
-	
+	input a, c;
+
 endmodule
-	

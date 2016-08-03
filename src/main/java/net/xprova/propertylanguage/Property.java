@@ -473,6 +473,10 @@ public class Property {
 
 		addDelayRecur(root, -minDelay);
 
+		printExpressionTree();
+
+		groupDelays(root);
+
 	}
 
 	public ArrayList<String> getIdentifiers() {
