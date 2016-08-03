@@ -54,7 +54,6 @@ public class CodeSimulator {
 
 	}
 
-	@SuppressWarnings("unused")
 	public int[] exploreSpace(int initial) throws Exception {
 
 		// method parameters:

@@ -1,29 +1,9 @@
 library load lib/xprova.v
 
-#read -b examples/topunit.v
+read -b examples/counter.v
 
-#design current topunit
-
-#assume data_out[3]
-
-read -b examples/tiny.v
-
-#assert (a ^ b ^ c) | d
-
-#assert (c & d) | @2 (@1 a & b)
-
-#assert #2 a & b
-
-#synthProp
-
-assert ~(@2 a & c)
-
-#assert d
+assert ~(count[3] & @1 count[4])
 
 prove -p
 
 dot -e=ST,RS,CK --pdf output/netlist.pdf
-
-#assert ~($fell(valid))
-
-#prove -w -p -s=ack,busy,send,stb,valid

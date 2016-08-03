@@ -37,13 +37,9 @@ public class CodeGenerator {
 
 	private ArrayList<String> assigns;
 
-	private ArrayList<Property> assumptions, assertions;
-
 	public ArrayList<Vertex> assertionNets, assumptionNets;
 
 	private int resetState;
-
-	private final String delayFormat = "@%d %s";
 
 	public CodeGenerator(NetlistGraph graph, ArrayList<Property> assumptions, ArrayList<Property> assertions)
 			throws Exception {
@@ -69,7 +65,7 @@ public class CodeGenerator {
 		assertionNets = new ArrayList<Vertex>();
 
 		Vertex clk = new Vertex("clk_dummy", VertexType.NET, "input");
-		Vertex rst= new Vertex("rst_dummy", VertexType.NET, "input");
+		Vertex rst = new Vertex("rst_dummy", VertexType.NET, "input");
 
 		this.graph.addVertex(clk);
 		this.graph.addVertex(rst);
@@ -204,115 +200,7 @@ public class CodeGenerator {
 
 	}
 
-	private void checkProperties(HashSet<Property> propertes) throws Exception {
-
-		for (Property p : propertes) {
-
-			for (String id : p.getIdentifiers()) {
-
-				if (graph.getVertex(id) == null) {
-
-					throw new Exception(String.format("Property (%s) contains an unrecognized identifier (%s)", p, id));
-
-				}
-
-			}
-
-		}
-
-	}
-
-	private void addPropertyFlops(HashSet<Property> properties) throws Exception {
-
-		HashMap<String, Integer> delays = new HashMap<String, Integer>();
-
-		for (Property p : properties)
-			p.getDelays(delays);
-
-		for (Entry<String, Integer> entry : delays.entrySet())
-			addFlopChain(entry.getKey(), entry.getValue());
-
-	}
-
-	private void addFlopChain(String netName, int n) throws Exception {
-
-		// appends a chain of n flip-flops to netName naming their outputs nets
-		// netName@i
-
-		Vertex netQ = graph.getVertex(netName);
-
-		Vertex clk = null, reset = null;
-
-		if (graph.getInputs().contains(netQ)) {
-
-			// TODO: fix ugly hack used here
-
-			// when adding a chain of flip-flops to hold the past values
-			// of an input net, the clk and reset pins of this net's virtual
-			// driver must be specified by the user (i.e. the user must specify
-			// the clock to which this input net is timed)
-
-			// atm the code below will extract a random DFF instance and use
-			// its CK and RS connections. This should work fine for the time
-			// being
-			// but will need to be revised when support for simulating multiple
-			// clocks is implemented
-
-			Vertex flop = graph.getModulesByType("DFF").iterator().next();
-
-			clk = graph.getNet(flop, "CK");
-
-			reset = graph.getNet(flop, "RS");
-
-		} else {
-
-			Vertex driver = graph.getSourceModule(netQ);
-
-			while (driver.subtype.equals(VerilogParser.CASSIGN_MOD)) {
-
-				Vertex dn = graph.getSources(driver).iterator().next();
-
-				driver = graph.getSourceModule(dn);
-
-			}
-
-			clk = graph.getNet(driver, "CK");
-
-			reset = graph.getNet(driver, "RS");
-
-			if (clk == null || reset == null) {
-
-				throw new Exception(String.format("could not determine clk and reset pins for driver of net <%s>",
-						netQ.toString()));
-
-			}
-
-		}
-
-		for (int i = 1; i <= n; i++) {
-
-			String nextNextName = String.format(delayFormat, i, netName);
-
-			Vertex nextFF = new Vertex(nextNextName + "_ff1", VertexType.MODULE, "DFF");
-
-			Vertex nextQ = new Vertex(nextNextName, VertexType.NET, "WIRE");
-
-			graph.addVertex(nextFF);
-			graph.addVertex(nextQ);
-
-			graph.addConnection(clk, nextFF, "CK");
-			graph.addConnection(reset, nextFF, "RS");
-			graph.addConnection(netQ, nextFF, "D");
-			graph.addConnection(nextFF, nextQ, "Q");
-
-			netQ = nextQ;
-		}
-
-	}
-
 	public ArrayList<String> generate(String templateCode) throws Exception {
-
-		CodeGenExprFormatter formatter = new CodeGenExprFormatter();
 
 		populateStructures();
 
@@ -499,18 +387,6 @@ public class CodeGenerator {
 
 					s = s.replaceFirst("//( )+", "");
 
-					// for (Property as : assumptions) {
-					//
-					// String si = s.replace("{ASSUMPTION}",
-					// as.getExpression(formatter, netNameMapping,
-					// delayFormat));
-					//
-					// si += expandComment;
-					//
-					// lines.add(si);
-					//
-					// }
-
 					for (Vertex as : assumptionNets) {
 
 						String si = s.replace("{ASSUMPTION}", netNameMapping.get(as.name));
@@ -524,18 +400,6 @@ public class CodeGenerator {
 				} else if (s.contains("{ASSERTION}")) {
 
 					s = s.replaceFirst("//( )+", "");
-
-					// for (Property as : assertions) {
-					//
-					// String si = s.replace("{ASSERTION}",
-					// as.getExpression(formatter, netNameMapping,
-					// delayFormat));
-					//
-					// si += expandComment;
-					//
-					// lines.add(si);
-					//
-					// }
 
 					for (Vertex as : assertionNets) {
 
