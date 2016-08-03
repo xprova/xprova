@@ -235,6 +235,22 @@ public class Property {
 			c1.delay -= 1;
 		}
 
+		// change (x |-> y) into (~x | y)
+
+		if (root.name.equals(IMPLY)) {
+
+			TreeNode c1 = root.children.get(0);
+
+			TreeNode not = new TreeNode(NOT, 0);
+
+			not.children.add(c1);
+
+			root.children.set(0, not);
+
+			root.name = "|";
+
+		}
+
 		// change ($rose(x)) into (~x & #1 x)
 
 		if (root.name.equals(ROSE)) {
@@ -306,6 +322,30 @@ public class Property {
 
 			root.children.add(c1);
 			root.children.add(c2);
+
+		}
+
+		// (x == y) into ~(x ^ y)
+
+		if (root.name.equals(EQ)) {
+
+			TreeNode xorNode = new TreeNode(root);
+
+			xorNode.name = "^";
+
+			root.children.clear();
+
+			root.name = "~";
+
+			root.children.add(xorNode);
+
+		}
+
+		// (x != y) into (x ^ y)
+
+		if (root.name.equals(NEQ)) {
+
+			root.name = "^";
 
 		}
 
