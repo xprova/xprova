@@ -407,15 +407,17 @@ public class Waveform {
 		if (signal.contains(".rst"))
 			return false;
 
+		String arrayName = getArrayName(signal);
+
 		// yosys internal nets:
-		if (signal.startsWith("_") && signal.endsWith("_"))
+		if (arrayName.startsWith("_") && arrayName.endsWith("_"))
 			return false;
 
 		// property nets:
 		if (signal.startsWith("@"))
 			return false;
 
-		if (!selectedSignals.contains(getArrayName(signal)))
+		if (!selectedSignals.contains(signal))
 			return false;
 
 		return true;
