@@ -42,6 +42,8 @@ public class CodeGenerator {
 
 	private static int resetState;
 
+	private static final String netIgnorePrefix = "!";
+
 	private static Vertex addPropertyNet(NetlistGraph graph) {
 
 		// adds a net vertex with a unique name to graph
@@ -232,9 +234,9 @@ public class CodeGenerator {
 
 		ArrayList<Vertex> assertionNets = new ArrayList<Vertex>();
 
-		Vertex clk = new Vertex("*clk_prop", VertexType.NET, "input");
-		Vertex rst = new Vertex("*rst_prop", VertexType.NET, "input");
-		Vertex set = new Vertex("*set_prop", VertexType.NET, "input");
+		Vertex clk = new Vertex(netIgnorePrefix + "clk_prop", VertexType.NET, "input");
+		Vertex rst = new Vertex(netIgnorePrefix + "rst_prop", VertexType.NET, "input");
+		Vertex set = new Vertex(netIgnorePrefix + "set_prop", VertexType.NET, "input");
 
 		graph.addVertex(clk);
 		graph.addVertex(rst);
@@ -532,6 +534,13 @@ public class CodeGenerator {
 
 			if (stNet != null && graph.isInput(stNet))
 				ignoreNets.add(stNet);
+
+		}
+
+		for (Vertex v : graph.getNets()) {
+
+			if (v.name.startsWith(netIgnorePrefix))
+				ignoreNets.add(v);
 
 		}
 
