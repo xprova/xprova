@@ -240,10 +240,6 @@ public class CodeGenerator {
 		graph.addVertex(rst);
 		graph.addVertex(set);
 
-		graph.addInput(clk);
-		graph.addInput(rst);
-		graph.addInput(set);
-
 		for (Property p : assumptions)
 			assumptionNets.add(addProperty(graph, p.root, clk, rst, set));
 

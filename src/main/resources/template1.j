@@ -115,6 +115,8 @@ public class CodeSimulator {
 		int all_assumptions;
 		int all_assertions;
 
+		Stack<Integer> rList = new Stack<Integer>();
+
 		System.out.println("Starting search ...");
 
 		long startTime = System.nanoTime();
@@ -177,6 +179,8 @@ public class CodeSimulator {
 
 						violationState = state;
 
+						rList.push(in);
+
 						break loop1;
 
 					}
@@ -201,8 +205,6 @@ public class CodeSimulator {
 
 		System.out.printf("States discovered = %d\n", statesDiscovered);
 
-		Stack<Integer> rList = new Stack<Integer>();
-
 		if (violationState != UNDISCOVERED) {
 
 			System.out.printf("Counter-example found (distance = %d)!\n", distance);
@@ -223,7 +225,7 @@ public class CodeSimulator {
 
 			int[] result = new int[distance];
 
-			for (int j = 0; j < distance - 1; j++)
+			for (int j = 0; j < distance; j++)
 				result[j] = rList.pop();
 
 			return result;
