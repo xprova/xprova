@@ -1,9 +1,9 @@
 library load lib/xprova.v
 
-read -b examples/counter.v
+read -b examples/tiny.v
 
-assert ~(count[3] & @1 count[4])
+assert ~count[3]
+
+assume $always(b)
 
 prove -p
-
-dot -e=ST,RS,CK --pdf output/netlist.pdf

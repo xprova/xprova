@@ -31,6 +31,7 @@ public class Property {
 	private final String FELL = "$fell";
 	private final String STABLE = "$stable";
 	private final String CHANGED = "$changed";
+	private final String ALWAYS = "$always";
 
 	// expression tree traversal functions
 
@@ -285,7 +286,7 @@ public class Property {
 		String c0 = root.getChild(0).getText();
 		String c1 = root.getChild(1).getText();
 
-		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0)) {
+		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)) {
 
 			children.add(parseAST(root.getChild(2)));
 

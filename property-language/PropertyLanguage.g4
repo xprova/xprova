@@ -17,7 +17,7 @@ expr
 	;
 
 funcExpr
-	: (ROSE|FELL|STABLE|CHANGED) LPAREN implyExpr RPAREN
+	: (ROSE|FELL|STABLE|CHANGED|ALWAYS) LPAREN implyExpr RPAREN
 	| implyExpr
 	;
 
@@ -141,6 +141,10 @@ STABLE
 
 CHANGED
 	: '$changed'
+	;
+
+ALWAYS
+	: '$always'
 	;
 
 NUM

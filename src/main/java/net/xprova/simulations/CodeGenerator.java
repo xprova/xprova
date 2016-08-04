@@ -90,7 +90,7 @@ public class CodeGenerator {
 
 	}
 
-	private static Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst) throws Exception {
+	private static Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst, Vertex set) throws Exception {
 
 		if (root.delay < 0) {
 
@@ -102,7 +102,7 @@ public class CodeGenerator {
 
 			root.delay = 0;
 
-			Vertex net = addProperty(graph, root, clk, rst);
+			Vertex net = addProperty(graph, root, clk, rst, set);
 
 			// create chain of flip-flops
 
@@ -145,7 +145,7 @@ public class CodeGenerator {
 
 			if (root.name.equals("(")) {
 
-				return addProperty(graph, root.children.get(0), clk, rst);
+				return addProperty(graph, root.children.get(0), clk, rst, set);
 
 			} else if (root.name.equals("&") || root.name.equals("|") || root.name.equals("^")) {
 
@@ -161,7 +161,7 @@ public class CodeGenerator {
 
 				for (TreeNode c : root.children) {
 
-					Vertex cInput = addProperty(graph, c, clk, rst);
+					Vertex cInput = addProperty(graph, c, clk, rst, set);
 
 					graph.addConnection(cInput, gate);
 
@@ -179,11 +179,39 @@ public class CodeGenerator {
 
 				graph.addConnection(gate, gateOutput);
 
-				Vertex gateInput = addProperty(graph, root.children.get(0), clk, rst);
+				Vertex gateInput = addProperty(graph, root.children.get(0), clk, rst, set);
 
 				graph.addConnection(gateInput, gate);
 
 				return gateOutput;
+
+			} else if (root.name.equals("$always")) {
+
+				Vertex and = addPropertyModule(graph, "AND");
+
+				Vertex flopInput = addPropertyNet(graph);
+
+				Vertex flop = addPropertyModule(graph, "DFF");
+
+				Vertex flopOutput = addPropertyNet(graph);
+
+				Vertex andInput = addProperty(graph, root.children.get(0), clk, rst, set);
+
+				graph.addConnection(and, flopInput, "Y");
+
+				graph.addConnection(flopInput, flop, "D");
+
+				graph.addConnection(flop, flopOutput, "Q");
+
+				graph.addConnection(clk, flop, "CK");
+
+				graph.addConnection(set, flop, "ST");
+
+				graph.addConnection(flopOutput, and, "A");
+
+				graph.addConnection(andInput, and);
+
+				return flopInput;
 
 			}
 
@@ -206,18 +234,21 @@ public class CodeGenerator {
 
 		Vertex clk = new Vertex("*clk_prop", VertexType.NET, "input");
 		Vertex rst = new Vertex("*rst_prop", VertexType.NET, "input");
+		Vertex set = new Vertex("*set_prop", VertexType.NET, "input");
 
 		graph.addVertex(clk);
 		graph.addVertex(rst);
+		graph.addVertex(set);
 
 		graph.addInput(clk);
 		graph.addInput(rst);
+		graph.addInput(set);
 
 		for (Property p : assumptions)
-			assumptionNets.add(addProperty(graph, p.root, clk, rst));
+			assumptionNets.add(addProperty(graph, p.root, clk, rst, set));
 
 		for (Property p : assertions)
-			assertionNets.add(addProperty(graph, p.root, clk, rst));
+			assertionNets.add(addProperty(graph, p.root, clk, rst, set));
 
 		// Step 2 : Populate code generation structures
 
@@ -497,7 +528,14 @@ public class CodeGenerator {
 
 			ignoreNets.add(graph.getNet(v, "CK"));
 
-			ignoreNets.add(graph.getNet(v, "RS"));
+			Vertex rsNet = graph.getNet(v, "RS");
+			Vertex stNet = graph.getNet(v, "ST");
+
+			if (rsNet != null && graph.isInput(rsNet))
+				ignoreNets.add(rsNet);
+
+			if (stNet != null && graph.isInput(stNet))
+				ignoreNets.add(stNet);
 
 		}
 
