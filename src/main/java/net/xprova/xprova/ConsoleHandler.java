@@ -54,6 +54,10 @@ public class ConsoleHandler {
 
 	private TreeMap<String, NetlistGraph> designs = null;
 
+	private final String codeGenTemplateFile = "template1.j";
+
+	private final String codeGenClassName = "CodeSimulator";
+
 	public ConsoleHandler(PrintStream ps) {
 
 		out = ps;
@@ -170,11 +174,7 @@ public class ConsoleHandler {
 
 			if (line.hasOption("b")) {
 
-				File tempDir = new File(System.getProperty("java.io.tmpdir"));
-
-				File tempFile = new File(tempDir, "synth.v");
-
-				String synthFile = tempFile.getAbsolutePath();
+				String synthFile = getTempFile("synth.v");
 
 				out.printf("Synthesizing behavioral design to %s ...\n", synthFile);
 
@@ -411,27 +411,20 @@ public class ConsoleHandler {
 
 		if (line.hasOption("--pdf")) {
 
-			String dotFileStr = "netlist.dot";
-
-			File tempDir = new File(System.getProperty("java.io.tmpdir"));
-
-			File javaFile = new File(tempDir, dotFileStr);
-
-			String cmd = "dot -Tpdf " + javaFile.getAbsolutePath() + " -o " + outFile;
+			String tempDotFile = getTempFile("netlist.dot");
 
 			// write temp dot file
 
-			GraphDotPrinter.printGraph(javaFile.getAbsolutePath(), sg, formatter, selectedVertices);
+			GraphDotPrinter.printGraph(tempDotFile, sg, formatter, selectedVertices);
 
 			// invoke DOT
 
-			int dotExitCode = executeProgram(cmd, true, true);
+			String cmdDot = "dot -Tpdf " + tempDotFile + " -o " + outFile;
 
-			if (dotExitCode != 0) {
+			int dotExitCode = executeProgram(cmdDot, true, true);
 
+			if (dotExitCode != 0)
 				throw new Exception("Error while attempting to convert dot file to pdf using DOT");
-
-			}
 
 		} else {
 
@@ -814,39 +807,31 @@ public class ConsoleHandler {
 
 		// code:
 
-		File tempDir = new File(System.getProperty("java.io.tmpdir"));
-
 		assertDesignLoaded();
 
-		NetlistGraph current2 = new NetlistGraph(current);
+		NetlistGraph currentCopy = new NetlistGraph(current);
 
-		(new Transformer(current2, defsFF)).expandDFFx();
+		(new Transformer(currentCopy, defsFF)).expandDFFx();
 
-		String templateResourceFile = "template1.j";
+		String defaultTextFile = getTempFile("counter-example.txt");
 
-		String javaFileStr = "CodeSimulator.java";
-
-		String classFileStr = "CodeSimulator";
-
-		String defTXT = (new File(tempDir, "counter-example.txt")).getAbsolutePath();
-
-		String txtFile = line.getOptionValue("txt", defTXT);
+		String txtFile = line.getOptionValue("txt", defaultTextFile);
 
 		String txtArg = "--txt " + txtFile;
 
-		File javaFile = new File(tempDir, javaFileStr);
+		String javaFile = getTempFile(codeGenClassName + ".java");
 
-		String cmd = "javac " + javaFile.getAbsolutePath();
+		String compileCmd = "javac " + javaFile;
 
-		String cmd2 = String.format("java -classpath %s %s %s", tempDir.getAbsolutePath(), classFileStr, txtArg);
+		String runCodeGenCmd = String.format("java -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
 
 		// generate code
 
-		String templateCode = loadResourceString(templateResourceFile);
+		String templateCode = loadResourceString(codeGenTemplateFile);
 
-		ArrayList<String> lines = CodeGenerator.generate(current2, assumptions, assertions, templateCode);
+		ArrayList<String> lines = CodeGenerator.generate(currentCopy, assumptions, assertions, templateCode);
 
-		out.println("Saving code to " + javaFile.getAbsolutePath() + " ...");
+		out.println("Saving code to " + javaFile + " ...");
 
 		PrintStream fout = new PrintStream(javaFile);
 
@@ -859,19 +844,16 @@ public class ConsoleHandler {
 
 		out.println("Compiling ...");
 
-		int compileExitCode = executeProgram(cmd, true, true);
+		int compileExitCode = executeProgram(compileCmd, true, true);
 
-		if (compileExitCode != 0) {
-
+		if (compileExitCode != 0)
 			throw new Exception("Compilation failed");
-
-		}
 
 		// run code
 
 		out.println("Executing compiled code ...");
 
-		int genExitCode = executeProgram(cmd2, true, true);
+		int genExitCode = executeProgram(runCodeGenCmd, true, true);
 
 		if (genExitCode == 100) {
 
@@ -883,7 +865,7 @@ public class ConsoleHandler {
 
 			boolean printWaveJSON = line.hasOption('w');
 
-			String defVCD = (new File(tempDir, "counter-example.vcd")).getAbsolutePath();
+			String defVCD = getTempFile("counter-example.vcd");
 
 			String vcdFile = line.getOptionValue("v", defVCD);
 
@@ -1383,6 +1365,19 @@ public class ConsoleHandler {
 			sg.combineVertices(comb, grp1);
 
 		}
+
+	}
+
+	private String getTempFile(String filename) {
+
+		// returns absolute path of file with name `filename` in a temp
+		// directory
+
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+
+		File temp = new File(tempDir, filename);
+
+		return temp.getAbsolutePath();
 
 	}
 
