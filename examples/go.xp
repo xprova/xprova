@@ -4,9 +4,7 @@ read -b examples/tiny.v
 
 assert ~count[3]
 
-assume $always ( a |=> ($changed(b)) )
-
-assume $always( ($changed(a)) )
+assume $always($changed($fell(a)))
 
 prove -p -t d:\counter.txt
 

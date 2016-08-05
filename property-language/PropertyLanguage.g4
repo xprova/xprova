@@ -17,8 +17,7 @@ expr
 	;
 
 funcExpr
-	: (ROSE|FELL|STABLE|CHANGED|ALWAYS) LPAREN implyExpr RPAREN
-	| implyExpr
+	: implyExpr
 	;
 
 implyExpr
@@ -53,6 +52,7 @@ nAtom
 atom
 	: ID
 	| LPAREN expr RPAREN
+	| (ROSE|FELL|STABLE|CHANGED|ALWAYS) LPAREN expr RPAREN
 	;
 
 // lexer rules
