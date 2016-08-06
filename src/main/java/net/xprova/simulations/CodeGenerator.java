@@ -443,7 +443,7 @@ public class CodeGenerator {
 
 						String si = s.replace("{ASSUMPTION}", netNameMapping.get(netName));
 
-						si = si.replace("{MAXDELAY}", "" + entry.getKey().getMaxDelay());
+						si = si.replace("{MAXDELAY}", "" + getMaxDelay(entry.getKey()));
 
 						si += expandComment;
 
@@ -461,7 +461,7 @@ public class CodeGenerator {
 
 						String si = s.replace("{ASSERTION}", netNameMapping.get(netName));
 
-						si = si.replace("{MAXDELAY}", "" + entry.getKey().getMaxDelay());
+						si = si.replace("{MAXDELAY}", "" + getMaxDelay(entry.getKey()));
 
 						si += expandComment;
 
@@ -747,6 +747,16 @@ public class CodeGenerator {
 			resetState = (resetState << 1) + bit;
 
 		}
+
+	}
+
+	private static int getMaxDelay(Property p) {
+
+		TreeNode copy = new TreeNode(p.root);
+
+		copy.flattenDelays(0);
+
+		return copy.getMaxDelay(0);
 
 	}
 

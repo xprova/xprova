@@ -327,14 +327,4 @@ public class Property {
 
 	}
 
-	public int getMaxDelay() {
-
-		TreeNode copy = new TreeNode(root);
-
-		copy.flattenDelays(0);
-
-		return copy.getMaxDelay(0);
-
-	}
-
 }
