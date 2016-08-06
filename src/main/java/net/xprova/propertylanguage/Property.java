@@ -33,94 +33,6 @@ public class Property {
 	private final String CHANGED = "$changed";
 	private final String ALWAYS = "$always";
 
-	// expression tree traversal functions
-
-	private void addDelayRecur(TreeNode root, int extraDelay) {
-
-		// adds to the delay of terminal nodes under root
-
-		if (root.isTerminal()) {
-
-			root.delay += extraDelay;
-
-		} else {
-
-			for (TreeNode c : root.children)
-				addDelayRecur(c, extraDelay);
-
-		}
-
-	}
-
-	private int getMinDelay(TreeNode root, int parentDelay) {
-
-		if (root.isTerminal()) {
-
-			return parentDelay + root.delay;
-
-		} else {
-
-			int minDelay = Integer.MAX_VALUE;
-
-			for (TreeNode n : root.children) {
-
-				int d = getMinDelay(n, parentDelay + root.delay);
-
-				minDelay = d < minDelay ? d : minDelay;
-
-			}
-
-			return minDelay;
-
-		}
-
-	}
-
-	private void flattenDelays(TreeNode root, int parentDelay) {
-
-		// this function propagates delays down a tree, effectively
-		// mapping an expression like (@1 (a & b)) to (@1 a & @1 b)
-
-		if (root.isTerminal()) {
-
-			root.delay += parentDelay;
-
-		} else {
-
-			for (TreeNode c : root.children)
-				flattenDelays(c, root.delay + parentDelay);
-
-			root.delay = 0;
-
-		}
-
-	}
-
-	private void groupDelays(TreeNode root) {
-
-		if (root.isTerminal()) {
-
-			return;
-
-		} else {
-
-			for (TreeNode c : root.children)
-				groupDelays(c);
-
-		}
-
-		int minChildDelay = Integer.MAX_VALUE;
-
-		for (TreeNode c : root.children)
-			minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
-
-		for (TreeNode c : root.children)
-			c.delay -= minChildDelay;
-
-		root.delay += minChildDelay;
-
-	}
-
 	private void rewriteSyntaticSugar(TreeNode root) {
 
 		for (TreeNode c : root.children)
@@ -253,8 +165,6 @@ public class Property {
 
 	}
 
-	// AST parsing
-
 	private TreeNode parseAST(ParseTree root) throws Exception {
 
 		ArrayList<TreeNode> children = new ArrayList<TreeNode>();
@@ -351,7 +261,7 @@ public class Property {
 			children.add(parseAST(root.getChild(0)));
 			children.add(parseAST(root.getChild(2)));
 
-			return  TreeNode.build(c1).children(children);
+			return TreeNode.build(c1).children(children);
 
 		} else if (c0.equals(LPAREN)) {
 
@@ -383,8 +293,6 @@ public class Property {
 
 	}
 
-	// public methods
-
 	public Property(String str) throws Exception {
 
 		// step 1: generate property AST
@@ -409,15 +317,23 @@ public class Property {
 
 		// step 4: normalise delays
 
-		flattenDelays(root, 0);
+		root.flattenDelays(0);
 
-		int minDelay = getMinDelay(root, 0);
+		root.addDelayRecur(-root.getMinDelay(0));
 
-		addDelayRecur(root, -minDelay);
-
-		groupDelays(root);
+		root.groupDelays();
 
 		root.print();
+
+	}
+
+	public int getMaxDelay() {
+
+		TreeNode copy = new TreeNode(root);
+
+		copy.flattenDelays(0);
+
+		return copy.getMaxDelay(0);
 
 	}
 

@@ -26,7 +26,7 @@ public class CodeGenerator {
 	//
 	// internalNets: nets that are not input, q or ignored
 	//
-	// flopMap:  map from flip-flop output (q) to input (d) nets
+	// flopMap: map from flip-flop output (q) to input (d) nets
 	//
 	// jNetNames: Java-friendly net names
 	//
@@ -92,7 +92,8 @@ public class CodeGenerator {
 
 	}
 
-	private static Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst, Vertex set) throws Exception {
+	private static Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst, Vertex set)
+			throws Exception {
 
 		if (root.delay < 0) {
 
@@ -230,9 +231,8 @@ public class CodeGenerator {
 
 		NetlistGraph graph = new NetlistGraph(source);
 
-		ArrayList<Vertex> assumptionNets = new ArrayList<Vertex>();
-
-		ArrayList<Vertex> assertionNets = new ArrayList<Vertex>();
+		HashMap<Property, Vertex> assumptionNets = new HashMap<Property, Vertex>();
+		HashMap<Property, Vertex> assertionNets = new HashMap<Property, Vertex>();
 
 		Vertex clk = new Vertex(netIgnorePrefix + "clk_prop", VertexType.NET, "input");
 		Vertex rst = new Vertex(netIgnorePrefix + "rst_prop", VertexType.NET, "input");
@@ -243,10 +243,10 @@ public class CodeGenerator {
 		graph.addVertex(set);
 
 		for (Property p : assumptions)
-			assumptionNets.add(addProperty(graph, p.root, clk, rst, set));
+			assumptionNets.put(p, addProperty(graph, p.root, clk, rst, set));
 
 		for (Property p : assertions)
-			assertionNets.add(addProperty(graph, p.root, clk, rst, set));
+			assertionNets.put(p, addProperty(graph, p.root, clk, rst, set));
 
 		// Step 2 : Populate code generation structures
 
@@ -437,9 +437,13 @@ public class CodeGenerator {
 
 					s = s.replaceFirst("//( )+", "");
 
-					for (Vertex as : assumptionNets) {
+					for (Entry<Property, Vertex> entry : assumptionNets.entrySet()) {
 
-						String si = s.replace("{ASSUMPTION}", netNameMapping.get(as.name));
+						String netName = entry.getValue().name;
+
+						String si = s.replace("{ASSUMPTION}", netNameMapping.get(netName));
+
+						si = si.replace("{MAXDELAY}", "" + entry.getKey().getMaxDelay());
 
 						si += expandComment;
 
@@ -451,9 +455,13 @@ public class CodeGenerator {
 
 					s = s.replaceFirst("//( )+", "");
 
-					for (Vertex as : assertionNets) {
+					for (Entry<Property, Vertex> entry : assertionNets.entrySet()) {
 
-						String si = s.replace("{ASSERTION}", netNameMapping.get(as.name));
+						String netName = entry.getValue().name;
+
+						String si = s.replace("{ASSERTION}", netNameMapping.get(netName));
+
+						si = si.replace("{MAXDELAY}", "" + entry.getKey().getMaxDelay());
 
 						si += expandComment;
 

@@ -172,8 +172,16 @@ public class CodeSimulator {
 					all_assumptions = -1;
 					all_assertions = -1;
 
-					// all_assumptions &= {ASSUMPTION};
-					// all_assertions &= {ASSERTION};
+					// In the code below we logically AND all assumptions
+					// and assertions.
+
+					// We don't want any property to evaluate to false if
+					// until we're at least {MAXDELAY} away from the initial state.
+					// This is {MAXDELAY} is the max depth of flip-flop chains within
+					// the property.
+
+					// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? 0 : -1);
+					// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? 0 : -1);
 
 					if (all_assumptions == -1 && all_assertions == 0) {
 

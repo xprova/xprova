@@ -2,9 +2,11 @@ library load lib/xprova.v
 
 read -b examples/tiny.v
 
-assert ~count[3]
+#assert ~count[3]
 
-assume $always($changed($fell(a)))
+assert $changed($fell(a))
+
+assume ~$always(a)
 
 prove -p -t d:\counter.txt
 
