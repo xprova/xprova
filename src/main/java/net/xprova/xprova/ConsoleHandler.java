@@ -34,6 +34,7 @@ import net.xprova.netlistgraph.Vertex;
 import net.xprova.piccolo.Command;
 import net.xprova.piccolo.Console;
 import net.xprova.propertylanguage.Property;
+import net.xprova.propertylanguage.PropertyBuilder;
 import net.xprova.simulations.CodeGenerator;
 import net.xprova.simulations.Waveform;
 import net.xprova.verilogparser.VerilogParser;
@@ -930,7 +931,8 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		assumptions.add(new Property(pStr));
+		assumptions.add(PropertyBuilder.build(pStr));
+
 	}
 
 	//@formatter:off
@@ -947,7 +949,7 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		assertions.add(new Property(pStr));
+		assertions.add(PropertyBuilder.build(pStr));
 	}
 
 	//@formatter:off

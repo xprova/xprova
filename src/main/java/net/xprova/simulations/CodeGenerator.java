@@ -13,7 +13,6 @@ import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
 import net.xprova.propertylanguage.Property;
-import net.xprova.propertylanguage.TreeNode;
 import net.xprova.verilogparser.VerilogParser;
 
 public class CodeGenerator {
@@ -92,7 +91,7 @@ public class CodeGenerator {
 
 	}
 
-	private static Vertex addProperty(NetlistGraph graph, TreeNode root, Vertex clk, Vertex rst, Vertex set)
+	private static Vertex addProperty(NetlistGraph graph, Property root, Vertex clk, Vertex rst, Vertex set)
 			throws Exception {
 
 		if (root.delay < 0) {
@@ -162,7 +161,7 @@ public class CodeGenerator {
 
 				graph.addConnection(gate, gateOutput);
 
-				for (TreeNode c : root.children) {
+				for (Property c : root.children) {
 
 					Vertex cInput = addProperty(graph, c, clk, rst, set);
 
@@ -243,10 +242,10 @@ public class CodeGenerator {
 		graph.addVertex(set);
 
 		for (Property p : assumptions)
-			assumptionNets.put(p, addProperty(graph, p.root, clk, rst, set));
+			assumptionNets.put(p, addProperty(graph, p, clk, rst, set));
 
 		for (Property p : assertions)
-			assertionNets.put(p, addProperty(graph, p.root, clk, rst, set));
+			assertionNets.put(p, addProperty(graph, p, clk, rst, set));
 
 		// Step 2 : Populate code generation structures
 
@@ -752,7 +751,7 @@ public class CodeGenerator {
 
 	private static int getMaxDelay(Property p) {
 
-		TreeNode copy = new TreeNode(p.root);
+		Property copy = new Property(p);
 
 		copy.flattenDelays(0);
 

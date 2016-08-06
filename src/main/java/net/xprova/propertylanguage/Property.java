@@ -1,330 +1,209 @@
 package net.xprova.propertylanguage;
 
 import java.util.ArrayList;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import net.xprova.propertylanguage.PropertyLanguageParser.AtomContext;
-import net.xprova.propertylanguage.PropertyLanguageParser.PropertyContext;
+import java.util.List;
 
 public class Property {
 
-	public final TreeNode root;
+	public String name;
 
-	// these must be the same as their correspondents in grammar:
-	private final String NOT = "~";
-	private final String AND = "&";
-	private final String XOR = "^";
-	private final String OR = "|";
-	private final String EQ = "==";
-	private final String NEQ = "!=";
-	private final String IMPLY = "|->";
-	private final String IMPLY_NEXT = "|=>";
-	private final String LPAREN = "(";
-	private final String AT = "@";
-	private final String HASH = "#";
-	private final String DOUBLE_HASH = "##";
-	private final String ROSE = "$rose";
-	private final String FELL = "$fell";
-	private final String STABLE = "$stable";
-	private final String CHANGED = "$changed";
-	private final String ALWAYS = "$always";
+	public int delay;
 
-	private void rewriteSyntaticSugar(TreeNode root) {
+	public List<Property> children;
 
-		for (TreeNode c : root.children)
-			rewriteSyntaticSugar(c);
+	public static Property build(String name) {
 
-		// change (x |=> #n y) into (x |-> #n+1 y)
+		return new Property(name);
 
-		if (root.name.equals(IMPLY_NEXT)) {
+	}
 
-			root.name = IMPLY;
+	public Property delay(int delay) {
 
-			TreeNode c1 = root.children.get(1);
+		this.delay = delay;
 
-			c1.delay -= 1;
-		}
+		return this;
 
-		// change (x |-> y) into (~x | y)
+	}
 
-		if (root.name.equals(IMPLY)) {
+	public Property child(Property child) {
 
-			TreeNode c1 = root.children.get(0);
+		children = new ArrayList<Property>();
 
-			TreeNode not = TreeNode.build(NOT);
+		children.add(child);
 
-			not.children.add(c1);
+		return this;
 
-			root.children.set(0, not);
+	}
 
-			root.name = "|";
+	public Property children(ArrayList<Property> children) {
 
-		}
+		this.children = children;
 
-		// change ($rose(x)) into (~x & #1 x)
+		return this;
 
-		if (root.name.equals(ROSE)) {
+	}
 
-			root.name = AND;
+	public Property(String name) {
 
-			TreeNode c1 = root.children.get(0);
+		this.name = name;
 
-			TreeNode c2 = TreeNode.build(NOT).child(new TreeNode(c1)).delay(1);
+		this.children = new ArrayList<Property>();
 
-			root.children.clear();
+	}
 
-			root.children.add(c1);
-			root.children.add(c2);
-		}
+	public Property(Property other) {
 
-		// change ($fell(x)) into (x & #1 ~x)
+		this.name = other.name;
 
-		if (root.name.equals(FELL)) {
+		this.delay = other.delay;
 
-			root.name = AND;
+		this.children = new ArrayList<Property>();
 
-			TreeNode c1 = root.children.get(0);
+		for (Property c : other.children)
+			this.children.add(new Property(c));
 
-			TreeNode c2 = TreeNode.build(NOT).child(new TreeNode(c1));
+	}
 
-			c1.delay += 1;
+	public void print() {
 
-			root.children.clear();
+		print("", true);
+	}
 
-			root.children.add(c1);
-			root.children.add(c2);
-		}
+	public boolean isTerminal() {
 
-		// $stable(x) into ~(x ^ #1 x)
+		return children.isEmpty();
 
-		if (root.name.equals(STABLE)) {
+	}
 
-			TreeNode c1 = new TreeNode(root.children.get(0));
-			TreeNode c2 = new TreeNode(root.children.get(0));
+	public void addDelayRecur(int extraDelay) {
 
-			c2.delay += 1;
+		// adds to the delay of terminal nodes under root
 
-			TreeNode xorN = TreeNode.build(XOR);
+		if (isTerminal()) {
 
-			xorN.children.add(c1);
-			xorN.children.add(c2);
+			delay += extraDelay;
 
-			root.name = NOT;
+		} else {
 
-			root.children.clear();
-
-			root.children.add(xorN);
-
-		}
-
-		// $changed(x) into (x ^ #1 x)
-
-		if (root.name.equals(CHANGED)) {
-
-			TreeNode c1 = new TreeNode(root.children.get(0));
-			TreeNode c2 = new TreeNode(root.children.get(0));
-
-			c2.delay += 1;
-
-			root.name = XOR;
-
-			root.children.clear();
-
-			root.children.add(c1);
-			root.children.add(c2);
-
-		}
-
-		// (x == y) into ~(x ^ y)
-
-		if (root.name.equals(EQ)) {
-
-			TreeNode xorNode = new TreeNode(root);
-
-			xorNode.name = "^";
-
-			root.children.clear();
-
-			root.name = "~";
-
-			root.children.add(xorNode);
-
-		}
-
-		// (x != y) into (x ^ y)
-
-		if (root.name.equals(NEQ)) {
-
-			root.name = "^";
+			for (Property c : children)
+				c.addDelayRecur(extraDelay);
 
 		}
 
 	}
 
-	private TreeNode parseAST(ParseTree root) throws Exception {
+	public int getMinDelay(int parentDelay) {
 
-		ArrayList<TreeNode> children = new ArrayList<TreeNode>();
+		if (isTerminal()) {
 
-		if (root.getChildCount() == 1) {
+			return parentDelay + delay;
 
-			if (root.getPayload() instanceof AtomContext) {
+		} else {
 
-				return TreeNode.build(root.getText());
+			int minDelay = Integer.MAX_VALUE;
 
-			} else {
+			for (Property n : children) {
 
-				return parseAST(root.getChild(0));
+				int d = n.getMinDelay(parentDelay + delay);
+
+				minDelay = d < minDelay ? d : minDelay;
 
 			}
 
-		}
-
-		if (root.getChildCount() == 2) {
-
-			// NOT
-
-			children.add(parseAST(root.getChild(1)));
-
-			return TreeNode.build(root.getChild(0).getText()).children(children);
+			return minDelay;
 
 		}
 
-		String c0 = root.getChild(0).getText();
-		String c1 = root.getChild(1).getText();
+	}
 
-		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)) {
+	public int getMaxDelay(int parentDelay) {
 
-			children.add(parseAST(root.getChild(2)));
+		if (isTerminal()) {
 
-			return TreeNode.build(c0).children(children);
+			return parentDelay + delay;
 
-		}
+		} else {
 
-		if (AND.equals(c1) || XOR.equals(c1) || OR.equals(c1)) {
+			int maxDelay = Integer.MIN_VALUE;
 
-			for (int i = 0; i < root.getChildCount(); i += 2)
-				children.add(parseAST(root.getChild(i)));
+			for (Property n : children) {
 
-			return TreeNode.build(c1).children(children);
+				int d = n.getMaxDelay(parentDelay + delay);
 
-		} else if (DOUBLE_HASH.equals(c1)) {
-
-			int cumDelay = 0;
-
-			for (int i = 0; i < root.getChildCount(); i++) {
-
-				ParseTree ci = root.getChild(i);
-
-				if (ci.getPayload() instanceof Token) {
-
-					Token pl = (Token) ci.getPayload();
-
-					if (DOUBLE_HASH.equals(pl.getText())) {
-
-						cumDelay += 1;
-
-					} else {
-
-						// token is NUM
-
-						// mind the (-1): we've incremented cumDelay when
-						// we processed the preceding DOUBLE_DASH so this
-						// is to make the total increase due to ##n equal
-						// to n
-
-						cumDelay += Integer.valueOf(pl.getText()) - 1;
-
-					}
-
-				} else {
-
-					// this is an identifier
-
-					TreeNode childNode = parseAST(ci);
-
-					childNode.delay -= cumDelay;
-
-					children.add(childNode);
-
-				}
+				maxDelay = d > maxDelay ? d : maxDelay;
 
 			}
 
-			return TreeNode.build(AND).children(children);
-
-		} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
-
-			children.add(parseAST(root.getChild(0)));
-			children.add(parseAST(root.getChild(2)));
-
-			return TreeNode.build(c1).children(children);
-
-		} else if (c0.equals(LPAREN)) {
-
-			children.add(parseAST(root.getChild(1)));
-
-			return TreeNode.build(LPAREN).children(children);
-
-		} else if (c0.equals(AT)) {
-
-			children.add(parseAST(root.getChild(2)));
-
-			int delay = Integer.valueOf(c1);
-
-			return TreeNode.build(LPAREN).children(children).delay(delay);
-
-		} else if (c0.equals(HASH)) {
-
-			children.add(parseAST(root.getChild(2)));
-
-			int delay = -Integer.valueOf(c1);
-
-			return TreeNode.build(LPAREN).children(children).delay(delay);
+			return maxDelay;
 
 		}
 
-		System.out.println(root.getText());
+	}
 
-		throw new Exception("error while traversing property AST");
+	public void flattenDelays(int parentDelay) {
+
+		// this function propagates delays down a tree, effectively
+		// mapping an expression like (@1 (a & b)) to (@1 a & @1 b)
+
+		if (isTerminal()) {
+
+			delay += parentDelay;
+
+		} else {
+
+			for (Property c : children)
+				c.flattenDelays(delay + parentDelay);
+
+			delay = 0;
+
+		}
 
 	}
 
-	public Property(String str) throws Exception {
+	public void groupDelays() {
 
-		// step 1: generate property AST
+		// this is the reverse operation of flatten
 
-		ANTLRInputStream antlr = new ANTLRInputStream(str);
+		// it minimises the sum of delays across all nodes, effectively mapping
+		// an expression like (@1 a & @1 b) to (@1 (a & b))
 
-		PropertyLanguageLexer lexer1 = new PropertyLanguageLexer(antlr);
+		if (isTerminal()) {
 
-		CommonTokenStream tokenStream = new CommonTokenStream(lexer1);
+			return;
 
-		PropertyLanguageParser p1 = new PropertyLanguageParser(tokenStream);
+		} else {
 
-		PropertyContext e = p1.property();
+			for (Property c : children)
+				c.groupDelays();
 
-		// step 2: traverse AST to generate expression tree
+		}
 
-		root = parseAST(e.getChild(0));
+		int minChildDelay = Integer.MAX_VALUE;
 
-		// step 3: process syntactic sugar
+		for (Property c : children)
+			minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
 
-		rewriteSyntaticSugar(root);
+		for (Property c : children)
+			c.delay -= minChildDelay;
 
-		// step 4: normalise delays
-
-		root.flattenDelays(0);
-
-		root.addDelayRecur(-root.getMinDelay(0));
-
-		root.groupDelays();
-
-		root.print();
+		delay += minChildDelay;
 
 	}
 
+	private void print(String prefix, boolean isTail) {
+
+		String n = delay != 0 ? String.format("%s (delay %d)", name, delay) : name;
+
+		System.out.println(prefix + (isTail ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ") + n);
+
+		if (children != null) {
+
+			for (int i = 0; i < children.size() - 1; i++)
+				children.get(i).print(prefix + (isTail ? "    " : "\u2502   "), false);
+
+			if (children.size() > 0)
+				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u2502   "), true);
+
+		}
+	}
 }
