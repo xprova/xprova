@@ -44,9 +44,8 @@ public class PropertyBuilder {
 
 			root.name = IMPLY;
 
-			Property c1 = root.children.get(1);
+			root.children.get(1).delay -= 1;
 
-			c1.delay -= 1;
 		}
 
 		// change (x |-> y) into (~x | y)
@@ -54,14 +53,13 @@ public class PropertyBuilder {
 		if (root.name.equals(IMPLY)) {
 
 			Property c1 = root.children.get(0);
+			Property c2 = root.children.get(1);
 
-			Property not = Property.build(NOT);
+			Property notC1 = Property.build(NOT).child(c1);
 
-			not.children.add(c1);
+			root.children(notC1, c2);
 
-			root.children.set(0, not);
-
-			root.name = "|";
+			root.name = OR;
 
 		}
 
@@ -75,10 +73,8 @@ public class PropertyBuilder {
 
 			Property c2 = Property.build(NOT).child(new Property(c1)).delay(1);
 
-			root.children.clear();
+			root.children(c1, c2);
 
-			root.children.add(c1);
-			root.children.add(c2);
 		}
 
 		// change ($fell(x)) into (x & #1 ~x)
@@ -89,14 +85,12 @@ public class PropertyBuilder {
 
 			Property c1 = root.children.get(0);
 
-			Property c2 = Property.build(NOT).child(new Property(c1));
+			Property notC1 = Property.build(NOT).child(new Property(c1));
 
 			c1.delay += 1;
 
-			root.children.clear();
+			root.children(c1, notC1);
 
-			root.children.add(c1);
-			root.children.add(c2);
 		}
 
 		// $stable(x) into ~(x ^ #1 x)
@@ -108,16 +102,9 @@ public class PropertyBuilder {
 
 			c2.delay += 1;
 
-			Property xorN = Property.build(XOR);
+			Property xorN = Property.build(XOR).children(c1, c2);
 
-			xorN.children.add(c1);
-			xorN.children.add(c2);
-
-			root.name = NOT;
-
-			root.children.clear();
-
-			root.children.add(xorN);
+			root.child(xorN).name = NOT;
 
 		}
 
@@ -130,12 +117,7 @@ public class PropertyBuilder {
 
 			c2.delay += 1;
 
-			root.name = XOR;
-
-			root.children.clear();
-
-			root.children.add(c1);
-			root.children.add(c2);
+			root.children(c1, c2).name = XOR;
 
 		}
 
@@ -145,13 +127,9 @@ public class PropertyBuilder {
 
 			Property xorNode = new Property(root);
 
-			xorNode.name = "^";
+			xorNode.name = XOR;
 
-			root.children.clear();
-
-			root.name = "~";
-
-			root.children.add(xorNode);
+			root.child(xorNode).name = NOT;
 
 		}
 
@@ -159,7 +137,7 @@ public class PropertyBuilder {
 
 		if (root.name.equals(NEQ)) {
 
-			root.name = "^";
+			root.name = XOR;
 
 		}
 

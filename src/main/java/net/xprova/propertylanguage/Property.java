@@ -43,6 +43,17 @@ public class Property {
 
 	}
 
+	public Property children(Property child1, Property child2) {
+
+		children = new ArrayList<Property>();
+
+		children.add(child1);
+		children.add(child2);
+
+		return this;
+
+	}
+
 	public Property(String name) {
 
 		this.name = name;
