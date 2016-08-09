@@ -2,9 +2,11 @@ library load lib/xprova.v
 
 read -b examples/eventually.v
 
-assume $always(~b)
+assume $never(b)
 
-assert $eventually(a, y)
+#assert $eventually(a, y)
+
+assert ~y
 
 prove -p
 

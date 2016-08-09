@@ -35,7 +35,7 @@ public class Property {
 
 	}
 
-	public Property children(ArrayList<Property> children) {
+	public Property children(List<Property> children) {
 
 		this.children = children;
 

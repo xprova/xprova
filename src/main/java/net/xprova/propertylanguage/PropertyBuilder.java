@@ -30,6 +30,7 @@ public class PropertyBuilder {
 	public static final String STABLE = "$stable";
 	public static final String CHANGED = "$changed";
 	public static final String ALWAYS = "$always";
+	public static final String NEVER = "$never";
 	public static final String EVENTUALLY = "$eventually";
 
 	private static void rewriteSyntaticSugar(Property root) {
@@ -162,6 +163,18 @@ public class PropertyBuilder {
 
 		}
 
+		// $never(x) into $always(~x)
+
+		if (root.name.equals(NEVER)) {
+
+			Property notChild = Property.build(NOT).children(root.children);
+
+			root.child(notChild);
+
+			root.name = ALWAYS;
+
+		}
+
 	}
 
 	private static Property parseAST(ParseTree root) throws Exception {
@@ -195,7 +208,8 @@ public class PropertyBuilder {
 		String c0 = root.getChild(0).getText();
 		String c1 = root.getChild(1).getText();
 
-		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)) {
+		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)
+				|| NEVER.equals(c0)) {
 
 			children.add(parseAST(root.getChild(2)));
 
