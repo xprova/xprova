@@ -13,6 +13,7 @@ import net.xprova.netlistgraph.NetlistGraph;
 import net.xprova.netlistgraph.Vertex;
 import net.xprova.netlistgraph.VertexType;
 import net.xprova.propertylanguage.Property;
+import net.xprova.propertylanguage.PropertyBuilder;
 import net.xprova.verilogparser.VerilogParser;
 
 public class CodeGenerator {
@@ -98,7 +99,9 @@ public class CodeGenerator {
 
 			throw new Exception("encountered node with negative delay in property expression");
 
-		} else if (root.delay > 0) {
+		}
+
+		if (root.delay > 0) {
 
 			int delay = root.delay;
 
@@ -129,7 +132,9 @@ public class CodeGenerator {
 
 			return net;
 
-		} else if (root.isTerminal()) {
+		}
+
+		if (root.isTerminal()) {
 
 			Vertex v = graph.getVertex(root.name);
 
@@ -143,83 +148,102 @@ public class CodeGenerator {
 
 			}
 
-		} else {
+		}
 
-			if (root.name.equals("(")) {
+		if (root.name.equals(PropertyBuilder.LPAREN)) {
 
-				return addProperty(graph, root.children.get(0), clk, rst, set);
+			return addProperty(graph, root.children.get(0), clk, rst, set);
 
-			} else if (root.name.equals("&") || root.name.equals("|") || root.name.equals("^")) {
+		}
 
-				// AND/OR gate
+		if (root.name.equals(PropertyBuilder.AND) || root.name.equals(PropertyBuilder.OR)
+				|| root.name.equals(PropertyBuilder.XOR)) {
 
-				String modType = root.name.equals("&") ? "AND" : (root.name.equals("|") ? "OR" : "XOR");
+			// AND/OR/XOR gate
 
-				Vertex gate = addPropertyModule(graph, modType);
+			String modType;
 
-				Vertex gateOutput = addPropertyNet(graph);
+			if (root.name.equals(PropertyBuilder.AND)) {
 
-				graph.addConnection(gate, gateOutput);
+				modType = "AND";
 
-				for (Property c : root.children) {
+			} else if (root.name.equals(PropertyBuilder.OR)) {
 
-					Vertex cInput = addProperty(graph, c, clk, rst, set);
+				modType = "OR";
 
-					graph.addConnection(cInput, gate);
+			} else {
 
-				}
-
-				return gateOutput;
-
-			} else if (root.name.equals("~")) {
-
-				// inverter
-
-				Vertex gate = addPropertyModule(graph, "NOT");
-
-				Vertex gateOutput = addPropertyNet(graph);
-
-				graph.addConnection(gate, gateOutput);
-
-				Vertex gateInput = addProperty(graph, root.children.get(0), clk, rst, set);
-
-				graph.addConnection(gateInput, gate);
-
-				return gateOutput;
-
-			} else if (root.name.equals("$always")) {
-
-				Vertex and = addPropertyModule(graph, "AND");
-
-				Vertex flopInput = addPropertyNet(graph);
-
-				Vertex flop = addPropertyModule(graph, "DFF");
-
-				Vertex flopOutput = addPropertyNet(graph);
-
-				Vertex andInput = addProperty(graph, root.children.get(0), clk, rst, set);
-
-				graph.addConnection(and, flopInput, "Y");
-
-				graph.addConnection(flopInput, flop, "D");
-
-				graph.addConnection(flop, flopOutput, "Q");
-
-				graph.addConnection(clk, flop, "CK");
-
-				graph.addConnection(set, flop, "ST");
-
-				graph.addConnection(flopOutput, and, "A");
-
-				graph.addConnection(andInput, and);
-
-				return flopInput;
+				modType = "XOR";
 
 			}
 
-			throw new Exception("property operator not yet implemented");
+			Vertex gate = addPropertyModule(graph, modType);
+
+			Vertex gateOutput = addPropertyNet(graph);
+
+			graph.addConnection(gate, gateOutput);
+
+			for (Property c : root.children) {
+
+				Vertex cInput = addProperty(graph, c, clk, rst, set);
+
+				graph.addConnection(cInput, gate);
+
+			}
+
+			return gateOutput;
 
 		}
+
+		if (root.name.equals(PropertyBuilder.NOT)) {
+
+			// inverter
+
+			Vertex gate = addPropertyModule(graph, "NOT");
+
+			Vertex gateOutput = addPropertyNet(graph);
+
+			graph.addConnection(gate, gateOutput);
+
+			Vertex gateInput = addProperty(graph, root.children.get(0), clk, rst, set);
+
+			graph.addConnection(gateInput, gate);
+
+			return gateOutput;
+
+		}
+
+		if (root.name.equals(PropertyBuilder.ALWAYS)) {
+
+			Vertex and = addPropertyModule(graph, "AND");
+
+			Vertex flopInput = addPropertyNet(graph);
+
+			Vertex flop = addPropertyModule(graph, "DFF");
+
+			Vertex flopOutput = addPropertyNet(graph);
+
+			Vertex andInput = addProperty(graph, root.children.get(0), clk, rst, set);
+
+			graph.addConnection(and, flopInput, "Y");
+
+			graph.addConnection(flopInput, flop, "D");
+
+			graph.addConnection(flop, flopOutput, "Q");
+
+			graph.addConnection(clk, flop, "CK");
+
+			graph.addConnection(set, flop, "ST");
+
+			graph.addConnection(flopOutput, and, "A");
+
+			graph.addConnection(andInput, and);
+
+			return flopInput;
+
+		}
+
+		throw new Exception("property operator not yet implemented");
 
 	}
 

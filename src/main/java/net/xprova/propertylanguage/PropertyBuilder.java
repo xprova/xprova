@@ -13,23 +13,24 @@ import net.xprova.propertylanguage.PropertyLanguageParser.PropertyContext;
 public class PropertyBuilder {
 
 	// these must be the same as their correspondents in grammar:
-	private static final String NOT = "~";
-	private static final String AND = "&";
-	private static final String XOR = "^";
-	private static final String OR = "|";
-	private static final String EQ = "==";
-	private static final String NEQ = "!=";
-	private static final String IMPLY = "|->";
-	private static final String IMPLY_NEXT = "|=>";
-	private static final String LPAREN = "(";
-	private static final String AT = "@";
-	private static final String HASH = "#";
-	private static final String DOUBLE_HASH = "##";
-	private static final String ROSE = "$rose";
-	private static final String FELL = "$fell";
-	private static final String STABLE = "$stable";
-	private static final String CHANGED = "$changed";
-	private static final String ALWAYS = "$always";
+	public static final String NOT = "~";
+	public static final String AND = "&";
+	public static final String XOR = "^";
+	public static final String OR = "|";
+	public static final String EQ = "==";
+	public static final String NEQ = "!=";
+	public static final String IMPLY = "|->";
+	public static final String IMPLY_NEXT = "|=>";
+	public static final String LPAREN = "(";
+	public static final String AT = "@";
+	public static final String HASH = "#";
+	public static final String DOUBLE_HASH = "##";
+	public static final String ROSE = "$rose";
+	public static final String FELL = "$fell";
+	public static final String STABLE = "$stable";
+	public static final String CHANGED = "$changed";
+	public static final String ALWAYS = "$always";
+	public static final String EVENTUALLY = "$eventually";
 
 	private static void rewriteSyntaticSugar(Property root) {
 
@@ -209,7 +210,9 @@ public class PropertyBuilder {
 
 			return Property.build(c1).children(children);
 
-		} else if (DOUBLE_HASH.equals(c1)) {
+		}
+
+		if (DOUBLE_HASH.equals(c1)) {
 
 			int cumDelay = 0;
 
@@ -254,20 +257,26 @@ public class PropertyBuilder {
 
 			return Property.build(AND).children(children);
 
-		} else if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
+		}
+
+		if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
 
 			children.add(parseAST(root.getChild(0)));
 			children.add(parseAST(root.getChild(2)));
 
 			return Property.build(c1).children(children);
 
-		} else if (c0.equals(LPAREN)) {
+		}
+
+		if (c0.equals(LPAREN)) {
 
 			children.add(parseAST(root.getChild(1)));
 
 			return Property.build(LPAREN).children(children);
 
-		} else if (c0.equals(AT)) {
+		}
+
+		if (c0.equals(AT)) {
 
 			children.add(parseAST(root.getChild(2)));
 
@@ -275,7 +284,9 @@ public class PropertyBuilder {
 
 			return Property.build(LPAREN).children(children).delay(delay);
 
-		} else if (c0.equals(HASH)) {
+		}
+
+		if (c0.equals(HASH)) {
 
 			children.add(parseAST(root.getChild(2)));
 
