@@ -1,12 +1,10 @@
 library load lib/xprova.v
 
-read -b examples/tiny.v
+read -b examples/eventually.v
 
-#assert ~count[3]
+assume $always(~b)
 
-assert $changed($fell(a))
+assert $eventually(a, y)
 
-assume ~$always(a)
-
-prove -p -t d:\counter.txt
+prove -p
 
