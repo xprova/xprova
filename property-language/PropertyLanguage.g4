@@ -53,6 +53,7 @@ atom
 	: ID
 	| LPAREN expr RPAREN
 	| (ROSE|FELL|STABLE|CHANGED|ALWAYS) LPAREN expr RPAREN
+	| EVENTUALLY LPAREN expr COMMA expr RPAREN
 	;
 
 // lexer rules
@@ -147,8 +148,16 @@ ALWAYS
 	: '$always'
 	;
 
+EVENTUALLY
+	: '$eventually'
+	;
+
 NUM
 	: [0-9] +
+	;
+
+COMMA
+	: ','
 	;
 
 WS
