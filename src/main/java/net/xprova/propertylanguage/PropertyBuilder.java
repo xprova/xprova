@@ -57,9 +57,7 @@ public class PropertyBuilder {
 
 			Property notC1 = Property.build(NOT).child(c1);
 
-			root.children(notC1, c2);
-
-			root.name = OR;
+			root.children(notC1, c2).name = OR;
 
 		}
 
@@ -67,13 +65,13 @@ public class PropertyBuilder {
 
 		if (root.name.equals(ROSE)) {
 
-			root.name = AND;
-
 			Property c1 = root.children.get(0);
 
-			Property c2 = Property.build(NOT).child(new Property(c1)).delay(1);
+			Property notC1 = Property.build(NOT).child(new Property(c1));
 
-			root.children(c1, c2);
+			notC1.delay += 2;
+
+			root.children(c1, notC1).name = AND;
 
 		}
 
@@ -81,15 +79,13 @@ public class PropertyBuilder {
 
 		if (root.name.equals(FELL)) {
 
-			root.name = AND;
-
 			Property c1 = root.children.get(0);
 
 			Property notC1 = Property.build(NOT).child(new Property(c1));
 
 			c1.delay += 1;
 
-			root.children(c1, notC1);
+			root.children(c1, notC1).name = AND;
 
 		}
 
@@ -147,9 +143,7 @@ public class PropertyBuilder {
 
 			Property notChild = Property.build(NOT).children(root.children);
 
-			root.child(notChild);
-
-			root.name = ALWAYS;
+			root.child(notChild).name = ALWAYS;
 
 		}
 
