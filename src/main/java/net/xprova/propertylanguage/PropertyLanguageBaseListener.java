@@ -28,25 +28,25 @@ public class PropertyLanguageBaseListener implements PropertyLanguageListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpr(PropertyLanguageParser.ExprContext ctx) { }
+	@Override public void enterTempExpr(PropertyLanguageParser.TempExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExpr(PropertyLanguageParser.ExprContext ctx) { }
+	@Override public void exitTempExpr(PropertyLanguageParser.TempExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFuncExpr(PropertyLanguageParser.FuncExprContext ctx) { }
+	@Override public void enterBaseExpr(PropertyLanguageParser.BaseExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFuncExpr(PropertyLanguageParser.FuncExprContext ctx) { }
+	@Override public void exitBaseExpr(PropertyLanguageParser.BaseExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

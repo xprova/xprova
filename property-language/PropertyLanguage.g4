@@ -9,14 +9,20 @@ grammar PropertyLanguage;
 // |->
 
 property
-	: expr EOF
+	: tempExpr EOF
 	;
 
-expr
-	: funcExpr
+// temporal layer
+
+tempExpr
+	: baseExpr
+	| (ALWAYS|NEVER) LPAREN baseExpr RPAREN
+	| EVENTUALLY LPAREN baseExpr COMMA baseExpr RPAREN
 	;
 
-funcExpr
+// boolean layer
+
+baseExpr
 	: implyExpr
 	;
 
@@ -51,9 +57,8 @@ nAtom
 
 atom
 	: ID
-	| LPAREN expr RPAREN
-	| (ROSE|FELL|STABLE|CHANGED|ALWAYS|NEVER) LPAREN expr RPAREN
-	| EVENTUALLY LPAREN expr COMMA expr RPAREN
+	| LPAREN baseExpr RPAREN
+	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
 	;
 
 // lexer rules

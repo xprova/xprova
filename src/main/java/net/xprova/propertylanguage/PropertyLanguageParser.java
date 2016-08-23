@@ -22,12 +22,12 @@ public class PropertyLanguageParser extends Parser {
 		RPAREN=14, HASH=15, DOUBLE_HASH=16, AT=17, ROSE=18, FELL=19, STABLE=20, 
 		CHANGED=21, ALWAYS=22, NEVER=23, EVENTUALLY=24, NUM=25, COMMA=26, WS=27;
 	public static final int
-		RULE_property = 0, RULE_expr = 1, RULE_funcExpr = 2, RULE_implyExpr = 3, 
+		RULE_property = 0, RULE_tempExpr = 1, RULE_baseExpr = 2, RULE_implyExpr = 3, 
 		RULE_orExpr = 4, RULE_xorExpr = 5, RULE_andExpr = 6, RULE_eqExpr = 7, 
 		RULE_timeAtom = 8, RULE_nAtom = 9, RULE_atom = 10;
 	public static final String[] ruleNames = {
-		"property", "expr", "funcExpr", "implyExpr", "orExpr", "xorExpr", "andExpr", 
-		"eqExpr", "timeAtom", "nAtom", "atom"
+		"property", "tempExpr", "baseExpr", "implyExpr", "orExpr", "xorExpr", 
+		"andExpr", "eqExpr", "timeAtom", "nAtom", "atom"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
@@ -92,8 +92,8 @@ public class PropertyLanguageParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class PropertyContext extends ParserRuleContext {
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
+		public TempExprContext tempExpr() {
+			return getRuleContext(TempExprContext.class,0);
 		}
 		public TerminalNode EOF() { return getToken(PropertyLanguageParser.EOF, 0); }
 		public PropertyContext(ParserRuleContext parent, int invokingState) {
@@ -117,7 +117,7 @@ public class PropertyLanguageParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(22);
-			expr();
+			tempExpr();
 			setState(23);
 			match(EOF);
 			}
@@ -133,32 +133,93 @@ public class PropertyLanguageParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExprContext extends ParserRuleContext {
-		public FuncExprContext funcExpr() {
-			return getRuleContext(FuncExprContext.class,0);
+	public static class TempExprContext extends ParserRuleContext {
+		public List<BaseExprContext> baseExpr() {
+			return getRuleContexts(BaseExprContext.class);
 		}
-		public ExprContext(ParserRuleContext parent, int invokingState) {
+		public BaseExprContext baseExpr(int i) {
+			return getRuleContext(BaseExprContext.class,i);
+		}
+		public TerminalNode LPAREN() { return getToken(PropertyLanguageParser.LPAREN, 0); }
+		public TerminalNode RPAREN() { return getToken(PropertyLanguageParser.RPAREN, 0); }
+		public TerminalNode ALWAYS() { return getToken(PropertyLanguageParser.ALWAYS, 0); }
+		public TerminalNode NEVER() { return getToken(PropertyLanguageParser.NEVER, 0); }
+		public TerminalNode EVENTUALLY() { return getToken(PropertyLanguageParser.EVENTUALLY, 0); }
+		public TerminalNode COMMA() { return getToken(PropertyLanguageParser.COMMA, 0); }
+		public TempExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override public int getRuleIndex() { return RULE_tempExpr; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterExpr(this);
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterTempExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitExpr(this);
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitTempExpr(this);
 		}
 	}
 
-	public final ExprContext expr() throws RecognitionException {
-		ExprContext _localctx = new ExprContext(_ctx, getState());
-		enterRule(_localctx, 2, RULE_expr);
+	public final TempExprContext tempExpr() throws RecognitionException {
+		TempExprContext _localctx = new TempExprContext(_ctx, getState());
+		enterRule(_localctx, 2, RULE_tempExpr);
+		int _la;
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(25);
-			funcExpr();
+			setState(38);
+			switch (_input.LA(1)) {
+			case ID:
+			case NOT:
+			case LPAREN:
+			case HASH:
+			case AT:
+			case ROSE:
+			case FELL:
+			case STABLE:
+			case CHANGED:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(25);
+				baseExpr();
+				}
+				break;
+			case ALWAYS:
+			case NEVER:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(26);
+				_la = _input.LA(1);
+				if ( !(_la==ALWAYS || _la==NEVER) ) {
+				_errHandler.recoverInline(this);
+				} else {
+					consume();
+				}
+				setState(27);
+				match(LPAREN);
+				setState(28);
+				baseExpr();
+				setState(29);
+				match(RPAREN);
+				}
+				break;
+			case EVENTUALLY:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(31);
+				match(EVENTUALLY);
+				setState(32);
+				match(LPAREN);
+				setState(33);
+				baseExpr();
+				setState(34);
+				match(COMMA);
+				setState(35);
+				baseExpr();
+				setState(36);
+				match(RPAREN);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -172,31 +233,31 @@ public class PropertyLanguageParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FuncExprContext extends ParserRuleContext {
+	public static class BaseExprContext extends ParserRuleContext {
 		public ImplyExprContext implyExpr() {
 			return getRuleContext(ImplyExprContext.class,0);
 		}
-		public FuncExprContext(ParserRuleContext parent, int invokingState) {
+		public BaseExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_funcExpr; }
+		@Override public int getRuleIndex() { return RULE_baseExpr; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterFuncExpr(this);
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).enterBaseExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitFuncExpr(this);
+			if ( listener instanceof PropertyLanguageListener ) ((PropertyLanguageListener)listener).exitBaseExpr(this);
 		}
 	}
 
-	public final FuncExprContext funcExpr() throws RecognitionException {
-		FuncExprContext _localctx = new FuncExprContext(_ctx, getState());
-		enterRule(_localctx, 4, RULE_funcExpr);
+	public final BaseExprContext baseExpr() throws RecognitionException {
+		BaseExprContext _localctx = new BaseExprContext(_ctx, getState());
+		enterRule(_localctx, 4, RULE_baseExpr);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(27);
+			setState(40);
 			implyExpr();
 			}
 		}
@@ -241,20 +302,20 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(29);
+			setState(42);
 			orExpr();
-			setState(32);
+			setState(45);
 			_la = _input.LA(1);
 			if (_la==IMPLY || _la==IMPLY_NEXT) {
 				{
-				setState(30);
+				setState(43);
 				_la = _input.LA(1);
 				if ( !(_la==IMPLY || _la==IMPLY_NEXT) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(31);
+				setState(44);
 				orExpr();
 				}
 			}
@@ -304,21 +365,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(34);
+			setState(47);
 			xorExpr();
-			setState(39);
+			setState(52);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==OR) {
 				{
 				{
-				setState(35);
+				setState(48);
 				match(OR);
-				setState(36);
+				setState(49);
 				xorExpr();
 				}
 				}
-				setState(41);
+				setState(54);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -367,21 +428,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(42);
+			setState(55);
 			andExpr();
-			setState(47);
+			setState(60);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==XOR) {
 				{
 				{
-				setState(43);
+				setState(56);
 				match(XOR);
-				setState(44);
+				setState(57);
 				andExpr();
 				}
 				}
-				setState(49);
+				setState(62);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -436,27 +497,27 @@ public class PropertyLanguageParser extends Parser {
 		enterRule(_localctx, 12, RULE_andExpr);
 		int _la;
 		try {
-			setState(69);
+			setState(82);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(50);
+				setState(63);
 				eqExpr();
-				setState(55);
+				setState(68);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==AND) {
 					{
 					{
-					setState(51);
+					setState(64);
 					match(AND);
-					setState(52);
+					setState(65);
 					eqExpr();
 					}
 					}
-					setState(57);
+					setState(70);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
@@ -465,30 +526,30 @@ public class PropertyLanguageParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(58);
+				setState(71);
 				eqExpr();
-				setState(66);
+				setState(79);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==DOUBLE_HASH) {
 					{
 					{
-					setState(59);
+					setState(72);
 					match(DOUBLE_HASH);
-					setState(61);
+					setState(74);
 					_la = _input.LA(1);
 					if (_la==NUM) {
 						{
-						setState(60);
+						setState(73);
 						match(NUM);
 						}
 					}
 
-					setState(63);
+					setState(76);
 					eqExpr();
 					}
 					}
-					setState(68);
+					setState(81);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
@@ -537,20 +598,20 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(71);
+			setState(84);
 			timeAtom();
-			setState(74);
+			setState(87);
 			_la = _input.LA(1);
 			if (_la==EQ || _la==NEQ) {
 				{
-				setState(72);
+				setState(85);
 				_la = _input.LA(1);
 				if ( !(_la==EQ || _la==NEQ) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(73);
+				setState(86);
 				timeAtom();
 				}
 			}
@@ -596,23 +657,23 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(78);
+			setState(91);
 			_la = _input.LA(1);
 			if (_la==HASH || _la==AT) {
 				{
-				setState(76);
+				setState(89);
 				_la = _input.LA(1);
 				if ( !(_la==HASH || _la==AT) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(77);
+				setState(90);
 				match(NUM);
 				}
 			}
 
-			setState(80);
+			setState(93);
 			nAtom();
 			}
 		}
@@ -653,16 +714,16 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(83);
+			setState(96);
 			_la = _input.LA(1);
 			if (_la==NOT) {
 				{
-				setState(82);
+				setState(95);
 				match(NOT);
 				}
 			}
 
-			setState(85);
+			setState(98);
 			atom();
 			}
 		}
@@ -680,21 +741,14 @@ public class PropertyLanguageParser extends Parser {
 	public static class AtomContext extends ParserRuleContext {
 		public TerminalNode ID() { return getToken(PropertyLanguageParser.ID, 0); }
 		public TerminalNode LPAREN() { return getToken(PropertyLanguageParser.LPAREN, 0); }
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
+		public BaseExprContext baseExpr() {
+			return getRuleContext(BaseExprContext.class,0);
 		}
 		public TerminalNode RPAREN() { return getToken(PropertyLanguageParser.RPAREN, 0); }
 		public TerminalNode ROSE() { return getToken(PropertyLanguageParser.ROSE, 0); }
 		public TerminalNode FELL() { return getToken(PropertyLanguageParser.FELL, 0); }
 		public TerminalNode STABLE() { return getToken(PropertyLanguageParser.STABLE, 0); }
 		public TerminalNode CHANGED() { return getToken(PropertyLanguageParser.CHANGED, 0); }
-		public TerminalNode ALWAYS() { return getToken(PropertyLanguageParser.ALWAYS, 0); }
-		public TerminalNode NEVER() { return getToken(PropertyLanguageParser.NEVER, 0); }
-		public TerminalNode EVENTUALLY() { return getToken(PropertyLanguageParser.EVENTUALLY, 0); }
-		public TerminalNode COMMA() { return getToken(PropertyLanguageParser.COMMA, 0); }
 		public AtomContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -714,23 +768,23 @@ public class PropertyLanguageParser extends Parser {
 		enterRule(_localctx, 20, RULE_atom);
 		int _la;
 		try {
-			setState(104);
+			setState(110);
 			switch (_input.LA(1)) {
 			case ID:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(87);
+				setState(100);
 				match(ID);
 				}
 				break;
 			case LPAREN:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(88);
+				setState(101);
 				match(LPAREN);
-				setState(89);
-				expr();
-				setState(90);
+				setState(102);
+				baseExpr();
+				setState(103);
 				match(RPAREN);
 				}
 				break;
@@ -738,39 +792,20 @@ public class PropertyLanguageParser extends Parser {
 			case FELL:
 			case STABLE:
 			case CHANGED:
-			case ALWAYS:
-			case NEVER:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(92);
+				setState(105);
 				_la = _input.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ROSE) | (1L << FELL) | (1L << STABLE) | (1L << CHANGED) | (1L << ALWAYS) | (1L << NEVER))) != 0)) ) {
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ROSE) | (1L << FELL) | (1L << STABLE) | (1L << CHANGED))) != 0)) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(93);
+				setState(106);
 				match(LPAREN);
-				setState(94);
-				expr();
-				setState(95);
-				match(RPAREN);
-				}
-				break;
-			case EVENTUALLY:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(97);
-				match(EVENTUALLY);
-				setState(98);
-				match(LPAREN);
-				setState(99);
-				expr();
-				setState(100);
-				match(COMMA);
-				setState(101);
-				expr();
-				setState(102);
+				setState(107);
+				baseExpr();
+				setState(108);
 				match(RPAREN);
 				}
 				break;
@@ -790,33 +825,34 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\35m\4\2\t\2\4\3\t"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\35s\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
-		"\f\t\f\3\2\3\2\3\2\3\3\3\3\3\4\3\4\3\5\3\5\3\5\5\5#\n\5\3\6\3\6\3\6\7"+
-		"\6(\n\6\f\6\16\6+\13\6\3\7\3\7\3\7\7\7\60\n\7\f\7\16\7\63\13\7\3\b\3\b"+
-		"\3\b\7\b8\n\b\f\b\16\b;\13\b\3\b\3\b\3\b\5\b@\n\b\3\b\7\bC\n\b\f\b\16"+
-		"\bF\13\b\5\bH\n\b\3\t\3\t\3\t\5\tM\n\t\3\n\3\n\5\nQ\n\n\3\n\3\n\3\13\5"+
-		"\13V\n\13\3\13\3\13\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3"+
-		"\f\3\f\3\f\3\f\3\f\5\fk\n\f\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24\26\2\6\3"+
-		"\2\r\16\3\2\13\f\4\2\21\21\23\23\3\2\24\31n\2\30\3\2\2\2\4\33\3\2\2\2"+
-		"\6\35\3\2\2\2\b\37\3\2\2\2\n$\3\2\2\2\f,\3\2\2\2\16G\3\2\2\2\20I\3\2\2"+
-		"\2\22P\3\2\2\2\24U\3\2\2\2\26j\3\2\2\2\30\31\5\4\3\2\31\32\7\2\2\3\32"+
-		"\3\3\2\2\2\33\34\5\6\4\2\34\5\3\2\2\2\35\36\5\b\5\2\36\7\3\2\2\2\37\""+
-		"\5\n\6\2 !\t\2\2\2!#\5\n\6\2\" \3\2\2\2\"#\3\2\2\2#\t\3\2\2\2$)\5\f\7"+
-		"\2%&\7\b\2\2&(\5\f\7\2\'%\3\2\2\2(+\3\2\2\2)\'\3\2\2\2)*\3\2\2\2*\13\3"+
-		"\2\2\2+)\3\2\2\2,\61\5\16\b\2-.\7\t\2\2.\60\5\16\b\2/-\3\2\2\2\60\63\3"+
-		"\2\2\2\61/\3\2\2\2\61\62\3\2\2\2\62\r\3\2\2\2\63\61\3\2\2\2\649\5\20\t"+
-		"\2\65\66\7\7\2\2\668\5\20\t\2\67\65\3\2\2\28;\3\2\2\29\67\3\2\2\29:\3"+
-		"\2\2\2:H\3\2\2\2;9\3\2\2\2<D\5\20\t\2=?\7\22\2\2>@\7\33\2\2?>\3\2\2\2"+
-		"?@\3\2\2\2@A\3\2\2\2AC\5\20\t\2B=\3\2\2\2CF\3\2\2\2DB\3\2\2\2DE\3\2\2"+
-		"\2EH\3\2\2\2FD\3\2\2\2G\64\3\2\2\2G<\3\2\2\2H\17\3\2\2\2IL\5\22\n\2JK"+
-		"\t\3\2\2KM\5\22\n\2LJ\3\2\2\2LM\3\2\2\2M\21\3\2\2\2NO\t\4\2\2OQ\7\33\2"+
-		"\2PN\3\2\2\2PQ\3\2\2\2QR\3\2\2\2RS\5\24\13\2S\23\3\2\2\2TV\7\n\2\2UT\3"+
-		"\2\2\2UV\3\2\2\2VW\3\2\2\2WX\5\26\f\2X\25\3\2\2\2Yk\7\3\2\2Z[\7\17\2\2"+
-		"[\\\5\4\3\2\\]\7\20\2\2]k\3\2\2\2^_\t\5\2\2_`\7\17\2\2`a\5\4\3\2ab\7\20"+
-		"\2\2bk\3\2\2\2cd\7\32\2\2de\7\17\2\2ef\5\4\3\2fg\7\34\2\2gh\5\4\3\2hi"+
-		"\7\20\2\2ik\3\2\2\2jY\3\2\2\2jZ\3\2\2\2j^\3\2\2\2jc\3\2\2\2k\27\3\2\2"+
-		"\2\r\")\619?DGLPUj";
+		"\f\t\f\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
+		"\5\3)\n\3\3\4\3\4\3\5\3\5\3\5\5\5\60\n\5\3\6\3\6\3\6\7\6\65\n\6\f\6\16"+
+		"\68\13\6\3\7\3\7\3\7\7\7=\n\7\f\7\16\7@\13\7\3\b\3\b\3\b\7\bE\n\b\f\b"+
+		"\16\bH\13\b\3\b\3\b\3\b\5\bM\n\b\3\b\7\bP\n\b\f\b\16\bS\13\b\5\bU\n\b"+
+		"\3\t\3\t\3\t\5\tZ\n\t\3\n\3\n\5\n^\n\n\3\n\3\n\3\13\5\13c\n\13\3\13\3"+
+		"\13\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\5\fq\n\f\3\f\2\2\r\2\4\6\b"+
+		"\n\f\16\20\22\24\26\2\7\3\2\30\31\3\2\r\16\3\2\13\f\4\2\21\21\23\23\3"+
+		"\2\24\27u\2\30\3\2\2\2\4(\3\2\2\2\6*\3\2\2\2\b,\3\2\2\2\n\61\3\2\2\2\f"+
+		"9\3\2\2\2\16T\3\2\2\2\20V\3\2\2\2\22]\3\2\2\2\24b\3\2\2\2\26p\3\2\2\2"+
+		"\30\31\5\4\3\2\31\32\7\2\2\3\32\3\3\2\2\2\33)\5\6\4\2\34\35\t\2\2\2\35"+
+		"\36\7\17\2\2\36\37\5\6\4\2\37 \7\20\2\2 )\3\2\2\2!\"\7\32\2\2\"#\7\17"+
+		"\2\2#$\5\6\4\2$%\7\34\2\2%&\5\6\4\2&\'\7\20\2\2\')\3\2\2\2(\33\3\2\2\2"+
+		"(\34\3\2\2\2(!\3\2\2\2)\5\3\2\2\2*+\5\b\5\2+\7\3\2\2\2,/\5\n\6\2-.\t\3"+
+		"\2\2.\60\5\n\6\2/-\3\2\2\2/\60\3\2\2\2\60\t\3\2\2\2\61\66\5\f\7\2\62\63"+
+		"\7\b\2\2\63\65\5\f\7\2\64\62\3\2\2\2\658\3\2\2\2\66\64\3\2\2\2\66\67\3"+
+		"\2\2\2\67\13\3\2\2\28\66\3\2\2\29>\5\16\b\2:;\7\t\2\2;=\5\16\b\2<:\3\2"+
+		"\2\2=@\3\2\2\2><\3\2\2\2>?\3\2\2\2?\r\3\2\2\2@>\3\2\2\2AF\5\20\t\2BC\7"+
+		"\7\2\2CE\5\20\t\2DB\3\2\2\2EH\3\2\2\2FD\3\2\2\2FG\3\2\2\2GU\3\2\2\2HF"+
+		"\3\2\2\2IQ\5\20\t\2JL\7\22\2\2KM\7\33\2\2LK\3\2\2\2LM\3\2\2\2MN\3\2\2"+
+		"\2NP\5\20\t\2OJ\3\2\2\2PS\3\2\2\2QO\3\2\2\2QR\3\2\2\2RU\3\2\2\2SQ\3\2"+
+		"\2\2TA\3\2\2\2TI\3\2\2\2U\17\3\2\2\2VY\5\22\n\2WX\t\4\2\2XZ\5\22\n\2Y"+
+		"W\3\2\2\2YZ\3\2\2\2Z\21\3\2\2\2[\\\t\5\2\2\\^\7\33\2\2][\3\2\2\2]^\3\2"+
+		"\2\2^_\3\2\2\2_`\5\24\13\2`\23\3\2\2\2ac\7\n\2\2ba\3\2\2\2bc\3\2\2\2c"+
+		"d\3\2\2\2de\5\26\f\2e\25\3\2\2\2fq\7\3\2\2gh\7\17\2\2hi\5\6\4\2ij\7\20"+
+		"\2\2jq\3\2\2\2kl\t\6\2\2lm\7\17\2\2mn\5\6\4\2no\7\20\2\2oq\3\2\2\2pf\3"+
+		"\2\2\2pg\3\2\2\2pk\3\2\2\2q\27\3\2\2\2\16(/\66>FLQTY]bp";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
