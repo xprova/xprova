@@ -8,5 +8,6 @@ assume $never(b)
 
 assert ~y
 
-prove -p
+prove -p -k
 
+dot -e,CK,RS,ST --pdf output/netlist.pdf

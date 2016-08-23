@@ -247,12 +247,10 @@ public class CodeGenerator {
 
 	}
 
-	public static ArrayList<String> generate(NetlistGraph source, ArrayList<Property> assumptions,
+	public static ArrayList<String> generate(NetlistGraph graph, ArrayList<Property> assumptions,
 			ArrayList<Property> assertions, String templateCode) throws Exception {
 
 		// Step 1: Add properties to graph
-
-		NetlistGraph graph = new NetlistGraph(source);
 
 		HashMap<Property, Vertex> assumptionNets = new HashMap<Property, Vertex>();
 		HashMap<Property, Vertex> assertionNets = new HashMap<Property, Vertex>();
