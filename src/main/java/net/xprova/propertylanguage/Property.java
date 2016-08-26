@@ -25,7 +25,7 @@ public class Property {
 
 	}
 
-	public Property child(Property child) {
+	public Property setChild(Property child) {
 
 		children = new ArrayList<Property>();
 
@@ -41,20 +41,12 @@ public class Property {
 
 	}
 
-	public Property children(List<Property> children) {
+	public Property setChildren(List<Property> children) {
 
-		this.children = children;
+		this.children = new ArrayList<Property>();
 
-		return this;
-
-	}
-
-	public Property children(Property child1, Property child2) {
-
-		children = new ArrayList<Property>();
-
-		children.add(child1);
-		children.add(child2);
+		for (Property c : children)
+			this.children.add(new Property(c));
 
 		return this;
 
@@ -74,10 +66,7 @@ public class Property {
 
 		this.delay = other.delay;
 
-		this.children = new ArrayList<Property>();
-
-		for (Property c : other.children)
-			this.children.add(new Property(c));
+		setChildren(other.children);
 
 	}
 

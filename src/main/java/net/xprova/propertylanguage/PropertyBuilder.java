@@ -53,9 +53,9 @@ public class PropertyBuilder {
 			Property c1 = root.children.get(0);
 			Property c2 = root.children.get(1);
 
-			Property notC1 = Property.build(NOT).child(c1);
+			Property notC1 = Property.build(NOT).setChild(c1);
 
-			root.children(notC1, c2).name = OR;
+			root.addChild(notC1).addChild(c2).name = OR;
 
 		}
 
@@ -65,11 +65,11 @@ public class PropertyBuilder {
 
 			Property c1 = root.children.get(0);
 
-			Property notC1 = Property.build(NOT).child(new Property(c1));
+			Property notC1 = Property.build(NOT).setChild(new Property(c1));
 
 			notC1.delay += 2;
 
-			root.children(c1, notC1).name = AND;
+			root.addChild(c1).addChild(notC1).name = AND;
 
 		}
 
@@ -79,11 +79,11 @@ public class PropertyBuilder {
 
 			Property c1 = root.children.get(0);
 
-			Property notC1 = Property.build(NOT).child(new Property(c1));
+			Property notC1 = Property.build(NOT).setChild(new Property(c1));
 
 			c1.delay += 1;
 
-			root.children(c1, notC1).name = AND;
+			root.addChild(c1).addChild(notC1).name = AND;
 
 		}
 
@@ -96,9 +96,9 @@ public class PropertyBuilder {
 
 			c2.delay += 1;
 
-			Property xorN = Property.build(XOR).children(c1, c2);
+			Property xorN = Property.build(XOR).addChild(c1).addChild(c2);
 
-			root.child(xorN).name = NOT;
+			root.setChild(xorN).name = NOT;
 
 		}
 
@@ -111,7 +111,7 @@ public class PropertyBuilder {
 
 			c2.delay += 1;
 
-			root.children(c1, c2).name = XOR;
+			root.addChild(c1).addChild(c2).name = XOR;
 
 		}
 
@@ -123,7 +123,7 @@ public class PropertyBuilder {
 
 			xorNode.name = XOR;
 
-			root.child(xorNode).name = NOT;
+			root.setChild(xorNode).name = NOT;
 
 		}
 
@@ -139,9 +139,9 @@ public class PropertyBuilder {
 
 		if (root.name.equals(NEVER)) {
 
-			Property notChild = Property.build(NOT).children(root.children);
+			Property notChild = Property.build(NOT).setChildren(root.children);
 
-			root.child(notChild).name = ALWAYS;
+			root.setChild(notChild).name = ALWAYS;
 
 		}
 
@@ -169,7 +169,7 @@ public class PropertyBuilder {
 
 			Property child = parseAST(root.getChild(1));
 
-			return Property.build(root.getChild(0).getText()).child(child);
+			return Property.build(root.getChild(0).getText()).setChild(child);
 
 		}
 
@@ -181,7 +181,7 @@ public class PropertyBuilder {
 
 			Property child = parseAST(root.getChild(2));
 
-			return Property.build(c0).child(child);
+			return Property.build(c0).setChild(child);
 
 		}
 
@@ -250,7 +250,7 @@ public class PropertyBuilder {
 			Property op1 = parseAST(root.getChild(0));
 			Property op2 = parseAST(root.getChild(2));
 
-			return Property.build(c1).children(op1, op2);
+			return Property.build(c1).addChild(op1).addChild(op2);
 
 		}
 
@@ -258,7 +258,7 @@ public class PropertyBuilder {
 
 			Property expr = parseAST(root.getChild(1));
 
-			return Property.build(LPAREN).child(expr);
+			return Property.build(LPAREN).setChild(expr);
 
 		}
 
@@ -268,7 +268,7 @@ public class PropertyBuilder {
 
 			int delay = Integer.valueOf(c1);
 
-			return Property.build(LPAREN).child(expr).delay(delay);
+			return Property.build(LPAREN).setChild(expr).delay(delay);
 
 		}
 
@@ -278,7 +278,7 @@ public class PropertyBuilder {
 
 			int delay = -Integer.valueOf(c1);
 
-			return Property.build(LPAREN).child(child).delay(delay);
+			return Property.build(LPAREN).setChild(child).delay(delay);
 
 		}
 
