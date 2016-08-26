@@ -29,6 +29,12 @@ public class Property {
 
 		children = new ArrayList<Property>();
 
+		return addChild(child);
+
+	}
+
+	public Property addChild(Property child) {
+
 		children.add(child);
 
 		return this;

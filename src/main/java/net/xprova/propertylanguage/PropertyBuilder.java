@@ -1,7 +1,5 @@
 package net.xprova.propertylanguage;
 
-import java.util.ArrayList;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
@@ -151,8 +149,6 @@ public class PropertyBuilder {
 
 	private static Property parseAST(ParseTree root) throws Exception {
 
-		ArrayList<Property> children = new ArrayList<Property>();
-
 		if (root.getChildCount() == 1) {
 
 			if (root.getPayload() instanceof AtomContext) {
@@ -171,9 +167,9 @@ public class PropertyBuilder {
 
 			// NOT
 
-			children.add(parseAST(root.getChild(1)));
+			Property child = parseAST(root.getChild(1));
 
-			return Property.build(root.getChild(0).getText()).children(children);
+			return Property.build(root.getChild(0).getText()).child(child);
 
 		}
 
@@ -183,22 +179,26 @@ public class PropertyBuilder {
 		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)
 				|| NEVER.equals(c0)) {
 
-			children.add(parseAST(root.getChild(2)));
+			Property child = parseAST(root.getChild(2));
 
-			return Property.build(c0).children(children);
+			return Property.build(c0).child(child);
 
 		}
 
 		if (AND.equals(c1) || XOR.equals(c1) || OR.equals(c1)) {
 
-			for (int i = 0; i < root.getChildCount(); i += 2)
-				children.add(parseAST(root.getChild(i)));
+			Property result = Property.build(c1);
 
-			return Property.build(c1).children(children);
+			for (int i = 0; i < root.getChildCount(); i += 2)
+				result.addChild(parseAST(root.getChild(i)));
+
+			return result;
 
 		}
 
 		if (DOUBLE_HASH.equals(c1)) {
+
+			Property result = Property.build(AND);
 
 			int cumDelay = 0;
 
@@ -235,50 +235,50 @@ public class PropertyBuilder {
 
 					childNode.delay -= cumDelay;
 
-					children.add(childNode);
+					result.addChild(childNode);
 
 				}
 
 			}
 
-			return Property.build(AND).children(children);
+			return result;
 
 		}
 
 		if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
 
-			children.add(parseAST(root.getChild(0)));
-			children.add(parseAST(root.getChild(2)));
+			Property op1 = parseAST(root.getChild(0));
+			Property op2 = parseAST(root.getChild(2));
 
-			return Property.build(c1).children(children);
+			return Property.build(c1).children(op1, op2);
 
 		}
 
 		if (c0.equals(LPAREN)) {
 
-			children.add(parseAST(root.getChild(1)));
+			Property expr = parseAST(root.getChild(1));
 
-			return Property.build(LPAREN).children(children);
+			return Property.build(LPAREN).child(expr);
 
 		}
 
 		if (c0.equals(AT)) {
 
-			children.add(parseAST(root.getChild(2)));
+			Property expr = parseAST(root.getChild(2));
 
 			int delay = Integer.valueOf(c1);
 
-			return Property.build(LPAREN).children(children).delay(delay);
+			return Property.build(LPAREN).child(expr).delay(delay);
 
 		}
 
 		if (c0.equals(HASH)) {
 
-			children.add(parseAST(root.getChild(2)));
+			Property child = parseAST(root.getChild(2));
 
 			int delay = -Integer.valueOf(c1);
 
-			return Property.build(LPAREN).children(children).delay(delay);
+			return Property.build(LPAREN).child(child).delay(delay);
 
 		}
 
