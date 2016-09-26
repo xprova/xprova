@@ -1,13 +1,7 @@
 library load lib/xprova.v
 
-read -b examples/eventually.v
+read -b examples/statemach1.v
 
-assume $never(b)
+assert ~(state[2] & state[0])
 
-#assert $eventually(a, y)
-
-assert ~y
-
-prove -p -k
-
-dot -e,CK,RS,ST --pdf output/netlist.pdf
+prove -p
