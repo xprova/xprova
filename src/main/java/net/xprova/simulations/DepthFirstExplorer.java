@@ -17,9 +17,13 @@ public class DepthFirstExplorer {
 
 		final int MAX_SIZE = 20;
 
+		final int INITIAL_STATE = 0;
+
 		// a variation of dfs2 that uses arrays instead of stacks and sets
 
 		int visited[] = new int[MAX_SIZE];
+
+		int onStack[] = new int[MAX_SIZE];
 
 		int stateStack[] = new int[MAX_SIZE];
 
@@ -29,9 +33,11 @@ public class DepthFirstExplorer {
 
 		int inputVecStackPtr = 0; // next available empty slot
 
-		stateStack[stateStackPtr++] = 0; // initial state
+		stateStack[stateStackPtr++] = INITIAL_STATE; // initial state
 
 		inputVecStack[inputVecStackPtr++] = 0; // initial state
+
+		onStack[INITIAL_STATE] = 1;
 
 		while (stateStackPtr > 0) {
 
@@ -39,21 +45,14 @@ public class DepthFirstExplorer {
 
 			int currentInputVec = inputVecStack[--inputVecStackPtr];
 
+			onStack[currentState] -= 1;
+
 			if (visited[currentState] == 1) {
 
 				continue;
 			}
 
-			// begin: ugly section, O(n)
-
-			boolean onStack = false;
-
-			for (int i = 0; i < stateStackPtr; i++)
-				onStack |= stateStack[i] == currentState;
-
-			// end: ugly section
-
-			if (onStack) {
+			if (onStack[currentState] != 0) {
 
 				Stack<Integer> states = new Stack<Integer>();
 
@@ -75,6 +74,8 @@ public class DepthFirstExplorer {
 
 				inputVecStack[inputVecStackPtr++] = currentInputVec + 1;
 
+				onStack[currentState] += 1;
+
 				// now push next state to stack:
 
 				int nextState = graph[currentState][currentInputVec];
@@ -82,6 +83,8 @@ public class DepthFirstExplorer {
 				stateStack[stateStackPtr++] = nextState;
 
 				inputVecStack[inputVecStackPtr++] = 0;
+
+				onStack[nextState] += 1;
 
 				continue;
 
