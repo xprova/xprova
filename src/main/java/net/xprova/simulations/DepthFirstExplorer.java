@@ -83,8 +83,6 @@ public class DepthFirstExplorer {
 
 				inputVecStack[inputVecStackPtr++] = 0;
 
-				visited[nextState] = inputVecStackPtr;
-
 				continue;
 
 			} else {
