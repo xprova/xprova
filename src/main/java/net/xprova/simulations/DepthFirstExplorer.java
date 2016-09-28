@@ -5,9 +5,99 @@ import java.util.Stack;
 
 public class DepthFirstExplorer {
 
+	static final int[][] graph0 = { { 1 }, { 2 }, { 0 } };
+
 	static final int[][] graph1 = { { 1, 2 }, { 3, 4 }, { 6 }, {}, { 5, 6 }, { 4 }, {} };
 
 	static final int[][] graph2 = { { 1 }, { 2, 5 }, { 3 }, { 4 }, { 2 }, { 6 }, { 7 }, { 5 } };
+
+	private static void dfs2_arrays(int[][] graph) {
+
+		final int MAX_SIZE = 20;
+
+		// a variation of dfs2 that uses arrays instead of stacks and sets
+
+		int visited[] = new int[MAX_SIZE];
+
+		int stateStack[] = new int[MAX_SIZE];
+
+		int inputVecStack[] = new int[MAX_SIZE];
+
+		int stateStackPtr = 0; // next available empty slot
+
+		int inputVecStackPtr = 0; // next available empty slot
+
+		stateStack[stateStackPtr++] = 0; // initial state
+
+		inputVecStack[inputVecStackPtr++] = 0; // initial state
+
+		while (stateStackPtr > 0) {
+
+			int currentState = stateStack[--stateStackPtr];
+
+			int currentInputVec = inputVecStack[--inputVecStackPtr];
+
+			if (visited[currentState] == 1) {
+
+				continue;
+			}
+
+			// begin: ugly section, O(n)
+
+			boolean onStack = false;
+
+			for (int i = 0; i < stateStackPtr; i++)
+				onStack |= stateStack[i] == currentState;
+
+			// end: ugly section
+
+			if (onStack) {
+
+				Stack<Integer> states = new Stack<Integer>();
+
+				for (int i = 0; i < stateStackPtr; i++)
+					states.push(stateStack[i]);
+
+				printCycle(states, currentState);
+
+				continue;
+			}
+
+			if (currentInputVec < graph[currentState].length) {
+
+				// there are more input vectors to explore in currentState
+
+				// first push next input vector of current state:
+
+				stateStack[stateStackPtr++] = currentState;
+
+				inputVecStack[inputVecStackPtr++] = currentInputVec + 1;
+
+				// now push next state to stack:
+
+				int nextState = graph[currentState][currentInputVec];
+
+				stateStack[stateStackPtr++] = nextState;
+
+				inputVecStack[inputVecStackPtr++] = 0;
+
+				visited[nextState] = inputVecStackPtr;
+
+				continue;
+
+			} else {
+
+				// explored all input vectors of currentState
+
+				// currentState is now marked as visited
+
+				visited[0] = 1;
+
+			}
+
+		}
+
+	}
 
 	private static void dfs2(int[][] graph) {
 
@@ -120,15 +210,19 @@ public class DepthFirstExplorer {
 
 	public static void main(String[] args) {
 
-		System.out.println("output of dfs():\n");
-
 		int[][] graph = graph2;
+
+		System.out.println("output of dfs():\n");
 
 		dfs(graph, 0, new Stack<Integer>(), new HashSet<Integer>());
 
 		System.out.println("\noutput of dfs2():\n");
 
 		dfs2(graph);
+
+		System.out.println("\noutput of dfs2_arrays():\n");
+
+		dfs2_arrays(graph);
 
 	}
 
