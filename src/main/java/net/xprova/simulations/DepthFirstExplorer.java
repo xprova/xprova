@@ -11,6 +11,8 @@ public class DepthFirstExplorer {
 
 	static final int[][] graph2 = { { 1 }, { 2, 5 }, { 3 }, { 4 }, { 2 }, { 6 }, { 7 }, { 5 } };
 
+	static final int[][] graph3 = { { 1 }, { 2, 4 }, { 3 }, { 2 }, { 3 } };
+
 	private static void dfs2_arrays(int[][] graph) {
 
 		final int MAX_SIZE = 20;
@@ -91,7 +93,7 @@ public class DepthFirstExplorer {
 
 				// currentState is now marked as visited
 
-				visited[0] = 1;
+				visited[currentState] = 1;
 
 			}
 
@@ -210,7 +212,7 @@ public class DepthFirstExplorer {
 
 	public static void main(String[] args) {
 
-		int[][] graph = graph2;
+		int[][] graph = graph3;
 
 		System.out.println("output of dfs():\n");
 
