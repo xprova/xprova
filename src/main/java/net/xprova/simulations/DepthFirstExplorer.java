@@ -21,72 +21,61 @@ public class DepthFirstExplorer {
 
 		// a variation of dfs2 that uses arrays instead of stacks and sets
 
-		int visited[] = new int[MAX_SIZE];
-
 		int onStack[] = new int[MAX_SIZE];
 
 		int stateStack[] = new int[MAX_SIZE];
 
-		int inputVecStack[] = new int[MAX_SIZE];
+		int inputVectors[] = new int[MAX_SIZE];
 
 		int stateStackPtr = 0; // next available empty slot
 
-		int inputVecStackPtr = 0; // next available empty slot
-
 		stateStack[stateStackPtr++] = INITIAL_STATE; // initial state
 
-		inputVecStack[inputVecStackPtr++] = 0; // initial state
+		inputVectors[INITIAL_STATE] = 0; // initial state
 
 		onStack[INITIAL_STATE] = 1;
 
 		while (stateStackPtr > 0) {
 
-			int currentState = stateStack[--stateStackPtr];
+			int currentState = stateStack[stateStackPtr - 1]; // peek
 
-			int currentInputVec = inputVecStack[--inputVecStackPtr];
+			int currentInputVec = inputVectors[currentState];
 
-			onStack[currentState] -= 1;
+			if (currentInputVec == -1) { // is state visited?
 
-			if (visited[currentState] == 1) {
-
-				continue;
-			}
-
-			if (onStack[currentState] != 0) {
-
-				Stack<Integer> states = new Stack<Integer>();
-
-				for (int i = 0; i < stateStackPtr; i++)
-					states.push(stateStack[i]);
-
-				printCycle(states, currentState);
+				stateStackPtr--; // pop
 
 				continue;
 			}
 
-			if (currentInputVec < graph[currentState].length) {
+			if (inputVectors[currentState] < graph[currentState].length) {
 
-				// there are more input vectors to explore in currentState
+				// there is at least one more nextState to explore
 
-				// first push next input vector of current state:
-
-				stateStack[stateStackPtr++] = currentState;
-
-				inputVecStack[inputVecStackPtr++] = currentInputVec + 1;
-
-				onStack[currentState] += 1;
-
-				// now push next state to stack:
+				inputVectors[currentState] = currentInputVec + 1;
 
 				int nextState = graph[currentState][currentInputVec];
 
-				stateStack[stateStackPtr++] = nextState;
+				if (onStack[nextState] == 1) {
 
-				inputVecStack[inputVecStackPtr++] = 0;
+					// found a cycle
 
-				onStack[nextState] += 1;
+					Stack<Integer> states = new Stack<Integer>();
 
-				continue;
+					for (int i = 0; i < stateStackPtr; i++)
+						states.push(stateStack[i]);
+
+					printCycle(states, nextState);
+
+				} else {
+
+					// push to stack
+
+					stateStack[stateStackPtr++] = nextState;
+
+					onStack[nextState] = 1;
+
+				}
 
 			} else {
 
@@ -94,7 +83,9 @@ public class DepthFirstExplorer {
 
 				// currentState is now marked as visited
 
-				visited[currentState] = 1;
+				onStack[currentState] = 0;
+
+				inputVectors[currentState] = -1;
 
 			}
 
@@ -200,12 +191,14 @@ public class DepthFirstExplorer {
 
 	private static void printCycle(Stack<Integer> stack, int currentState) {
 
-		System.out.println("Found cycle:");
+		System.out.printf("Found cycle: ");
 
 		stack.push(currentState);
 
 		for (int c : stack)
-			System.out.println("  item: " + c);
+			System.out.printf("%d ", c);
+
+		System.out.println("");
 
 		stack.pop();
 
