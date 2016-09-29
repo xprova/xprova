@@ -65,7 +65,7 @@ public class DepthFirstExplorer {
 					for (int i = 0; i < stateStackPtr; i++)
 						states.push(stateStack[i]);
 
-					printCycle(states, nextState);
+					printCycle(states, nextState, "dfs2_arrays");
 
 				} else {
 
@@ -120,7 +120,7 @@ public class DepthFirstExplorer {
 
 			if (states.contains(currentState)) {
 
-				printCycle(states, currentState);
+				printCycle(states, currentState, "dfs2");
 
 				continue;
 			}
@@ -170,7 +170,7 @@ public class DepthFirstExplorer {
 
 			if (stack.contains(c)) {
 
-				printCycle(stack, c);
+				printCycle(stack, c, "dfs");
 
 				stack.pop();
 
@@ -189,16 +189,16 @@ public class DepthFirstExplorer {
 
 	}
 
-	private static void printCycle(Stack<Integer> stack, int currentState) {
+	private static void printCycle(Stack<Integer> stack, int currentState, String methodName) {
 
-		System.out.printf("Found cycle: ");
+//		System.out.printf("Found cycle: ");
 
 		stack.push(currentState);
 
 		for (int c : stack)
 			System.out.printf("%d ", c);
 
-		System.out.println("");
+		System.out.printf(" (%s)\n", methodName);
 
 		stack.pop();
 
@@ -206,19 +206,23 @@ public class DepthFirstExplorer {
 
 	public static void main(String[] args) {
 
-		int[][] graph = graph3;
+		int[][][] graphs = { graph0, graph1, graph2, graph3 };
 
-		System.out.println("output of dfs():\n");
+		for (int i=0; i<graphs.length; i++) {
 
-		dfs(graph, 0, new Stack<Integer>(), new HashSet<Integer>());
+			System.out.printf("Cycles in graph %d:\n", i);
 
-		System.out.println("\noutput of dfs2():\n");
+			int[][] graph = graphs[i];
 
-		dfs2(graph);
+			dfs(graph, 0, new Stack<Integer>(), new HashSet<Integer>());
 
-		System.out.println("\noutput of dfs2_arrays():\n");
+			dfs2(graph);
 
-		dfs2_arrays(graph);
+			dfs2_arrays(graph);
+
+			System.out.println("");
+
+		}
 
 	}
 
