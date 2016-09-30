@@ -41,14 +41,13 @@ public class DepthFirstExplorer {
 
 			int currentInputVec = inputVectors[currentState];
 
-			if (currentInputVec == -1) { // is state visited?
+			if (currentInputVec == -1) {
+
+				// state is visited
 
 				stateStackPtr--; // pop
 
-				continue;
-			}
-
-			if (inputVectors[currentState] < graph[currentState].length) {
+			} else if (currentInputVec < graph[currentState].length) {
 
 				// there is at least one more nextState to explore
 
@@ -191,8 +190,6 @@ public class DepthFirstExplorer {
 
 	private static void printCycle(Stack<Integer> stack, int currentState, String methodName) {
 
-//		System.out.printf("Found cycle: ");
-
 		stack.push(currentState);
 
 		for (int c : stack)
@@ -208,7 +205,7 @@ public class DepthFirstExplorer {
 
 		int[][][] graphs = { graph0, graph1, graph2, graph3 };
 
-		for (int i=0; i<graphs.length; i++) {
+		for (int i = 0; i < graphs.length; i++) {
 
 			System.out.printf("Cycles in graph %d:\n", i);
 
