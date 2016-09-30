@@ -18,6 +18,38 @@ public class DepthFirstExplorer {
 
 		// a variation of dfs2 that uses arrays instead of stacks and sets
 
+		// This is a DFS algorithm based on a stack of nodes (stateStack)
+		// representing the current search branch and an additional lookup table
+		// (inputVectors) that holds the index of each node's child in the
+		// stack.
+		//
+		// For example:
+		//
+		// stateStack : 0 1 2
+		// InputVectors : 2 3 4
+		//
+		// mean that the current path is:
+		//
+		// state 0, currently at its 3rd child (index = 2)
+		// state 1, currently at its 4th child (index = 3)
+		// state 2, currently at its 5th child (index = 4)
+		//
+		// i.e. state 1 is the 3rd child of state 0 and so forth
+		//
+		// As the 5th child of state 2 is not on the stack, this means the
+		// algorithm has just removed it from the stack and is about to check
+		// whether state 2 has any subsequent children.
+		//
+		// The array inputVectors can also hold the special values:
+		//
+		// UNDISCOVERED : node has never been pushed to the stack
+		//
+		// VISITED : all node children have been processed
+		//
+		// These values can be used to determine in O(1) whether a node is on
+		// the stack or not (specifically, the condition for this is
+		// UNDISCOVERED & !VISITED).
+
 		final int MAX_SIZE = 20;
 
 		final int INITIAL_STATE = 0;
