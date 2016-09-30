@@ -14,6 +14,8 @@ public class DepthFirstExplorer {
 
 	static final int[][] graph3 = { { 1 }, { 2, 4 }, { 3 }, { 2 }, { 3 } };
 
+	static final int[][] graph4 = { { 1, 2, 3 }, { 2 }, { 3 }, { 1 } };
+
 	private static void dfs2_arrays(int[][] graph) {
 
 		// a variation of dfs2 that uses arrays instead of stacks and sets
@@ -232,7 +234,7 @@ public class DepthFirstExplorer {
 
 	public static void main(String[] args) {
 
-		int[][][] graphs = { graph0, graph1, graph2, graph3 };
+		int[][][] graphs = { graph0, graph1, graph2, graph3, graph4 };
 
 		for (int i = 0; i < graphs.length; i++) {
 
