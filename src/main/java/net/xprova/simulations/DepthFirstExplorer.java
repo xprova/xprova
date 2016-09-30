@@ -1,5 +1,6 @@
 package net.xprova.simulations;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -15,17 +16,21 @@ public class DepthFirstExplorer {
 
 	private static void dfs2_arrays(int[][] graph) {
 
+		// a variation of dfs2 that uses arrays instead of stacks and sets
+
 		final int MAX_SIZE = 20;
 
 		final int INITIAL_STATE = 0;
 
-		// a variation of dfs2 that uses arrays instead of stacks and sets
+		final int UNDISCOVERED = -1;
 
-		int onStack[] = new int[MAX_SIZE];
+		final int VISITED = -2;
 
 		int stateStack[] = new int[MAX_SIZE];
 
 		int inputVectors[] = new int[MAX_SIZE];
+
+		Arrays.fill(inputVectors, UNDISCOVERED);
 
 		int stateStackPtr = 0; // next available empty slot
 
@@ -33,21 +38,13 @@ public class DepthFirstExplorer {
 
 		inputVectors[INITIAL_STATE] = 0; // initial state
 
-		onStack[INITIAL_STATE] = 1;
-
 		while (stateStackPtr > 0) {
 
 			int currentState = stateStack[stateStackPtr - 1]; // peek
 
 			int currentInputVec = inputVectors[currentState];
 
-			if (currentInputVec == -1) {
-
-				// state is visited
-
-				stateStackPtr--; // pop
-
-			} else if (currentInputVec < graph[currentState].length) {
+			if (currentInputVec < graph[currentState].length) {
 
 				// there is at least one more nextState to explore
 
@@ -55,7 +52,15 @@ public class DepthFirstExplorer {
 
 				int nextState = graph[currentState][currentInputVec];
 
-				if (onStack[nextState] == 1) {
+				if (inputVectors[nextState] == UNDISCOVERED) {
+
+					// push to stack
+
+					stateStack[stateStackPtr++] = nextState;
+
+					inputVectors[nextState] = 0;
+
+				} else if (inputVectors[nextState] != VISITED) {
 
 					// found a cycle
 
@@ -66,14 +71,6 @@ public class DepthFirstExplorer {
 
 					printCycle(states, nextState, "dfs2_arrays");
 
-				} else {
-
-					// push to stack
-
-					stateStack[stateStackPtr++] = nextState;
-
-					onStack[nextState] = 1;
-
 				}
 
 			} else {
@@ -82,9 +79,9 @@ public class DepthFirstExplorer {
 
 				// currentState is now marked as visited
 
-				onStack[currentState] = 0;
-
 				inputVectors[currentState] = -1;
+
+				stateStackPtr--; // pop
 
 			}
 
