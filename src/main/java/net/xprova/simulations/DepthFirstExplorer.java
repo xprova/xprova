@@ -113,7 +113,7 @@ public class DepthFirstExplorer {
 
 				// currentState is now marked as visited
 
-				inputVectors[currentState] = -1;
+				inputVectors[currentState] = VISITED;
 
 				stateStackPtr--; // pop
 
