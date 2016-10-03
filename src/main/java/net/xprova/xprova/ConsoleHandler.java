@@ -55,9 +55,9 @@ public class ConsoleHandler {
 
 	private TreeMap<String, NetlistGraph> designs = null;
 
-	private final String codeGenTemplateFile = "template1.j";
+	private final String codeGenTemplateFile = "template2.j";
 
-	private final String codeGenClassName = "CodeSimulator";
+	private final String codeGenClassName = "CodeSimulator2";
 
 	public ConsoleHandler(PrintStream ps) {
 
