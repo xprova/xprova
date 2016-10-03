@@ -282,6 +282,16 @@ public class PropertyBuilder {
 
 		}
 
+		if (c0.equals(EVENTUALLY)) {
+
+			Property trigger = parseAST(root.getChild(2));
+
+			Property expr = parseAST(root.getChild(4));
+
+			return Property.build(EVENTUALLY).addChild(trigger).addChild(expr);
+
+		}
+
 		System.out.println(root.getText());
 
 		throw new Exception("error while traversing property AST");

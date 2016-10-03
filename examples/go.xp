@@ -2,6 +2,6 @@ library load lib/xprova.v
 
 read -b examples/statemach1.v
 
-#assert ~(state[2] & state[0])
+assert $eventually(a, state[2])
 
 prove -c
