@@ -774,7 +774,8 @@ public class ConsoleHandler {
 			"  -g --gtkwave     open counter-example using gtkwave",
 			"  -w --wavejson    print counter-example in WaveJSON format",
 			"  -s --signals     list of signals to include in counter-example",
-			"  -k --keep        keep assertion logic in current design for debugging",
+			"  -k --keep        keep assertion logic in current design (debugging)",
+			"  -c --onlycode    generate code but do not compile or run Java model (debugging)"
 		}
 	)
 	//@formatter:on
@@ -797,6 +798,8 @@ public class ConsoleHandler {
 				Option.builder("g").longOpt("gtkwave").build(),
 
 				Option.builder("k").longOpt("keep").build(),
+
+				Option.builder("c").longOpt("onlycode").build(),
 
 		};
 
@@ -845,6 +848,9 @@ public class ConsoleHandler {
 			fout.println(l);
 
 		fout.close();
+
+		if (line.hasOption("c"))
+			return;
 
 		// compile using javac
 
