@@ -16,6 +16,10 @@ public class DepthFirstExplorer {
 
 	static final int[][] graph4 = { { 1, 2, 3 }, { 2 }, { 3 }, { 1 } };
 
+	static final int[][] graph5 = { { 1 }, { 2 }, { 3, 4 }, { 1 }, { 1 } };
+
+	static final int[][] graph6 = { { 1 }, { 0, 2 }, { 0, 1 } };
+
 	private static void dfs2_arrays(int[][] graph) {
 
 		// a variation of dfs2 that uses arrays instead of stacks and sets
@@ -189,7 +193,7 @@ public class DepthFirstExplorer {
 
 	}
 
-	private static boolean dfs(int[][] graph, int current, Stack<Integer> stack, HashSet<Integer> visited) {
+	private static void dfs(int[][] graph, int current, Stack<Integer> stack, HashSet<Integer> visited) {
 
 		stack.push(current);
 
@@ -202,9 +206,7 @@ public class DepthFirstExplorer {
 
 				printCycle(stack, c, "dfs");
 
-				stack.pop();
-
-				return true;
+				continue;
 			}
 
 			dfs(graph, c, stack, visited);
@@ -214,8 +216,6 @@ public class DepthFirstExplorer {
 		stack.pop();
 
 		visited.add(current);
-
-		return false;
 
 	}
 
@@ -234,7 +234,7 @@ public class DepthFirstExplorer {
 
 	public static void main(String[] args) {
 
-		int[][][] graphs = { graph0, graph1, graph2, graph3, graph4 };
+		int[][][] graphs = { graph0, graph1, graph2, graph3, graph4, graph5, graph6 };
 
 		for (int i = 0; i < graphs.length; i++) {
 
