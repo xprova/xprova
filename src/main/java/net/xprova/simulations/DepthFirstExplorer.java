@@ -1,7 +1,9 @@
 package net.xprova.simulations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Stack;
 
 public class DepthFirstExplorer {
@@ -20,9 +22,10 @@ public class DepthFirstExplorer {
 
 	static final int[][] graph6 = { { 1 }, { 0, 2 }, { 0, 1 } };
 
-	private static void dfs2_arrays(int[][] graph) {
+	private static void dfs3(int[][] graph, ArrayList<List<Integer>> cycles_dfs3) {
 
-		// a variation of dfs2 that uses arrays instead of stacks and sets
+		// a non-recursive implementation based on arrays instead of standard
+		// containers
 
 		// This is a DFS algorithm based on a stack of nodes (stateStack)
 		// representing the current search branch and an additional lookup table
@@ -107,7 +110,7 @@ public class DepthFirstExplorer {
 					for (int i = 0; i < stateStackPtr; i++)
 						states.push(stateStack[i]);
 
-					printCycle(states, nextState, "dfs2_arrays");
+					processCycle(states, nextState, cycles_dfs3);
 
 				}
 
@@ -127,9 +130,9 @@ public class DepthFirstExplorer {
 
 	}
 
-	private static void dfs2(int[][] graph) {
+	private static void dfs2(int[][] graph, ArrayList<List<Integer>> cycles_dfs2) {
 
-		// a non-recursive implementation of dfs()
+		// a non-recursive implementation using standard containers
 
 		HashSet<Integer> visited = new HashSet<Integer>();
 
@@ -154,7 +157,7 @@ public class DepthFirstExplorer {
 
 			if (states.contains(currentState)) {
 
-				printCycle(states, currentState, "dfs2");
+				processCycle(states, currentState, cycles_dfs2);
 
 				continue;
 			}
@@ -193,7 +196,10 @@ public class DepthFirstExplorer {
 
 	}
 
-	private static void dfs(int[][] graph, int current, Stack<Integer> stack, HashSet<Integer> visited) {
+	private static void dfs1(int[][] graph, int current, Stack<Integer> stack, HashSet<Integer> visited,
+			ArrayList<List<Integer>> cycles_dfs1) {
+
+		// textbook recursive implementation using standard containers
 
 		stack.push(current);
 
@@ -204,12 +210,12 @@ public class DepthFirstExplorer {
 
 			if (stack.contains(c)) {
 
-				printCycle(stack, c, "dfs");
+				processCycle(stack, c, cycles_dfs1);
 
 				continue;
 			}
 
-			dfs(graph, c, stack, visited);
+			dfs1(graph, c, stack, visited, cycles_dfs1);
 
 		}
 
@@ -219,16 +225,51 @@ public class DepthFirstExplorer {
 
 	}
 
-	private static void printCycle(Stack<Integer> stack, int currentState, String methodName) {
+	private static void processCycle(List<Integer> stack, int currentState, List<List<Integer>> cycles) {
 
-		stack.push(currentState);
+		stack.add(currentState);
 
-		for (int c : stack)
-			System.out.printf("%d ", c);
+		cycles.add(new ArrayList<Integer>(stack));
 
-		System.out.printf(" (%s)\n", methodName);
+		stack.remove(stack.size() - 1);
 
-		stack.pop();
+	}
+
+	private static boolean compareLists(List<List<List<Integer>>> cycles_dfs) {
+
+		List<List<Integer>> first = cycles_dfs.get(0);
+
+		for (List<List<Integer>> list : cycles_dfs)
+			if (!compareTwoLists(first, list))
+				return false;
+
+		return true;
+
+	}
+
+	private static boolean compareTwoLists(List<List<Integer>> first, List<List<Integer>> second) {
+
+		if (first.size() != second.size())
+			return false;
+
+		for (int i = 0; i < first.size(); i++)
+			if (!compareTwoSubLists(first.get(i), second.get(i)))
+				return false;
+
+		return true;
+
+	}
+
+	private static boolean compareTwoSubLists(List<Integer> first, List<Integer> second) {
+
+		if (first.size() != second.size())
+			return false;
+
+		for (int i = 0; i < first.size(); i++)
+			if (first.get(i) != second.get(i))
+				return false;
+
+		return true;
 
 	}
 
@@ -238,17 +279,29 @@ public class DepthFirstExplorer {
 
 		for (int i = 0; i < graphs.length; i++) {
 
-			System.out.printf("Cycles in graph %d:\n", i);
+			System.out.printf("graph %d: ", i);
 
 			int[][] graph = graphs[i];
 
-			dfs(graph, 0, new Stack<Integer>(), new HashSet<Integer>());
+			ArrayList<List<Integer>> cycles_dfs1 = new ArrayList<>();
+			ArrayList<List<Integer>> cycles_dfs2 = new ArrayList<>();
+			ArrayList<List<Integer>> cycles_dfs3 = new ArrayList<>();
 
-			dfs2(graph);
+			dfs1(graph, 0, new Stack<Integer>(), new HashSet<Integer>(), cycles_dfs1);
 
-			dfs2_arrays(graph);
+			dfs2(graph, cycles_dfs2);
 
-			System.out.println("");
+			dfs3(graph, cycles_dfs3);
+
+			List<List<List<Integer>>> cycles_dfs = new ArrayList<>();
+
+			cycles_dfs.add(cycles_dfs1);
+			cycles_dfs.add(cycles_dfs2);
+			cycles_dfs.add(cycles_dfs3);
+
+			boolean result = compareLists(cycles_dfs);
+
+			System.out.println(result ? "all equal (" + cycles_dfs1.size() + " cycles)" : "mismatch");
 
 		}
 
