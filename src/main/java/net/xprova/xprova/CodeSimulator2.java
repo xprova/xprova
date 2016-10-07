@@ -18,7 +18,7 @@ public class CodeSimulator2 {
 		int inputBitCount = 1; // {EXPANDED}
 		//@formatter:on
 
-		final int MAX_SIZE = 1 << stateBitCount;;
+		final int MAX_SIZE = 1 << stateBitCount;
 
 		final int INITIAL_STATE = 0;
 
@@ -79,6 +79,8 @@ public class CodeSimulator2 {
 
 			int currentState = stateStack[stateStackPtr - 1]; // peek
 
+			printState("currentState", currentState);
+
 			int currentInputVec = inputVectors[currentState];
 
 			if (currentInputVec < inputCombinationCount) {
@@ -87,7 +89,7 @@ public class CodeSimulator2 {
 
 				inputVectors[currentState] = currentInputVec + 1;
 
-//				int nextState = graph[currentState][currentInputVec];
+				// int nextState = graph[currentState][currentInputVec];
 
 				//@formatter:off
 				// {STATE_BIT} = -(currentState >> {STATE_BIT_INDEX} & 1);
@@ -152,18 +154,16 @@ public class CodeSimulator2 {
 
 					// found a cycle
 
-					System.out.println("found a cycle ");
+					System.out.println("  found a cycle ");
 
 					if (n_n59_20 == -1) {
 
-						System.out.println("violation of liveness property, stack (bottom to top):");
+						System.out.println("    violation of liveness property, stack (bottom to top):");
 
-						for (int i=0; i<stateStackPtr; i++)
-							System.out.println("state: " + stateStack[i]);
+						for (int i = 0; i < stateStackPtr; i++)
+							printState("    State", stateStack[i]);
 
-						System.out.println("state: " + nextState);
-
-						return;
+						printState("    State", nextState);
 
 					}
 
@@ -185,6 +185,11 @@ public class CodeSimulator2 {
 
 		}
 
+	}
+
+	static void printState(String label, int state) {
+
+		System.out.println(label + ": " + state + " (" + (state >> 2) + ")");
 	}
 
 }
