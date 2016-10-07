@@ -87,8 +87,6 @@ public class CodeSimulator2 {
 
 				// there is at least one more nextState to explore
 
-				inputVectors[currentState] = currentInputVec + 1;
-
 				// int nextState = graph[currentState][currentInputVec];
 
 				//@formatter:off
@@ -104,6 +102,11 @@ public class CodeSimulator2 {
 				// int {INPUT_BIT} = -(currentInputVec >> {INPUT_BIT_INDEX} & 1);
 				int na_10 = -(currentInputVec >> 0 & 1); // {EXPANDED}
 				//@formatter:on
+
+				// increment inputVectors afterwards so that the first input
+				// vector is 0
+
+				inputVectors[currentState] = currentInputVec + 1;
 
 				//@formatter:off
 				// {COMB_ASSIGN}
