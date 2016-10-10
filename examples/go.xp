@@ -4,9 +4,9 @@ read -b examples/statemach1.v
 
 assert $eventually(a, state[2])
 
-prove -c -k
+prove
 
 #rename nets
-rename modules
+#rename modules
 
-dot -e=CK,RS,ST --pdf output/netlist.pdf
+#dot -e=CK,RS,ST --pdf output/netlist.pdf

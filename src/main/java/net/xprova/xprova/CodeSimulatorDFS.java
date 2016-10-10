@@ -2,7 +2,7 @@ package net.xprova.xprova;
 
 import java.util.Arrays;
 
-public class CodeSimulator2 {
+public class CodeSimulatorDFS {
 
 	public static final int L = 0;
 	public static final int H = -1;
@@ -79,11 +79,11 @@ public class CodeSimulator2 {
 
 			int currentState = stateStack[stateStackPtr - 1]; // peek
 
-			printState("currentState", currentState);
-
 			int currentInputVec = inputVectors[currentState];
 
 			if (currentInputVec < inputCombinationCount) {
+
+				printState(stateStackPtr, String.format("(inpVec = %d) currentState", currentInputVec), currentState);
 
 				// there is at least one more nextState to explore
 
@@ -157,16 +157,17 @@ public class CodeSimulator2 {
 
 					// found a cycle
 
-					System.out.println("  found a cycle ");
+					// System.out.println(" found a cycle ");
 
 					if (n_n59_20 == -1) {
 
-						System.out.println("    violation of liveness property, stack (bottom to top):");
+						// System.out.println(" violation of liveness property,
+						// stack (bottom to top):");
 
 						for (int i = 0; i < stateStackPtr; i++)
-							printState("    State", stateStack[i]);
+							printState(stateStackPtr + 1, "State", stateStack[i]);
 
-						printState("    State", nextState);
+						printState(stateStackPtr + 1, "State", nextState);
 
 					}
 
@@ -190,7 +191,10 @@ public class CodeSimulator2 {
 
 	}
 
-	static void printState(String label, int state) {
+	static void printState(int depth, String label, int state) {
+
+		for (int j = 0; j < depth - 1; j++)
+			System.out.printf("  ");
 
 		System.out.println(label + ": " + state + " (" + (state >> 2) + ")");
 	}

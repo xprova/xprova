@@ -57,7 +57,7 @@ public class ConsoleHandler {
 
 	private final String codeGenTemplateFile = "template2.j";
 
-	private final String codeGenClassName = "CodeSimulator2";
+	private final String codeGenClassName = "CodeSimulatorDFS";
 
 	public ConsoleHandler(PrintStream ps) {
 
