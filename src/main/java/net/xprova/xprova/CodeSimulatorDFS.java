@@ -11,6 +11,28 @@ public class CodeSimulatorDFS {
 
 	public static void main(String args[]) throws Exception {
 
+		CodeSimulatorDFS sim1 = new CodeSimulatorDFS();
+
+		int[] counterExample = sim1.exploreSpace();
+
+		if (counterExample != null) {
+
+			// TODO: implement sim1.simulate()
+			// sim1.simulate(initial, counterExample, txtFile);
+
+			System.out.println("Found counter example");
+
+			// 100 is a special return code for finding a counter-example but
+			// terminating successfully
+
+			System.exit(100);
+
+		}
+
+	}
+
+	public int[] exploreSpace() {
+
 		//@formatter:off
 		// int stateBitCount = {STATE_BIT_COUNT};
 		int stateBitCount = 5; // {EXPANDED}
@@ -40,39 +62,43 @@ public class CodeSimulatorDFS {
 
 		inputVectors[INITIAL_STATE] = 0; // initial state
 
+		int all_assumptions;
+		int all_assertions;
+		int all_live_assertions;
+
 		//@formatter:off
 		// int {STATE_BIT};
-		int n_n52_26; // {EXPANDED}
-		int n_n53_2; // {EXPANDED}
-		int nstate_0__25; // {EXPANDED}
-		int nstate_1__22; // {EXPANDED}
-		int nstate_2__30; // {EXPANDED}
+		int n_n52_21; // {EXPANDED}
+		int n_n53_29; // {EXPANDED}
+		int nstate_0__28; // {EXPANDED}
+		int nstate_1__17; // {EXPANDED}
+		int nstate_2__24; // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
 		// int {NON_STATE_BIT};
-		int n_n54_11; // {EXPANDED}
-		int n_n55_5; // {EXPANDED}
-		int n_n56_6; // {EXPANDED}
-		int n_n59_20; // {EXPANDED}
-		int n_00__0__21; // {EXPANDED}
-		int n_00__1__0; // {EXPANDED}
-		int n_00__2__31; // {EXPANDED}
-		int n_01__16; // {EXPANDED}
-		int n_02__13; // {EXPANDED}
+		int n_n54_31; // {EXPANDED}
+		int n_n55_32; // {EXPANDED}
+		int n_n56_25; // {EXPANDED}
+		int n_n59_11; // {EXPANDED}
+		int n_00__0__8; // {EXPANDED}
+		int n_00__1__12; // {EXPANDED}
+		int n_00__2__23; // {EXPANDED}
+		int n_01__14; // {EXPANDED}
+		int n_02__2; // {EXPANDED}
 		int n_03__4; // {EXPANDED}
-		int n_04__32; // {EXPANDED}
-		int n_05__15; // {EXPANDED}
-		int n_06__7; // {EXPANDED}
-		int n_07__23; // {EXPANDED}
-		int n_08__28; // {EXPANDED}
-		int n_09__14; // {EXPANDED}
-		int n_10__17; // {EXPANDED}
-		int n_11__8; // {EXPANDED}
-		int n_12__29; // {EXPANDED}
-		int n_13__12; // {EXPANDED}
-		int n_14__18; // {EXPANDED}
-		int n_15__24; // {EXPANDED}
+		int n_04__18; // {EXPANDED}
+		int n_05__13; // {EXPANDED}
+		int n_06__26; // {EXPANDED}
+		int n_07__19; // {EXPANDED}
+		int n_08__9; // {EXPANDED}
+		int n_09__20; // {EXPANDED}
+		int n_10__27; // {EXPANDED}
+		int n_11__15; // {EXPANDED}
+		int n_12__1; // {EXPANDED}
+		int n_13__16; // {EXPANDED}
+		int n_14__3; // {EXPANDED}
+		int n_15__22; // {EXPANDED}
 		//@formatter:on
 
 		while (stateStackPtr > 0) {
@@ -91,11 +117,11 @@ public class CodeSimulatorDFS {
 
 				//@formatter:off
 				// {STATE_BIT} = -(currentState >> {STATE_BIT_INDEX} & 1);
-				n_n52_26 = -(currentState >> 0 & 1); // {EXPANDED}
-				n_n53_2 = -(currentState >> 1 & 1); // {EXPANDED}
-				nstate_0__25 = -(currentState >> 2 & 1); // {EXPANDED}
-				nstate_1__22 = -(currentState >> 3 & 1); // {EXPANDED}
-				nstate_2__30 = -(currentState >> 4 & 1); // {EXPANDED}
+				n_n52_21 = -(currentState >> 0 & 1); // {EXPANDED}
+				n_n53_29 = -(currentState >> 1 & 1); // {EXPANDED}
+				nstate_0__28 = -(currentState >> 2 & 1); // {EXPANDED}
+				nstate_1__17 = -(currentState >> 3 & 1); // {EXPANDED}
+				nstate_2__24 = -(currentState >> 4 & 1); // {EXPANDED}
 				//@formatter:on
 
 				//@formatter:off
@@ -110,40 +136,67 @@ public class CodeSimulatorDFS {
 
 				//@formatter:off
 				// {COMB_ASSIGN}
-				n_15__24 = 0; // {EXPANDED}
-				n_n55_5 = n_n53_2 | nstate_2__30; // {EXPANDED}
-				n_14__18 = ~nstate_1__22; // {EXPANDED}
-				n_n56_6 = ~n_n53_2; // {EXPANDED}
-				n_n54_11 = na_10 | n_n52_26; // {EXPANDED}
-				n_13__12 = ~nstate_2__30; // {EXPANDED}
-				n_08__28 = na_10 | nstate_1__22; // {EXPANDED}
-				n_01__16 = ~(n_14__18 & nstate_0__25); // {EXPANDED}
-				n_04__32 = n_14__18 | nstate_0__25; // {EXPANDED}
-				n_03__4 = ~(na_10 & n_14__18); // {EXPANDED}
-				n_10__17 = ~(n_01__16 & nstate_2__30); // {EXPANDED}
-				n_n59_20 = n_n56_6 & n_n52_26; // {EXPANDED}
-				n_02__13 = ~(n_13__12 | n_01__16); // {EXPANDED}
-				n_09__14 = ~(n_08__28 & n_01__16); // {EXPANDED}
-				n_06__7 = ~(n_13__12 & nstate_0__25); // {EXPANDED}
-				n_05__15 = ~(n_03__4 & n_04__32); // {EXPANDED}
-				n_11__8 = n_03__4 | n_06__7; // {EXPANDED}
-				n_00__0__21 = ~(n_02__13 | n_05__15); // {EXPANDED}
-				n_07__23 = na_10 | n_06__7; // {EXPANDED}
-				n_00__1__0 = ~(n_09__14 & n_07__23); // {EXPANDED}
-				n_12__29 = n_11__8 & n_04__32; // {EXPANDED}
-				n_00__2__31 = ~(n_10__17 & n_12__29); // {EXPANDED}
+				n_15__22 = 0; // {EXPANDED}
+				n_14__3 = ~nstate_1__17; // {EXPANDED}
+				n_03__4 = ~(na_10 & n_14__3); // {EXPANDED}
+				n_08__9 = nstate_1__17 | na_10; // {EXPANDED}
+				n_n56_25 = ~n_n53_29; // {EXPANDED}
+				n_n59_11 = n_n56_25 & n_n52_21; // {EXPANDED}
+				n_n55_32 = nstate_2__24 | n_n53_29; // {EXPANDED}
+				n_n54_31 = na_10 | n_n52_21; // {EXPANDED}
+				n_01__14 = ~(n_14__3 & nstate_0__28); // {EXPANDED}
+				n_13__16 = ~nstate_2__24; // {EXPANDED}
+				n_06__26 = ~(nstate_0__28 & n_13__16); // {EXPANDED}
+				n_04__18 = n_14__3 | nstate_0__28; // {EXPANDED}
+				n_02__2 = ~(n_01__14 | n_13__16); // {EXPANDED}
+				n_10__27 = ~(nstate_2__24 & n_01__14); // {EXPANDED}
+				n_09__20 = ~(n_08__9 & n_01__14); // {EXPANDED}
+				n_05__13 = ~(n_04__18 & n_03__4); // {EXPANDED}
+				n_11__15 = n_06__26 | n_03__4; // {EXPANDED}
+				n_00__0__8 = ~(n_02__2 | n_05__13); // {EXPANDED}
+				n_12__1 = n_04__18 & n_11__15; // {EXPANDED}
+				n_07__19 = n_06__26 | na_10; // {EXPANDED}
+				n_00__1__12 = ~(n_07__19 & n_09__20); // {EXPANDED}
+				n_00__2__23 = ~(n_12__1 & n_10__27); // {EXPANDED}
 				//@formatter:on
 
 				int nextState = 0;
 
 				//@formatter:off
 				// nextState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
-				nextState |= n_n54_11 & (1 << 0); // {EXPANDED}
-				nextState |= n_n55_5 & (1 << 1); // {EXPANDED}
-				nextState |= n_00__0__21 & (1 << 2); // {EXPANDED}
-				nextState |= n_00__1__0 & (1 << 3); // {EXPANDED}
-				nextState |= n_00__2__31 & (1 << 4); // {EXPANDED}
+				nextState |= n_n54_31 & (1 << 0); // {EXPANDED}
+				nextState |= n_n55_32 & (1 << 1); // {EXPANDED}
+				nextState |= n_00__0__8 & (1 << 2); // {EXPANDED}
+				nextState |= n_00__1__12 & (1 << 3); // {EXPANDED}
+				nextState |= n_00__2__23 & (1 << 4); // {EXPANDED}
 				//@formatter:on
+
+				all_assumptions = -1;
+				all_assertions = -1;
+
+				// In the code below we logically AND all assumptions
+				// and assertions.
+
+				// We don't want any property to evaluate to false if
+				// until we're at least {MAXDELAY} away from the initial state.
+				// This is {MAXDELAY} is the max depth of flip-flop chains
+				// within
+				// the property.
+
+				// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? 0
+				// : -1);
+				// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? 0 :
+				// -1);
+
+				if (all_assumptions == -1 && all_assertions == 0) {
+
+					// TODO: expand this stub
+
+					System.out.println("violation of (non-liveness) property");
+
+					break;
+
+				}
 
 				if (inputVectors[nextState] == UNDISCOVERED) {
 
@@ -157,12 +210,21 @@ public class CodeSimulatorDFS {
 
 					// found a cycle
 
-					// System.out.println(" found a cycle ");
+					all_live_assertions = -1;
 
-					if (n_n59_20 == -1) {
+					// In the code below we logically AND all live assertions
 
-						// System.out.println(" violation of liveness property,
-						// stack (bottom to top):");
+					// TODO: add code to handle delays in properties (ignored
+					// for now)
+
+					//@formatter:off
+					// all_live_assertions &= {LIVE_ASSERTION};
+					all_live_assertions &= n_n59_11; // {EXPANDED}
+					//@formatter:on
+
+					if (all_live_assertions == 0) {
+
+						System.out.println("found violation of live assertion:");
 
 						for (int i = 0; i < stateStackPtr; i++)
 							printState(stateStackPtr + 1, "State", stateStack[i]);
@@ -171,7 +233,7 @@ public class CodeSimulatorDFS {
 
 					}
 
-					// TODO:
+					break;
 
 				}
 
@@ -186,6 +248,21 @@ public class CodeSimulatorDFS {
 				stateStackPtr--; // pop
 
 			}
+
+		}
+
+		if (stateStackPtr != 0) {
+
+			int[] counter = new int[stateStackPtr];
+
+			for (int j = 0; j < stateStackPtr; j++)
+				counter[j] = inputVectors[stateStack[j]];
+
+			return counter;
+
+		} else {
+
+			return null;
 
 		}
 

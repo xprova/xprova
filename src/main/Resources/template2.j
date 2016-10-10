@@ -36,6 +36,8 @@ public class CodeSimulatorDFS {
 
 		inputVectors[INITIAL_STATE] = 0; // initial state
 
+		int all_assumptions;
+		int all_assertions;
 		int all_live_assertions;
 
 		//@formatter:off
@@ -82,6 +84,28 @@ public class CodeSimulatorDFS {
 				//@formatter:off
 				// nextState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 				//@formatter:on
+
+				all_assumptions = -1;
+				all_assertions = -1;
+
+				// In the code below we logically AND all assumptions
+				// and assertions.
+
+				// We don't want any property to evaluate to false if
+				// until we're at least {MAXDELAY} away from the initial state.
+				// This is {MAXDELAY} is the max depth of flip-flop chains within
+				// the property.
+
+				// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? 0 : -1);
+				// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? 0 : -1);
+
+				if (all_assumptions == -1 && all_assertions == 0) {
+
+					// TODO: expand this stub
+
+					System.out.println("violation of (non-liveness) property");
+
+				}
 
 				if (inputVectors[nextState] == UNDISCOVERED) {
 
