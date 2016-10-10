@@ -298,14 +298,19 @@ public class CodeGenerator {
 
 			graph.addConnection(and, liveNet);
 
-			// TODO: need to mark this net as being live instead of just
-			// returning it here
-
 			return liveNet;
 
 		}
 
 		throw new Exception("property operator not yet implemented");
+
+	}
+
+	private static boolean isLive(Property p) {
+
+		// TODO: expand this stub (only eventually for now)
+
+		return p.name.equals(PropertyBuilder.EVENTUALLY);
 
 	}
 
@@ -317,6 +322,8 @@ public class CodeGenerator {
 		HashMap<Property, Vertex> assumptionNets = new HashMap<Property, Vertex>();
 		HashMap<Property, Vertex> assertionNets = new HashMap<Property, Vertex>();
 
+		HashMap<Property, Vertex> liveAssertionNets = new HashMap<Property, Vertex>();
+
 		Vertex clk = new Vertex(netIgnorePrefix + "clk_prop", VertexType.NET, "input");
 		Vertex rst = new Vertex(netIgnorePrefix + "rst_prop", VertexType.NET, "input");
 		Vertex set = new Vertex(netIgnorePrefix + "set_prop", VertexType.NET, "input");
@@ -325,11 +332,33 @@ public class CodeGenerator {
 		graph.addVertex(rst);
 		graph.addVertex(set);
 
-		for (Property p : assumptions)
-			assumptionNets.put(p, addProperty(graph, p, clk, rst, set));
+		for (Property p : assumptions) {
 
-		for (Property p : assertions)
-			assertionNets.put(p, addProperty(graph, p, clk, rst, set));
+			if (isLive(p)) {
+
+				throw new Exception("specified live property as an assumption");
+
+			} else {
+
+				assumptionNets.put(p, addProperty(graph, p, clk, rst, set));
+
+			}
+
+		}
+
+		for (Property p : assertions) {
+
+			if (isLive(p)) {
+
+				liveAssertionNets.put(p, addProperty(graph, p, clk, rst, set));
+
+			} else {
+
+				assertionNets.put(p, addProperty(graph, p, clk, rst, set));
+
+			}
+
+		}
 
 		// Step 2 : Populate code generation structures
 
@@ -545,6 +574,22 @@ public class CodeGenerator {
 						String si = s.replace("{ASSERTION}", netNameMapping.get(netName));
 
 						si = si.replace("{MAXDELAY}", "" + getMaxDelay(entry.getKey()));
+
+						si += expandComment;
+
+						lines.add(si);
+
+					}
+
+				} else if (s.contains("{LIVE_ASSERTION}")) {
+
+					s = s.replaceFirst("//( )+", "");
+
+					for (Entry<Property, Vertex> entry : liveAssertionNets.entrySet()) {
+
+						String netName = entry.getValue().name;
+
+						String si = s.replace("{LIVE_ASSERTION}", netNameMapping.get(netName));
 
 						si += expandComment;
 

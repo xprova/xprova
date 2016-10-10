@@ -36,6 +36,8 @@ public class CodeSimulatorDFS {
 
 		inputVectors[INITIAL_STATE] = 0; // initial state
 
+		int all_live_assertions;
+
 		//@formatter:off
 		// int {STATE_BIT};
 		//@formatter:on
@@ -93,16 +95,28 @@ public class CodeSimulatorDFS {
 
 					// found a cycle
 
-					// if (n_n59_20 == -1) {
+					all_live_assertions = -1;
 
-					// 	for (int i = 0; i < stateStackPtr; i++)
-					// 		printState(stateStackPtr + 1, "State", stateStack[i]);
+					// In the code below we logically AND all live assertions
 
-					// 	printState(stateStackPtr + 1, "State", nextState);
+					// TODO: add code to handle delays in properties (ignored for now)
 
-					// }
+					//@formatter:off
+					// all_live_assertions &= {LIVE_ASSERTION};
+					//@formatter:on
 
-					//return;
+					if (all_live_assertions == 0) {
+
+						System.out.println("found violation of live assertion:");
+
+						for (int i = 0; i < stateStackPtr; i++)
+							printState(stateStackPtr + 1, "State", stateStack[i]);
+
+						printState(stateStackPtr + 1, "State", nextState);
+
+					}
+
+					return;
 
 				}
 
