@@ -283,9 +283,9 @@ public class DepthFirstExplorer {
 
 			int[][] graph = graphs[i];
 
-			ArrayList<List<Integer>> cycles_dfs1 = new ArrayList<>();
-			ArrayList<List<Integer>> cycles_dfs2 = new ArrayList<>();
-			ArrayList<List<Integer>> cycles_dfs3 = new ArrayList<>();
+			ArrayList<List<Integer>> cycles_dfs1 = new ArrayList<List<Integer>>();
+			ArrayList<List<Integer>> cycles_dfs2 = new ArrayList<List<Integer>>();
+			ArrayList<List<Integer>> cycles_dfs3 = new ArrayList<List<Integer>>();
 
 			dfs1(graph, 0, new Stack<Integer>(), new HashSet<Integer>(), cycles_dfs1);
 
@@ -293,7 +293,7 @@ public class DepthFirstExplorer {
 
 			dfs3(graph, cycles_dfs3);
 
-			List<List<List<Integer>>> cycles_dfs = new ArrayList<>();
+			List<List<List<Integer>>> cycles_dfs = new ArrayList<List<List<Integer>>>();
 
 			cycles_dfs.add(cycles_dfs1);
 			cycles_dfs.add(cycles_dfs2);
