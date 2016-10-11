@@ -122,8 +122,8 @@ public class CodeSimulatorDFS {
 				// nextState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 				//@formatter:on
 
-				all_assumptions = -1;
-				all_assertions = -1;
+				all_assumptions = H;
+				all_assertions = H;
 
 				// In the code below we logically AND all assumptions
 				// and assertions.
@@ -133,12 +133,14 @@ public class CodeSimulatorDFS {
 				// is {MAXDELAY} is the max depth of flip-flop chains within
 				// the property.
 
+				int distance = stateStackPtr - 1;
+
 				//@formatter:off
-				// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? 0 : -1);
-				// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? 0 : -1);
+				// all_assumptions &= {ASSUMPTION} | (stateStackPtr > {MAXDELAY} ? L : H);
+				// all_assertions &= {ASSERTION} | (stateStackPtr > {MAXDELAY} ? L : H);
 				//@formatter:on
 
-				if (all_assumptions == -1 && all_assertions == 0) {
+				if (all_assumptions == H && all_assertions == L) {
 
 					// TODO: expand this stub
 

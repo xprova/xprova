@@ -31,6 +31,8 @@ public class CodeSimulatorDFS {
 
 		}
 
+		txtFile = new File("d:\\out.txt");
+
 		int[] counterExample = sim1.exploreSpace(initial);
 
 		if (counterExample != null) {
@@ -50,7 +52,7 @@ public class CodeSimulatorDFS {
 
 		//@formatter:off
 		// int stateBitCount = {STATE_BIT_COUNT};
-		int stateBitCount = 5; // {EXPANDED}
+		int stateBitCount = 4; // {EXPANDED}
 		// int inputBitCount = {INPUT_BIT_COUNT};
 		int inputBitCount = 1; // {EXPANDED}
 		//@formatter:on
@@ -79,44 +81,43 @@ public class CodeSimulatorDFS {
 		int all_assertions;
 		int all_live_assertions;
 
+		int currentState = initial;
+
 		//@formatter:off
 		// int {STATE_BIT};
-		int n_n52_21; // {EXPANDED}
-		int n_n53_29; // {EXPANDED}
-		int nstate_0__28; // {EXPANDED}
-		int nstate_1__17; // {EXPANDED}
-		int nstate_2__24; // {EXPANDED}
+		int n_n51_24; // {EXPANDED}
+		int nstate_0__10; // {EXPANDED}
+		int nstate_1__26; // {EXPANDED}
+		int nstate_2__19; // {EXPANDED}
 		//@formatter:on
 
 		//@formatter:off
 		// int {NON_STATE_BIT};
-		int n_n54_31; // {EXPANDED}
-		int n_n55_32; // {EXPANDED}
-		int n_n56_25; // {EXPANDED}
-		int n_n59_11; // {EXPANDED}
-		int n_00__0__8; // {EXPANDED}
-		int n_00__1__12; // {EXPANDED}
-		int n_00__2__23; // {EXPANDED}
+		int n_n49_16; // {EXPANDED}
+		int n_n53_15; // {EXPANDED}
+		int n_00__0__13; // {EXPANDED}
+		int n_00__1__20; // {EXPANDED}
+		int n_00__2__22; // {EXPANDED}
 		int n_01__14; // {EXPANDED}
-		int n_02__2; // {EXPANDED}
-		int n_03__4; // {EXPANDED}
-		int n_04__18; // {EXPANDED}
-		int n_05__13; // {EXPANDED}
-		int n_06__26; // {EXPANDED}
-		int n_07__19; // {EXPANDED}
-		int n_08__9; // {EXPANDED}
-		int n_09__20; // {EXPANDED}
-		int n_10__27; // {EXPANDED}
-		int n_11__15; // {EXPANDED}
-		int n_12__1; // {EXPANDED}
-		int n_13__16; // {EXPANDED}
-		int n_14__3; // {EXPANDED}
-		int n_15__22; // {EXPANDED}
+		int n_02__5; // {EXPANDED}
+		int n_03__23; // {EXPANDED}
+		int n_04__27; // {EXPANDED}
+		int n_05__25; // {EXPANDED}
+		int n_06__6; // {EXPANDED}
+		int n_07__3; // {EXPANDED}
+		int n_08__0; // {EXPANDED}
+		int n_09__17; // {EXPANDED}
+		int n_10__21; // {EXPANDED}
+		int n_11__29; // {EXPANDED}
+		int n_12__9; // {EXPANDED}
+		int n_13__11; // {EXPANDED}
+		int n_14__12; // {EXPANDED}
+		int n_15__4; // {EXPANDED}
 		//@formatter:on
 
 		while (stateStackPtr > 0) {
 
-			int currentState = stateStack[stateStackPtr - 1]; // peek
+			currentState = stateStack[stateStackPtr - 1]; // peek
 
 			int currentInputVec = inputVectors[currentState];
 
@@ -130,16 +131,15 @@ public class CodeSimulatorDFS {
 
 				//@formatter:off
 				// {STATE_BIT} = -(currentState >> {STATE_BIT_INDEX} & 1);
-				n_n52_21 = -(currentState >> 0 & 1); // {EXPANDED}
-				n_n53_29 = -(currentState >> 1 & 1); // {EXPANDED}
-				nstate_0__28 = -(currentState >> 2 & 1); // {EXPANDED}
-				nstate_1__17 = -(currentState >> 3 & 1); // {EXPANDED}
-				nstate_2__24 = -(currentState >> 4 & 1); // {EXPANDED}
+				n_n51_24 = -(currentState >> 0 & 1); // {EXPANDED}
+				nstate_0__10 = -(currentState >> 1 & 1); // {EXPANDED}
+				nstate_1__26 = -(currentState >> 2 & 1); // {EXPANDED}
+				nstate_2__19 = -(currentState >> 3 & 1); // {EXPANDED}
 				//@formatter:on
 
 				//@formatter:off
 				// int {INPUT_BIT} = -(currentInputVec >> {INPUT_BIT_INDEX} & 1);
-				int na_10 = -(currentInputVec >> 0 & 1); // {EXPANDED}
+				int na_2 = -(currentInputVec >> 0 & 1); // {EXPANDED}
 				//@formatter:on
 
 				// increment inputVectors afterwards so that the first input
@@ -149,59 +149,58 @@ public class CodeSimulatorDFS {
 
 				//@formatter:off
 				// {COMB_ASSIGN}
-				n_15__22 = 0; // {EXPANDED}
-				n_14__3 = ~nstate_1__17; // {EXPANDED}
-				n_03__4 = ~(na_10 & n_14__3); // {EXPANDED}
-				n_08__9 = nstate_1__17 | na_10; // {EXPANDED}
-				n_n56_25 = ~n_n53_29; // {EXPANDED}
-				n_n59_11 = n_n56_25 & n_n52_21; // {EXPANDED}
-				n_n55_32 = nstate_2__24 | n_n53_29; // {EXPANDED}
-				n_n54_31 = na_10 | n_n52_21; // {EXPANDED}
-				n_01__14 = ~(n_14__3 & nstate_0__28); // {EXPANDED}
-				n_13__16 = ~nstate_2__24; // {EXPANDED}
-				n_06__26 = ~(nstate_0__28 & n_13__16); // {EXPANDED}
-				n_04__18 = n_14__3 | nstate_0__28; // {EXPANDED}
-				n_02__2 = ~(n_01__14 | n_13__16); // {EXPANDED}
-				n_10__27 = ~(nstate_2__24 & n_01__14); // {EXPANDED}
-				n_09__20 = ~(n_08__9 & n_01__14); // {EXPANDED}
-				n_05__13 = ~(n_04__18 & n_03__4); // {EXPANDED}
-				n_11__15 = n_06__26 | n_03__4; // {EXPANDED}
-				n_00__0__8 = ~(n_02__2 | n_05__13); // {EXPANDED}
-				n_12__1 = n_04__18 & n_11__15; // {EXPANDED}
-				n_07__19 = n_06__26 | na_10; // {EXPANDED}
-				n_00__1__12 = ~(n_07__19 & n_09__20); // {EXPANDED}
-				n_00__2__23 = ~(n_12__1 & n_10__27); // {EXPANDED}
+				n_15__4 = 0; // {EXPANDED}
+				n_08__0 = na_2 | nstate_1__26; // {EXPANDED}
+				n_13__11 = ~nstate_2__19; // {EXPANDED}
+				n_14__12 = ~nstate_1__26; // {EXPANDED}
+				n_04__27 = nstate_0__10 | n_14__12; // {EXPANDED}
+				n_01__14 = ~(nstate_0__10 & n_14__12); // {EXPANDED}
+				n_n53_15 = ~nstate_2__19; // {EXPANDED}
+				n_n49_16 = n_n51_24 & n_n53_15; // {EXPANDED}
+				n_09__17 = ~(n_08__0 & n_01__14); // {EXPANDED}
+				n_02__5 = ~(n_13__11 | n_01__14); // {EXPANDED}
+				n_10__21 = ~(nstate_2__19 & n_01__14); // {EXPANDED}
+				n_06__6 = ~(nstate_0__10 & n_13__11); // {EXPANDED}
+				n_03__23 = ~(na_2 & n_14__12); // {EXPANDED}
+				n_05__25 = ~(n_03__23 & n_04__27); // {EXPANDED}
+				n_07__3 = na_2 | n_06__6; // {EXPANDED}
+				n_00__0__13 = ~(n_05__25 | n_02__5); // {EXPANDED}
+				n_11__29 = n_06__6 | n_03__23; // {EXPANDED}
+				n_00__1__20 = ~(n_09__17 & n_07__3); // {EXPANDED}
+				n_12__9 = n_04__27 & n_11__29; // {EXPANDED}
+				n_00__2__22 = ~(n_10__21 & n_12__9); // {EXPANDED}
 				//@formatter:on
 
 				int nextState = 0;
 
 				//@formatter:off
 				// nextState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
-				nextState |= n_n54_31 & (1 << 0); // {EXPANDED}
-				nextState |= n_n55_32 & (1 << 1); // {EXPANDED}
-				nextState |= n_00__0__8 & (1 << 2); // {EXPANDED}
-				nextState |= n_00__1__12 & (1 << 3); // {EXPANDED}
-				nextState |= n_00__2__23 & (1 << 4); // {EXPANDED}
+				nextState |= n_n49_16 & (1 << 0); // {EXPANDED}
+				nextState |= n_00__0__13 & (1 << 1); // {EXPANDED}
+				nextState |= n_00__1__20 & (1 << 2); // {EXPANDED}
+				nextState |= n_00__2__22 & (1 << 3); // {EXPANDED}
 				//@formatter:on
 
-				all_assumptions = -1;
-				all_assertions = -1;
+				all_assumptions = H;
+				all_assertions = H;
 
 				// In the code below we logically AND all assumptions
 				// and assertions.
 
-				// We don't want any property to evaluate to false if
-				// until we're at least {MAXDELAY} away from the initial state.
-				// This is {MAXDELAY} is the max depth of flip-flop chains
-				// within
+				// We don't want any property to evaluate to false if until
+				// we're at least {MAXDELAY} away from the initial state. This
+				// is {MAXDELAY} is the max depth of flip-flop chains within
 				// the property.
 
-				// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? 0
-				// : -1);
-				// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? 0 :
-				// -1);
+				int distance = stateStackPtr - 1;
 
-				if (all_assumptions == -1 && all_assertions == 0) {
+				//@formatter:off
+				// all_assumptions &= {ASSUMPTION} | (stateStackPtr > {MAXDELAY} ? L : H);
+				// all_assertions &= {ASSERTION} | (stateStackPtr > {MAXDELAY} ? L : H);
+				all_assertions &= n_n49_16 | (distance > 0 ? L : H); // {EXPANDED}
+				//@formatter:on
+
+				if (all_assumptions == H && all_assertions == L) {
 
 					// TODO: expand this stub
 
@@ -232,7 +231,6 @@ public class CodeSimulatorDFS {
 
 					//@formatter:off
 					// all_live_assertions &= {LIVE_ASSERTION};
-					all_live_assertions &= n_n59_11; // {EXPANDED}
 					//@formatter:on
 
 					if (all_live_assertions == 0) {
@@ -266,10 +264,12 @@ public class CodeSimulatorDFS {
 
 		if (stateStackPtr != 0) {
 
-			int[] counter = new int[stateStackPtr];
+			int[] counter = new int[stateStackPtr+1];
 
 			for (int j = 0; j < stateStackPtr; j++)
-				counter[j] = inputVectors[stateStack[j]];
+				counter[j] = inputVectors[stateStack[j]] - 1;
+
+			counter[stateStackPtr] = inputVectors[currentState] - 1;
 
 			return counter;
 
@@ -287,8 +287,7 @@ public class CodeSimulatorDFS {
 
 		//@formatter:off
 		// result.add("{STATE_BIT_ORG}");
-		result.add("*n52"); // {EXPANDED}
-		result.add("*n53"); // {EXPANDED}
+		result.add("*n51"); // {EXPANDED}
 		result.add("state[0]"); // {EXPANDED}
 		result.add("state[1]"); // {EXPANDED}
 		result.add("state[2]"); // {EXPANDED}
@@ -297,10 +296,8 @@ public class CodeSimulatorDFS {
 		result.add("a"); // {EXPANDED}
 
 		// result.add("{NON_STATE_BIT_ORG}");
-		result.add("*n54"); // {EXPANDED}
-		result.add("*n55"); // {EXPANDED}
-		result.add("*n56"); // {EXPANDED}
-		result.add("*n59"); // {EXPANDED}
+		result.add("*n49"); // {EXPANDED}
+		result.add("*n53"); // {EXPANDED}
 		result.add("_00_[0]"); // {EXPANDED}
 		result.add("_00_[1]"); // {EXPANDED}
 		result.add("_00_[2]"); // {EXPANDED}
@@ -341,86 +338,79 @@ public class CodeSimulatorDFS {
 
 		//@formatter:off
 		// int[] {STATE_BIT} = new int[cycles];
-		int[] n_n52_21 = new int[cycles]; // {EXPANDED}
-		int[] n_n53_29 = new int[cycles]; // {EXPANDED}
-		int[] nstate_0__28 = new int[cycles]; // {EXPANDED}
-		int[] nstate_1__17 = new int[cycles]; // {EXPANDED}
-		int[] nstate_2__24 = new int[cycles]; // {EXPANDED}
+		int[] n_n51_24 = new int[cycles]; // {EXPANDED}
+		int[] nstate_0__10 = new int[cycles]; // {EXPANDED}
+		int[] nstate_1__26 = new int[cycles]; // {EXPANDED}
+		int[] nstate_2__19 = new int[cycles]; // {EXPANDED}
 
 		// int[] {INPUT_BIT} = new int[cycles];
-		int[] na_10 = new int[cycles]; // {EXPANDED}
+		int[] na_2 = new int[cycles]; // {EXPANDED}
 
 		// {STATE_BIT}[0] = -(initial >> {STATE_BIT_INDEX} & 1);
-		n_n52_21[0] = -(initial >> 0 & 1); // {EXPANDED}
-		n_n53_29[0] = -(initial >> 1 & 1); // {EXPANDED}
-		nstate_0__28[0] = -(initial >> 2 & 1); // {EXPANDED}
-		nstate_1__17[0] = -(initial >> 3 & 1); // {EXPANDED}
-		nstate_2__24[0] = -(initial >> 4 & 1); // {EXPANDED}
+		n_n51_24[0] = -(initial >> 0 & 1); // {EXPANDED}
+		nstate_0__10[0] = -(initial >> 1 & 1); // {EXPANDED}
+		nstate_1__26[0] = -(initial >> 2 & 1); // {EXPANDED}
+		nstate_2__19[0] = -(initial >> 3 & 1); // {EXPANDED}
 
 		// int[] {NON_STATE_BIT} = new int[cycles];
-		int[] n_n54_31 = new int[cycles]; // {EXPANDED}
-		int[] n_n55_32 = new int[cycles]; // {EXPANDED}
-		int[] n_n56_25 = new int[cycles]; // {EXPANDED}
-		int[] n_n59_11 = new int[cycles]; // {EXPANDED}
-		int[] n_00__0__8 = new int[cycles]; // {EXPANDED}
-		int[] n_00__1__12 = new int[cycles]; // {EXPANDED}
-		int[] n_00__2__23 = new int[cycles]; // {EXPANDED}
+		int[] n_n49_16 = new int[cycles]; // {EXPANDED}
+		int[] n_n53_15 = new int[cycles]; // {EXPANDED}
+		int[] n_00__0__13 = new int[cycles]; // {EXPANDED}
+		int[] n_00__1__20 = new int[cycles]; // {EXPANDED}
+		int[] n_00__2__22 = new int[cycles]; // {EXPANDED}
 		int[] n_01__14 = new int[cycles]; // {EXPANDED}
-		int[] n_02__2 = new int[cycles]; // {EXPANDED}
-		int[] n_03__4 = new int[cycles]; // {EXPANDED}
-		int[] n_04__18 = new int[cycles]; // {EXPANDED}
-		int[] n_05__13 = new int[cycles]; // {EXPANDED}
-		int[] n_06__26 = new int[cycles]; // {EXPANDED}
-		int[] n_07__19 = new int[cycles]; // {EXPANDED}
-		int[] n_08__9 = new int[cycles]; // {EXPANDED}
-		int[] n_09__20 = new int[cycles]; // {EXPANDED}
-		int[] n_10__27 = new int[cycles]; // {EXPANDED}
-		int[] n_11__15 = new int[cycles]; // {EXPANDED}
-		int[] n_12__1 = new int[cycles]; // {EXPANDED}
-		int[] n_13__16 = new int[cycles]; // {EXPANDED}
-		int[] n_14__3 = new int[cycles]; // {EXPANDED}
-		int[] n_15__22 = new int[cycles]; // {EXPANDED}
+		int[] n_02__5 = new int[cycles]; // {EXPANDED}
+		int[] n_03__23 = new int[cycles]; // {EXPANDED}
+		int[] n_04__27 = new int[cycles]; // {EXPANDED}
+		int[] n_05__25 = new int[cycles]; // {EXPANDED}
+		int[] n_06__6 = new int[cycles]; // {EXPANDED}
+		int[] n_07__3 = new int[cycles]; // {EXPANDED}
+		int[] n_08__0 = new int[cycles]; // {EXPANDED}
+		int[] n_09__17 = new int[cycles]; // {EXPANDED}
+		int[] n_10__21 = new int[cycles]; // {EXPANDED}
+		int[] n_11__29 = new int[cycles]; // {EXPANDED}
+		int[] n_12__9 = new int[cycles]; // {EXPANDED}
+		int[] n_13__11 = new int[cycles]; // {EXPANDED}
+		int[] n_14__12 = new int[cycles]; // {EXPANDED}
+		int[] n_15__4 = new int[cycles]; // {EXPANDED}
 		//@formatter:on
 
 		for (int i = 0; i < cycles; i++) {
 
 			//@formatter:off
 			// {INPUT_BIT}[i] = -(inputs[i] >> {INPUT_BIT_INDEX} & 1);
-			na_10[i] = -(inputs[i] >> 0 & 1); // {EXPANDED}
+			na_2[i] = -(inputs[i] >> 0 & 1); // {EXPANDED}
 
 			// {COMB_ASSIGN} {POSTFIX1=[i]} {POSTFIX2=[i]}
-			n_15__22[i] = 0; // {EXPANDED}
-			n_14__3[i] = ~nstate_1__17[i]; // {EXPANDED}
-			n_03__4[i] = ~(na_10[i] & n_14__3[i]); // {EXPANDED}
-			n_08__9[i] = nstate_1__17[i] | na_10[i]; // {EXPANDED}
-			n_n56_25[i] = ~n_n53_29[i]; // {EXPANDED}
-			n_n59_11[i] = n_n56_25[i] & n_n52_21[i]; // {EXPANDED}
-			n_n55_32[i] = nstate_2__24[i] | n_n53_29[i]; // {EXPANDED}
-			n_n54_31[i] = na_10[i] | n_n52_21[i]; // {EXPANDED}
-			n_01__14[i] = ~(n_14__3[i] & nstate_0__28[i]); // {EXPANDED}
-			n_13__16[i] = ~nstate_2__24[i]; // {EXPANDED}
-			n_06__26[i] = ~(nstate_0__28[i] & n_13__16[i]); // {EXPANDED}
-			n_04__18[i] = n_14__3[i] | nstate_0__28[i]; // {EXPANDED}
-			n_02__2[i] = ~(n_01__14[i] | n_13__16[i]); // {EXPANDED}
-			n_10__27[i] = ~(nstate_2__24[i] & n_01__14[i]); // {EXPANDED}
-			n_09__20[i] = ~(n_08__9[i] & n_01__14[i]); // {EXPANDED}
-			n_05__13[i] = ~(n_04__18[i] & n_03__4[i]); // {EXPANDED}
-			n_11__15[i] = n_06__26[i] | n_03__4[i]; // {EXPANDED}
-			n_00__0__8[i] = ~(n_02__2[i] | n_05__13[i]); // {EXPANDED}
-			n_12__1[i] = n_04__18[i] & n_11__15[i]; // {EXPANDED}
-			n_07__19[i] = n_06__26[i] | na_10[i]; // {EXPANDED}
-			n_00__1__12[i] = ~(n_07__19[i] & n_09__20[i]); // {EXPANDED}
-			n_00__2__23[i] = ~(n_12__1[i] & n_10__27[i]); // {EXPANDED}
+			n_15__4[i] = 0; // {EXPANDED}
+			n_08__0[i] = na_2[i] | nstate_1__26[i]; // {EXPANDED}
+			n_13__11[i] = ~nstate_2__19[i]; // {EXPANDED}
+			n_14__12[i] = ~nstate_1__26[i]; // {EXPANDED}
+			n_04__27[i] = nstate_0__10[i] | n_14__12[i]; // {EXPANDED}
+			n_01__14[i] = ~(nstate_0__10[i] & n_14__12[i]); // {EXPANDED}
+			n_n53_15[i] = ~nstate_2__19[i]; // {EXPANDED}
+			n_n49_16[i] = n_n51_24[i] & n_n53_15[i]; // {EXPANDED}
+			n_09__17[i] = ~(n_08__0[i] & n_01__14[i]); // {EXPANDED}
+			n_02__5[i] = ~(n_13__11[i] | n_01__14[i]); // {EXPANDED}
+			n_10__21[i] = ~(nstate_2__19[i] & n_01__14[i]); // {EXPANDED}
+			n_06__6[i] = ~(nstate_0__10[i] & n_13__11[i]); // {EXPANDED}
+			n_03__23[i] = ~(na_2[i] & n_14__12[i]); // {EXPANDED}
+			n_05__25[i] = ~(n_03__23[i] & n_04__27[i]); // {EXPANDED}
+			n_07__3[i] = na_2[i] | n_06__6[i]; // {EXPANDED}
+			n_00__0__13[i] = ~(n_05__25[i] | n_02__5[i]); // {EXPANDED}
+			n_11__29[i] = n_06__6[i] | n_03__23[i]; // {EXPANDED}
+			n_00__1__20[i] = ~(n_09__17[i] & n_07__3[i]); // {EXPANDED}
+			n_12__9[i] = n_04__27[i] & n_11__29[i]; // {EXPANDED}
+			n_00__2__22[i] = ~(n_10__21[i] & n_12__9[i]); // {EXPANDED}
 
 			if (i < cycles-1) {
 
 				//@formatter:off
 				// {STATE_BIT}[i+1] |= {NEXT_STATE_BIT}[i];
-				n_n52_21[i+1] |= n_n54_31[i]; // {EXPANDED}
-				n_n53_29[i+1] |= n_n55_32[i]; // {EXPANDED}
-				nstate_0__28[i+1] |= n_00__0__8[i]; // {EXPANDED}
-				nstate_1__17[i+1] |= n_00__1__12[i]; // {EXPANDED}
-				nstate_2__24[i+1] |= n_00__2__23[i]; // {EXPANDED}
+				n_n51_24[i+1] |= n_n49_16[i]; // {EXPANDED}
+				nstate_0__10[i+1] |= n_00__0__13[i]; // {EXPANDED}
+				nstate_1__26[i+1] |= n_00__1__20[i]; // {EXPANDED}
+				nstate_2__19[i+1] |= n_00__2__22[i]; // {EXPANDED}
 				//@formatter:on
 
 			}
@@ -431,38 +421,35 @@ public class CodeSimulatorDFS {
 
 		//@formatter:off
 		// waveforms.add({STATE_BIT});
-		waveforms.add(n_n52_21); // {EXPANDED}
-		waveforms.add(n_n53_29); // {EXPANDED}
-		waveforms.add(nstate_0__28); // {EXPANDED}
-		waveforms.add(nstate_1__17); // {EXPANDED}
-		waveforms.add(nstate_2__24); // {EXPANDED}
+		waveforms.add(n_n51_24); // {EXPANDED}
+		waveforms.add(nstate_0__10); // {EXPANDED}
+		waveforms.add(nstate_1__26); // {EXPANDED}
+		waveforms.add(nstate_2__19); // {EXPANDED}
 
 		// waveforms.add({INPUT_BIT});
-		waveforms.add(na_10); // {EXPANDED}
+		waveforms.add(na_2); // {EXPANDED}
 
 		// waveforms.add({NON_STATE_BIT});
-		waveforms.add(n_n54_31); // {EXPANDED}
-		waveforms.add(n_n55_32); // {EXPANDED}
-		waveforms.add(n_n56_25); // {EXPANDED}
-		waveforms.add(n_n59_11); // {EXPANDED}
-		waveforms.add(n_00__0__8); // {EXPANDED}
-		waveforms.add(n_00__1__12); // {EXPANDED}
-		waveforms.add(n_00__2__23); // {EXPANDED}
+		waveforms.add(n_n49_16); // {EXPANDED}
+		waveforms.add(n_n53_15); // {EXPANDED}
+		waveforms.add(n_00__0__13); // {EXPANDED}
+		waveforms.add(n_00__1__20); // {EXPANDED}
+		waveforms.add(n_00__2__22); // {EXPANDED}
 		waveforms.add(n_01__14); // {EXPANDED}
-		waveforms.add(n_02__2); // {EXPANDED}
-		waveforms.add(n_03__4); // {EXPANDED}
-		waveforms.add(n_04__18); // {EXPANDED}
-		waveforms.add(n_05__13); // {EXPANDED}
-		waveforms.add(n_06__26); // {EXPANDED}
-		waveforms.add(n_07__19); // {EXPANDED}
-		waveforms.add(n_08__9); // {EXPANDED}
-		waveforms.add(n_09__20); // {EXPANDED}
-		waveforms.add(n_10__27); // {EXPANDED}
-		waveforms.add(n_11__15); // {EXPANDED}
-		waveforms.add(n_12__1); // {EXPANDED}
-		waveforms.add(n_13__16); // {EXPANDED}
-		waveforms.add(n_14__3); // {EXPANDED}
-		waveforms.add(n_15__22); // {EXPANDED}
+		waveforms.add(n_02__5); // {EXPANDED}
+		waveforms.add(n_03__23); // {EXPANDED}
+		waveforms.add(n_04__27); // {EXPANDED}
+		waveforms.add(n_05__25); // {EXPANDED}
+		waveforms.add(n_06__6); // {EXPANDED}
+		waveforms.add(n_07__3); // {EXPANDED}
+		waveforms.add(n_08__0); // {EXPANDED}
+		waveforms.add(n_09__17); // {EXPANDED}
+		waveforms.add(n_10__21); // {EXPANDED}
+		waveforms.add(n_11__29); // {EXPANDED}
+		waveforms.add(n_12__9); // {EXPANDED}
+		waveforms.add(n_13__11); // {EXPANDED}
+		waveforms.add(n_14__12); // {EXPANDED}
+		waveforms.add(n_15__4); // {EXPANDED}
 		//@formatter:on
 
 		return waveforms;
