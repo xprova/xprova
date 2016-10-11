@@ -75,6 +75,8 @@ public class CodeSimulatorDFS {
 		int all_assertions;
 		int all_live_assertions;
 
+		int currentState = initial;
+
 		//@formatter:off
 		// int {STATE_BIT};
 		//@formatter:on
@@ -85,7 +87,7 @@ public class CodeSimulatorDFS {
 
 		while (stateStackPtr > 0) {
 
-			int currentState = stateStack[stateStackPtr - 1]; // peek
+			currentState = stateStack[stateStackPtr - 1]; // peek
 
 			int currentInputVec = inputVectors[currentState];
 
@@ -200,10 +202,12 @@ public class CodeSimulatorDFS {
 
 		if (stateStackPtr != 0) {
 
-			int[] counter = new int[stateStackPtr];
+			int[] counter = new int[stateStackPtr+1];
 
 			for (int j = 0; j < stateStackPtr; j++)
-				counter[j] = inputVectors[stateStack[j]];
+				counter[j] = inputVectors[stateStack[j]] - 1;
+
+			counter[stateStackPtr] = inputVectors[currentState] - 1;
 
 			return counter;
 
