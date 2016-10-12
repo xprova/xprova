@@ -122,5 +122,7 @@ abc.history
 *.jar
 
 src/main/java/net/xprova/xprova/CodeSimulator.java
+src/main/java/net/xprova/xprova/CodeSimulatorDFS.java
 
 project.sublime-workspace
+
