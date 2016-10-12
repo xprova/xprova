@@ -77,6 +77,8 @@ public class CodeSimulatorDFS {
 
 		int currentState = initial;
 
+		boolean livenessViolation = false;
+
 		//@formatter:off
 		// int {STATE_BIT};
 		//@formatter:on
@@ -136,8 +138,8 @@ public class CodeSimulatorDFS {
 				int distance = stateStackPtr - 1;
 
 				//@formatter:off
-				// all_assumptions &= {ASSUMPTION} | (stateStackPtr > {MAXDELAY} ? L : H);
-				// all_assertions &= {ASSERTION} | (stateStackPtr > {MAXDELAY} ? L : H);
+				// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? L : H);
+				// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? L : H);
 				//@formatter:on
 
 				if (all_assumptions == H && all_assertions == L) {
@@ -182,9 +184,11 @@ public class CodeSimulatorDFS {
 
 						printState(stateStackPtr + 1, "State", nextState);
 
-					}
+						livenessViolation = true;
 
-					break;
+						break;
+
+					}
 
 				}
 
@@ -204,12 +208,15 @@ public class CodeSimulatorDFS {
 
 		if (stateStackPtr != 0) {
 
-			int[] counter = new int[stateStackPtr+1];
+			int counterExampleCycles = livenessViolation ? stateStackPtr+1 : stateStackPtr;
+
+			int[] counter = new int[counterExampleCycles];
 
 			for (int j = 0; j < stateStackPtr; j++)
 				counter[j] = inputVectors[stateStack[j]] - 1;
 
-			counter[stateStackPtr] = inputVectors[currentState] - 1;
+			if (livenessViolation)
+				counter[stateStackPtr] = inputVectors[currentState] - 1;
 
 			return counter;
 

@@ -3,7 +3,9 @@ library load lib/xprova.v
 read -b examples/statemach1.v
 
 #assert $eventually(a, state[2])
-assert $never(state[2])
+#assert $never(state[2])
+assert ~(state[2] & state[1])
+
 
 #rename nets
 rename modules
