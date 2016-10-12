@@ -16,9 +16,9 @@ public class CodeSimulatorDFS {
 
 		CodeSimulatorDFS sim1 = new CodeSimulatorDFS();
 
-		int initial = 0; // TODO
+		int initial = sim1.getResetState();
 
-		File  txtFile = null;
+		File txtFile = null;
 
 		for (int i = 0; i < args.length; i++) {
 
@@ -41,6 +41,12 @@ public class CodeSimulatorDFS {
 			System.exit(100);
 
 		}
+
+	}
+
+	public int getResetState() {
+
+		// return {RESET_STATE};
 
 	}
 
