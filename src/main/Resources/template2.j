@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class CodeSimulatorDFS {
+public class CodeSimulator {
 
 	public static final int L = 0;
 	public static final int H = -1;
@@ -14,7 +14,7 @@ public class CodeSimulatorDFS {
 		// usage:
 		// codesimulator [--txt <file>]
 
-		CodeSimulatorDFS sim1 = new CodeSimulatorDFS();
+		CodeSimulator sim1 = new CodeSimulator();
 
 		int initial = sim1.getResetState();
 

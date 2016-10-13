@@ -55,10 +55,6 @@ public class ConsoleHandler {
 
 	private TreeMap<String, NetlistGraph> designs = null;
 
-	private final String codeGenTemplateFile = "template2.j";
-
-	private final String codeGenClassName = "CodeSimulatorDFS";
-
 	public ConsoleHandler(PrintStream ps) {
 
 		out = ps;
@@ -765,7 +761,8 @@ public class ConsoleHandler {
 		help = {
 			"Usage:",
 			"  prove [--print] [--vcd <file>] [--txt <file>] [--gtkwave]",
-			"        [--signals sig1,sig2...]",
+			"        [--wavejson] [--signals sig1,sig2...] [--keep]",
+			"        [--onlycode] [--dfs]",
 			"",
 			"Options:",
 			"  -p --print       print counter-example to console",
@@ -775,7 +772,8 @@ public class ConsoleHandler {
 			"  -w --wavejson    print counter-example in WaveJSON format",
 			"  -s --signals     list of signals to include in counter-example",
 			"  -k --keep        keep assertion logic in current design (debugging)",
-			"  -c --onlycode    generate code but do not compile or run Java model (debugging)"
+			"  -c --onlycode    generate code but do not compile or run Java model (debugging)",
+			"  -d --dfs         use DFS (required for verifying liveness properties",
 		}
 	)
 	//@formatter:on
@@ -801,6 +799,8 @@ public class ConsoleHandler {
 
 				Option.builder("c").longOpt("onlycode").build(),
 
+				Option.builder("d").longOpt("depth").build(),
+
 		};
 
 		Options options = new Options();
@@ -817,6 +817,12 @@ public class ConsoleHandler {
 		assertDesignLoaded();
 
 		boolean keepAssertionLogic = line.hasOption("k");
+
+		boolean useDepthTemplate = line.hasOption("d");
+
+		final String codeGenTemplateFile = useDepthTemplate ? "template2.j" : "template1.j";
+
+		final String codeGenClassName = "CodeSimulator";
 
 		NetlistGraph currentCopy = keepAssertionLogic ? current : new NetlistGraph(current);
 
