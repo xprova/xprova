@@ -755,6 +755,59 @@ public class ConsoleHandler {
 
 	}
 
+	@Command
+	public void space() throws Exception {
+
+		// code:
+
+		assertDesignLoaded();
+
+		final String codeGenTemplateFile = "template3.j";
+
+		final String codeGenClassName = "CodeSimulator";
+
+		NetlistGraph currentCopy = current;
+
+		String javaFile = getTempFile(codeGenClassName + ".java");
+
+		String compileCmd = "javac " + javaFile;
+
+		String runCodeGenCmd = String.format("java -classpath %s %s", getTempFile(""), codeGenClassName);
+
+		// generate code
+
+		String templateCode = loadResourceString(codeGenTemplateFile);
+
+		ArrayList<Property> emptyList = new ArrayList<Property>();
+
+		ArrayList<String> lines = CodeGenerator.generate(currentCopy, emptyList, emptyList, templateCode);
+
+		out.println("Saving code to " + javaFile + " ...");
+
+		PrintStream fout = new PrintStream(javaFile);
+
+		for (String l : lines)
+			fout.println(l);
+
+		fout.close();
+
+		// compile using javac
+
+		out.println("Compiling ...");
+
+		int compileExitCode = executeProgram(compileCmd, true, true);
+
+		if (compileExitCode != 0)
+			throw new Exception("Compilation failed");
+
+		// run code
+
+		out.println("Executing compiled code ...");
+
+		int genExitCode = executeProgram(runCodeGenCmd, true, true);
+
+	}
+
 	//@formatter:off
 	@Command(
 		description = "run formal verification",
