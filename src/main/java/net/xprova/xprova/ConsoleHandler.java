@@ -325,7 +325,7 @@ public class ConsoleHandler {
 			if (flop == null) {
 
 				throw new Exception(
-						String.format("netlist <%s> does not contain flip-flip <%s>", current.getName(), vName));
+						String.format("netlist <%s> does not contain flip-flop <%s>", current.getName(), vName));
 
 			}
 
@@ -489,7 +489,7 @@ public class ConsoleHandler {
 
 				String strFormat = "%20s %14s %14s %14s\n";
 
-				out.print(String.format(strFormat, "Flip-flip Module", "Clock Port", "Reset Port", "Data Port"));
+				out.print(String.format(strFormat, "Flip-flop Module", "Clock Port", "Reset Port", "Data Port"));
 				out.print(String.format(strFormat, "----------------", "----------", "----------", "---------"));
 
 				for (FlipFlop f : defsFF.values())
@@ -826,7 +826,7 @@ public class ConsoleHandler {
 			"  -s --signals     list of signals to include in counter-example",
 			"  -k --keep        keep assertion logic in current design (debugging)",
 			"  -c --onlycode    generate code but do not compile or run Java model (debugging)",
-			"  -d --dfs         use DFS (required for verifying liveness properties",
+			"  -d --dfs         use DFS (required for verifying liveness properties)",
 		}
 	)
 	//@formatter:on
