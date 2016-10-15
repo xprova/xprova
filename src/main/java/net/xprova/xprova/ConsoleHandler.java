@@ -755,7 +755,13 @@ public class ConsoleHandler {
 
 	}
 
-	@Command
+	@Command(
+		description = "generate state space graph",
+		help = {
+			"Usage:",
+			"  space"
+		}
+	)
 	public void space() throws Exception {
 
 		// code:
