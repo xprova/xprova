@@ -135,13 +135,13 @@ public class CodeSimulator {
 					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 					//@formatter:on
 
+					System.out.println(String.format("discovered edge: %d -> %d (input = %d)", state, nxState, in));
+
 					if (parentState[nxState] == UNDISCOVERED) {
 
 						toVisitNextArr[toVisitNextArrOccupied] = nxState;
 
 						toVisitNextArrOccupied += 1;
-
-						System.out.println("discovered edge: " + state + " -> " + nxState);
 
 						parentState[nxState] = state;
 
