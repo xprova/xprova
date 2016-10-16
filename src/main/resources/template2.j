@@ -79,7 +79,7 @@ public class CodeSimulator {
 
 		int all_assumptions;
 		int all_assertions;
-		int all_live_assertions;
+		int any_liveness_armed;
 
 		int currentState = initial;
 
@@ -168,20 +168,29 @@ public class CodeSimulator {
 
 				} else if (inputVectors[nextState] != VISITED) {
 
-					// found a cycle
+					// found a cycle in the state graph
 
-					all_live_assertions = -1;
+					any_liveness_armed = L;
 
-					// In the code below we logically AND all live assertions
+					// The expression {LIVE_ASSERTION} indicates whether the
+					// assertion is in an armed state. Violations are reported
+					// if state graph loops are discovered where the assertion
+					// is armed. For example, the property $eventually(a, y)
+					// will get armed once the trigger `a` is asserted and
+					// before the release expression `y` is asserted. The
+					// existence of a loop in which this assertion is
+					// triggered means that there is a case in which a is
+					// asserted but y never gets asserted eventually, i.e. a
+					// violation of the property.
 
 					// TODO: add code to handle delays in properties (ignored
 					// for now)
 
 					//@formatter:off
-					// all_live_assertions &= {LIVE_ASSERTION};
+					// any_liveness_armed |= {LIVE_ASSERTION};
 					//@formatter:on
 
-					if (all_live_assertions == 0) {
+					if (any_liveness_armed == H) {
 
 						System.out.println("found violation of live assertion:");
 
