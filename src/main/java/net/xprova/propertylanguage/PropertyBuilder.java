@@ -30,6 +30,8 @@ public class PropertyBuilder {
 	public static final String ALWAYS = "$always";
 	public static final String NEVER = "$never";
 	public static final String EVENTUALLY = "$eventually";
+	public static final String HIGH = "1";
+	public static final String LOW = "0";
 
 	private static void rewriteSyntaticSugar(Property root) {
 

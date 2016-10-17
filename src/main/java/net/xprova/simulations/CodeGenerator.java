@@ -136,15 +136,38 @@ public class CodeGenerator {
 
 		if (root.isTerminal()) {
 
-			Vertex v = graph.getVertex(root.name);
+			boolean isHigh = root.name.equals(PropertyBuilder.HIGH);
+			boolean isLow = root.name.equals(PropertyBuilder.LOW);
 
-			if (v == null) {
+			if (isHigh | isLow) {
 
-				throw new Exception("graph does not contain identifier " + root.name);
+				String tieModName = isHigh ? "TIE1" : "TIE0";
+
+				Vertex tieMod = addPropertyModule(graph, tieModName);
+
+				Vertex tie1Output = addPropertyNet(graph);
+
+				graph.addVertex(tieMod);
+
+				graph.addVertex(tie1Output);
+
+				graph.addConnection(tieMod, tie1Output, "y");
+
+				return tie1Output;
 
 			} else {
 
-				return v;
+				Vertex v = graph.getVertex(root.name);
+
+				if (v == null) {
+
+					throw new Exception("graph does not contain identifier " + root.name);
+
+				} else {
+
+					return v;
+
+				}
 
 			}
 

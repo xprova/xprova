@@ -1,12 +1,12 @@
 library load lib/xprova.v
 
-read -b examples/eventually.v
+read -b examples/statemach1.v
 
-assert $eventually(a, y)
+assert $eventually(1, state[2])
 
-#rename nets
+rename nets
 rename modules
 
-prove -kd
+prove -dkg
 
 dot -e=CK,RS,ST --pdf output/netlist.pdf

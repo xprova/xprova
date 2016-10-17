@@ -59,9 +59,19 @@ atom
 	: ID
 	| LPAREN baseExpr RPAREN
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
+	| High
+	| Low
 	;
 
 // lexer rules
+
+High
+	: '1'
+	;
+
+Low
+	: '0'
+	;
 
 ID
 	: Simple_identifier
