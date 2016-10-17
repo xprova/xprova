@@ -292,7 +292,7 @@ public class CodeGenerator {
 
 		}
 
-	throw new Exception("property operator not yet implemented");
+		throw new Exception("property operator not yet implemented");
 
 	}
 
@@ -903,54 +903,47 @@ public class CodeGenerator {
 
 	}
 
-	private static Vertex insertTwoInputEventuallyBlock(NetlistGraph graph, Vertex trigger, Vertex expr, Vertex clk,
-			Vertex set, Vertex rst) throws Exception {
+	private static Vertex insertTriggerBlock(NetlistGraph graph, Vertex trigger_in, Vertex expr, Vertex clk, Vertex set,
+			Vertex rst) throws Exception {
 
-		Vertex or1 = addPropertyModule(graph, "OR"); // trigger
-		Vertex or2 = addPropertyModule(graph, "OR"); // expr
+		// a block with one input (trigger_in) and one output (triggerFired)
 
-		Vertex and = addPropertyModule(graph, "AND");
-		Vertex not = addPropertyModule(graph, "NOT");
-
-		Vertex flopOutput1 = addPropertyNet(graph);
-		Vertex flopOutput2 = addPropertyNet(graph);
-
-		Vertex flopInput1 = addPropertyNet(graph);
-		Vertex flopInput2 = addPropertyNet(graph);
-
-		Vertex flopOutput2Not = addPropertyNet(graph);
+		// trigger_out is initially low but once trigger_in goes high,
+		// trigger_out goes high and remains high forever
 
 		Vertex flop1 = addPropertyModule(graph, "DFF");
-		Vertex flop2 = addPropertyModule(graph, "DFF");
+		Vertex or1 = addPropertyModule(graph, "OR");
 
-		Vertex liveNet = addPropertyNet(graph);
+		Vertex flopInput1 = addPropertyNet(graph);
+		Vertex triggerFired = addPropertyNet(graph);
+
+		graph.addConnection(trigger_in, or1);
+		graph.addConnection(or1, flopInput1);
+		graph.addConnection(triggerFired, or1);
+
+		graph.addConnection(flopInput1, flop1, "D");
+		graph.addConnection(flop1, triggerFired, "Q");
 
 		graph.addConnection(clk, flop1, "CK");
 		graph.addConnection(set, flop1, "RS");
 
-		graph.addConnection(clk, flop2, "CK");
-		graph.addConnection(set, flop2, "RS");
+		return triggerFired;
+	}
 
-		graph.addConnection(flopInput1, flop1, "D");
-		graph.addConnection(flopInput2, flop2, "D");
+	private static Vertex insertTwoInputEventuallyBlock(NetlistGraph graph, Vertex trigger, Vertex expr, Vertex clk,
+			Vertex set, Vertex rst) throws Exception {
 
-		graph.addConnection(flop1, flopOutput1, "Q");
-		graph.addConnection(flop2, flopOutput2, "Q");
+		Vertex triggerFired = insertTriggerBlock(graph, trigger, expr, clk, set, rst);
 
-		graph.addConnection(trigger, or1);
-		graph.addConnection(expr, or2);
+		Vertex eventuallyNet = insetSingleInputEventuallyBlock(graph, expr, clk, set, rst);
 
-		graph.addConnection(or1, flopInput1);
-		graph.addConnection(or2, flopInput2);
+		Vertex and = addPropertyModule(graph, "AND");
 
-		graph.addConnection(flopOutput1, or1);
-		graph.addConnection(flopOutput2, or2);
+		Vertex liveNet = addPropertyNet(graph);
 
-		graph.addConnection(flopOutput2, not);
-		graph.addConnection(not, flopOutput2Not);
+		graph.addConnection(triggerFired, and);
 
-		graph.addConnection(flopOutput1, and);
-		graph.addConnection(flopOutput2Not, and);
+		graph.addConnection(eventuallyNet, and);
 
 		graph.addConnection(and, liveNet);
 
