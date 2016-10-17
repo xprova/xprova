@@ -286,11 +286,21 @@ public class PropertyBuilder {
 
 		if (c0.equals(EVENTUALLY)) {
 
-			Property trigger = parseAST(root.getChild(2));
+			if (root.getChildCount() == 6) {
 
-			Property expr = parseAST(root.getChild(4));
+				Property trigger = parseAST(root.getChild(2));
 
-			return Property.build(EVENTUALLY).addChild(trigger).addChild(expr);
+				Property expr = parseAST(root.getChild(4));
+
+				return Property.build(EVENTUALLY).addChild(trigger).addChild(expr);
+
+			} else if (root.getChildCount() == 4) {
+
+				Property expr = parseAST(root.getChild(2));
+
+				return Property.build(EVENTUALLY).addChild(expr);
+
+			}
 
 		}
 

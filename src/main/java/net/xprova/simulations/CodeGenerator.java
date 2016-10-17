@@ -270,17 +270,29 @@ public class CodeGenerator {
 
 			// create a liveness net
 
-			Vertex trigger = addProperty(graph, root.children.get(0), clk, rst, set);
+			Vertex liveNet = null;
 
-			Vertex expr = addProperty(graph, root.children.get(1), clk, rst, set);
+			if (root.children.size() == 2) {
 
-			Vertex liveNet = insertTwoInputEventuallyBlock(graph, trigger, expr, clk, set, rst);
+				Vertex trigger = addProperty(graph, root.children.get(0), clk, rst, set);
+
+				Vertex expr = addProperty(graph, root.children.get(1), clk, rst, set);
+
+				liveNet = insertTwoInputEventuallyBlock(graph, trigger, expr, clk, set, rst);
+
+			} else if (root.children.size() == 1) {
+
+				Vertex expr = addProperty(graph, root.children.get(0), clk, rst, set);
+
+				liveNet = insetSingleInputEventuallyBlock(graph, expr, clk, set, rst);
+
+			}
 
 			return liveNet;
 
 		}
 
-		throw new Exception("property operator not yet implemented");
+	throw new Exception("property operator not yet implemented");
 
 	}
 
@@ -856,7 +868,43 @@ public class CodeGenerator {
 
 	}
 
-	private static Vertex insertTwoInputEventuallyBlock(NetlistGraph graph, Vertex trigger, Vertex expr, Vertex clk, Vertex set, Vertex rst) throws Exception {
+	private static Vertex insetSingleInputEventuallyBlock(NetlistGraph graph, Vertex expr, Vertex clk, Vertex set,
+			Vertex rst) throws Exception {
+
+		Vertex or2 = addPropertyModule(graph, "OR"); // expr
+
+		Vertex not = addPropertyModule(graph, "NOT");
+
+		Vertex flopOutput2 = addPropertyNet(graph);
+
+		Vertex flopInput2 = addPropertyNet(graph);
+
+		Vertex liveNet = addPropertyNet(graph);
+
+		Vertex flop2 = addPropertyModule(graph, "DFF");
+
+		graph.addConnection(clk, flop2, "CK");
+		graph.addConnection(set, flop2, "RS");
+
+		graph.addConnection(flopInput2, flop2, "D");
+
+		graph.addConnection(flop2, flopOutput2, "Q");
+
+		graph.addConnection(expr, or2);
+
+		graph.addConnection(or2, flopInput2);
+
+		graph.addConnection(flopOutput2, or2);
+
+		graph.addConnection(flopOutput2, not);
+		graph.addConnection(not, liveNet);
+
+		return liveNet;
+
+	}
+
+	private static Vertex insertTwoInputEventuallyBlock(NetlistGraph graph, Vertex trigger, Vertex expr, Vertex clk,
+			Vertex set, Vertex rst) throws Exception {
 
 		Vertex or1 = addPropertyModule(graph, "OR"); // trigger
 		Vertex or2 = addPropertyModule(graph, "OR"); // expr

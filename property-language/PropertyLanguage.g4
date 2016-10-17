@@ -17,7 +17,7 @@ property
 tempExpr
 	: baseExpr
 	| (ALWAYS|NEVER) LPAREN baseExpr RPAREN
-	| EVENTUALLY LPAREN baseExpr COMMA baseExpr RPAREN
+	| EVENTUALLY LPAREN (baseExpr COMMA)? baseExpr RPAREN
 	;
 
 // boolean layer
