@@ -172,7 +172,7 @@ public class CodeSimulator {
 
 					any_liveness_armed = L;
 
-					// The expression {LIVE_ASSERTION} indicates whether the
+					// The expression LIVE_ASSERTION indicates whether the
 					// assertion is in an armed state. Violations are reported
 					// if state graph loops are discovered where the assertion
 					// is armed. For example, the property $eventually(a, y)
