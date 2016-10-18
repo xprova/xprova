@@ -238,31 +238,11 @@ public class CodeGenerator {
 
 		if (root.name.equals(PropertyBuilder.ALWAYS)) {
 
-			Vertex and = addPropertyModule(graph, "AND");
+			Vertex alwaysInput = addProperty(graph, root.children.get(0), clk, rst, set);
 
-			Vertex flopInput = addPropertyNet(graph);
+			Vertex alwaysNet = insertSingleInputAlwaysBlock(graph, alwaysInput, clk, set, rst);
 
-			Vertex flop = addPropertyModule(graph, "DFF");
-
-			Vertex flopOutput = addPropertyNet(graph);
-
-			Vertex andInput = addProperty(graph, root.children.get(0), clk, rst, set);
-
-			graph.addConnection(and, flopInput, "Y");
-
-			graph.addConnection(flopInput, flop, "D");
-
-			graph.addConnection(flop, flopOutput, "Q");
-
-			graph.addConnection(clk, flop, "CK");
-
-			graph.addConnection(set, flop, "ST");
-
-			graph.addConnection(flopOutput, and, "A");
-
-			graph.addConnection(andInput, and);
-
-			return flopInput;
+			return alwaysNet;
 
 		}
 
@@ -293,6 +273,35 @@ public class CodeGenerator {
 		}
 
 		throw new Exception("property operator not yet implemented");
+
+	}
+
+	private static Vertex insertSingleInputAlwaysBlock(NetlistGraph graph, Vertex input, Vertex clk, Vertex set,
+			Vertex rst) throws Exception {
+
+		Vertex and = addPropertyModule(graph, "AND");
+
+		Vertex flopInput = addPropertyNet(graph);
+
+		Vertex flop = addPropertyModule(graph, "DFF");
+
+		Vertex flopOutput = addPropertyNet(graph);
+
+		graph.addConnection(and, flopInput, "Y");
+
+		graph.addConnection(flopInput, flop, "D");
+
+		graph.addConnection(flop, flopOutput, "Q");
+
+		graph.addConnection(clk, flop, "CK");
+
+		graph.addConnection(set, flop, "ST");
+
+		graph.addConnection(flopOutput, and, "A");
+
+		graph.addConnection(input, and);
+
+		return flopOutput;
 
 	}
 
