@@ -1,12 +1,12 @@
 library load lib/xprova.v
 
-read -b examples/statemach1.v
+read -b examples/counter.v
 
-assert $eventually(1, state[2])
+assert ~(($once(count[6])) & count[5])
 
-rename nets
-rename modules
+#rename nets
+#rename modules
 
-prove -dkg
+prove -kg
 
 dot -e=CK,RS,ST --pdf output/netlist.pdf

@@ -148,6 +148,18 @@ public class PropertyBuilder {
 
 		}
 
+		// $once(x) into ~$always(~x)
+
+		if (root.name.equals(ONCE)) {
+
+			Property notChild = Property.build(NOT).setChildren(root.children);
+
+			Property always = Property.build(ALWAYS).setChild(notChild);
+
+			root.setChild(always).name = NOT;
+
+		}
+
 	}
 
 	private static Property parseAST(ParseTree root) throws Exception {

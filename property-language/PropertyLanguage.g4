@@ -23,7 +23,7 @@ tempExpr
 
 baseExpr
 	: implyExpr
-	| (ALWAYS|NEVER) LPAREN implyExpr RPAREN
+	| (ALWAYS|NEVER|ONCE) LPAREN implyExpr RPAREN
 	;
 
 implyExpr
@@ -165,6 +165,10 @@ ALWAYS
 
 NEVER
 	: '$never'
+	;
+
+ONCE
+	: '$once'
 	;
 
 EVENTUALLY
