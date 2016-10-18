@@ -16,7 +16,6 @@ property
 
 tempExpr
 	: baseExpr
-	| (ALWAYS|NEVER) LPAREN baseExpr RPAREN
 	| EVENTUALLY LPAREN (baseExpr COMMA)? baseExpr RPAREN
 	;
 
@@ -24,6 +23,7 @@ tempExpr
 
 baseExpr
 	: implyExpr
+	| (ALWAYS|NEVER) LPAREN implyExpr RPAREN
 	;
 
 implyExpr

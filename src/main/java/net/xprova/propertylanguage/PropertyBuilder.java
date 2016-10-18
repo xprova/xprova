@@ -28,6 +28,7 @@ public class PropertyBuilder {
 	public static final String STABLE = "$stable";
 	public static final String CHANGED = "$changed";
 	public static final String ALWAYS = "$always";
+	public static final String ONCE = "$once";
 	public static final String NEVER = "$never";
 	public static final String EVENTUALLY = "$eventually";
 	public static final String HIGH = "1";
@@ -179,7 +180,7 @@ public class PropertyBuilder {
 		String c1 = root.getChild(1).getText();
 
 		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)
-				|| NEVER.equals(c0)) {
+				|| NEVER.equals(c0) || ONCE.equals(c0)) {
 
 			Property child = parseAST(root.getChild(2));
 
