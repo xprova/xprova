@@ -226,11 +226,11 @@ public class CodeGenerator {
 
 			Vertex gateOutput = addPropertyNet(graph);
 
-			graph.addConnection(gate, gateOutput);
+			graph.addConnection(gate, gateOutput, "y");
 
 			Vertex gateInput = addProperty(graph, root.children.get(0), clk, rst, set);
 
-			graph.addConnection(gateInput, gate);
+			graph.addConnection(gateInput, gate, "a");
 
 			return gateOutput;
 
@@ -279,6 +279,10 @@ public class CodeGenerator {
 	private static Vertex insertSingleInputAlwaysBlock(NetlistGraph graph, Vertex input, Vertex clk, Vertex set,
 			Vertex rst) throws Exception {
 
+		// a block with one input (input) and one output (flopOutput)
+
+		// returns high until input is low then returns low forever
+
 		Vertex and = addPropertyModule(graph, "AND");
 
 		Vertex flopInput = addPropertyNet(graph);
@@ -287,7 +291,7 @@ public class CodeGenerator {
 
 		Vertex flopOutput = addPropertyNet(graph);
 
-		graph.addConnection(and, flopInput, "Y");
+		graph.addConnection(and, flopInput, "y");
 
 		graph.addConnection(flopInput, flop, "D");
 
@@ -297,9 +301,9 @@ public class CodeGenerator {
 
 		graph.addConnection(set, flop, "ST");
 
-		graph.addConnection(flopOutput, and, "A");
+		graph.addConnection(flopOutput, and, "a");
 
-		graph.addConnection(input, and);
+		graph.addConnection(input, and, "b");
 
 		return flopOutput;
 
@@ -941,6 +945,12 @@ public class CodeGenerator {
 
 	private static Vertex insertTwoInputEventuallyBlock(NetlistGraph graph, Vertex trigger, Vertex expr, Vertex clk,
 			Vertex set, Vertex rst) throws Exception {
+
+		// a block with two inputs (trigger and expr) and one output (liveNet)
+
+		// initially returns low
+		// when trigger goes high then it returns high until expr goes high too
+		// where it returns low forever
 
 		Vertex triggerFired = insertTriggerBlock(graph, trigger, expr, clk, set, rst);
 
