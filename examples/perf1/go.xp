@@ -1,0 +1,8 @@
+library load lib/xprova.v
+
+read -b examples/perf1/perf1.v
+
+assert ~err
+
+prove
+

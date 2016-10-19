@@ -1,0 +1,10 @@
+library load lib/xprova.v
+
+read -b examples/perf2/perf2.v
+
+design current top
+
+assert ~err
+
+prove
+

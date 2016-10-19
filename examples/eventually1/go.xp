@@ -1,0 +1,8 @@
+library load lib/xprova.v
+
+read -b examples/eventually1/eventually1.v
+
+assert $eventually(a, y)
+
+prove -d
+

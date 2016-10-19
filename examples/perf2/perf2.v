@@ -109,11 +109,11 @@ module lfsr4(clk, rst, ena, state);
 
 endmodule
 
-module top (clk, rst, code, valid, secret, state);
+module top (clk, rst, code, err, secret, state);
 
 	input clk, rst;
 
-	output valid;
+	output err;
 
 	input [14:0] code;
 
@@ -130,7 +130,7 @@ module top (clk, rst, code, valid, secret, state);
 
 	assign ena = (code == secret);
 
-	assign valid = state != 'b100000000000;
-	//assign valid = code != secret;
+	assign err = state != 'b100000000000;
 
 endmodule
+
