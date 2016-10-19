@@ -31,13 +31,23 @@ public class PropertyBuilder {
 	public static final String ONCE = "$once";
 	public static final String NEVER = "$never";
 	public static final String EVENTUALLY = "$eventually";
+	public static final String UNTIL = "$until";
 	public static final String HIGH = "1";
 	public static final String LOW = "0";
 
 	private static void rewriteSyntaticSugar(Property root) {
 
-		for (Property c : root.children)
-			rewriteSyntaticSugar(c);
+		// $until(x,y) into $never(x) |-> y
+
+		if (root.name.equals(UNTIL)) {
+
+			Property neverX = Property.build(NEVER).setChild(root.children.get(0));
+
+			Property y = root.children.get(1);
+
+			root.setChild(neverX).addChild(y).name = IMPLY;
+
+		}
 
 		// change (x |=> #n y) into (x |-> #n+1 y)
 
@@ -159,6 +169,9 @@ public class PropertyBuilder {
 			root.setChild(always).name = NOT;
 
 		}
+
+		for (Property c : root.children)
+			rewriteSyntaticSugar(c);
 
 	}
 
@@ -314,6 +327,16 @@ public class PropertyBuilder {
 				return Property.build(EVENTUALLY).addChild(expr);
 
 			}
+
+		}
+
+		if (c0.equals(UNTIL)) {
+
+			Property trigger = parseAST(root.getChild(2));
+
+			Property expr = parseAST(root.getChild(4));
+
+			return Property.build(UNTIL).addChild(trigger).addChild(expr);
 
 		}
 

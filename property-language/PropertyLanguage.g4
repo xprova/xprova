@@ -24,6 +24,7 @@ tempExpr
 baseExpr
 	: implyExpr
 	| (ALWAYS|NEVER|ONCE) LPAREN implyExpr RPAREN
+	| UNTIL LPAREN implyExpr COMMA implyExpr RPAREN
 	;
 
 implyExpr
@@ -169,6 +170,10 @@ NEVER
 
 ONCE
 	: '$once'
+	;
+
+UNTIL
+	: '$until'
 	;
 
 EVENTUALLY
