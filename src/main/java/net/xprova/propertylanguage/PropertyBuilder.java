@@ -58,7 +58,7 @@ public class PropertyBuilder {
 
 			Property notC1 = Property.build(NOT).setChild(c1);
 
-			root.addChild(notC1).addChild(c2).name = OR;
+			root.setChild(notC1).addChild(c2).name = OR;
 
 		}
 
@@ -72,7 +72,7 @@ public class PropertyBuilder {
 
 			notC1.delay += 2;
 
-			root.addChild(c1).addChild(notC1).name = AND;
+			root.setChild(c1).addChild(notC1).name = AND;
 
 		}
 
@@ -86,7 +86,7 @@ public class PropertyBuilder {
 
 			c1.delay += 1;
 
-			root.addChild(c1).addChild(notC1).name = AND;
+			root.setChild(c1).addChild(notC1).name = AND;
 
 		}
 
@@ -95,7 +95,7 @@ public class PropertyBuilder {
 		if (root.name.equals(STABLE)) {
 
 			Property c1 = new Property(root.children.get(0));
-			Property c2 = new Property(root.children.get(0));
+			Property c2 = new Property(root.children.get(1));
 
 			c2.delay += 1;
 
@@ -110,11 +110,11 @@ public class PropertyBuilder {
 		if (root.name.equals(CHANGED)) {
 
 			Property c1 = new Property(root.children.get(0));
-			Property c2 = new Property(root.children.get(0));
+			Property c2 = new Property(root.children.get(1));
 
 			c2.delay += 1;
 
-			root.addChild(c1).addChild(c2).name = XOR;
+			root.setChild(c1).addChild(c2).name = XOR;
 
 		}
 
