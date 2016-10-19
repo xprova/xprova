@@ -1034,7 +1034,7 @@ public class ConsoleHandler {
 		help = {
 			"Usage:",
 			"  props list",
-			"  props clear <num>"
+			"  props clear (*|<num>)"
 		}
 	)
 	//@formatter:on
@@ -1066,7 +1066,7 @@ public class ConsoleHandler {
 
 		} else if ("clear".equals(cmd) && args.length > 1) {
 
-			if ("all".equals(args[1])) {
+			if ("*".equals(args[1])) {
 
 				assumptions.clear();
 
