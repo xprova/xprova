@@ -227,19 +227,9 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static class BaseExprContext extends ParserRuleContext {
-		public List<ImplyExprContext> implyExpr() {
-			return getRuleContexts(ImplyExprContext.class);
+		public ImplyExprContext implyExpr() {
+			return getRuleContext(ImplyExprContext.class,0);
 		}
-		public ImplyExprContext implyExpr(int i) {
-			return getRuleContext(ImplyExprContext.class,i);
-		}
-		public TerminalNode LPAREN() { return getToken(PropertyLanguageParser.LPAREN, 0); }
-		public TerminalNode RPAREN() { return getToken(PropertyLanguageParser.RPAREN, 0); }
-		public TerminalNode ALWAYS() { return getToken(PropertyLanguageParser.ALWAYS, 0); }
-		public TerminalNode NEVER() { return getToken(PropertyLanguageParser.NEVER, 0); }
-		public TerminalNode ONCE() { return getToken(PropertyLanguageParser.ONCE, 0); }
-		public TerminalNode UNTIL() { return getToken(PropertyLanguageParser.UNTIL, 0); }
-		public TerminalNode COMMA() { return getToken(PropertyLanguageParser.COMMA, 0); }
 		public BaseExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -257,66 +247,11 @@ public class PropertyLanguageParser extends Parser {
 	public final BaseExprContext baseExpr() throws RecognitionException {
 		BaseExprContext _localctx = new BaseExprContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_baseExpr);
-		int _la;
 		try {
-			setState(51);
-			switch (_input.LA(1)) {
-			case High:
-			case Low:
-			case ID:
-			case NOT:
-			case LPAREN:
-			case HASH:
-			case AT:
-			case ROSE:
-			case FELL:
-			case STABLE:
-			case CHANGED:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(38);
-				implyExpr();
-				}
-				break;
-			case ALWAYS:
-			case NEVER:
-			case ONCE:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(39);
-				_la = _input.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ALWAYS) | (1L << NEVER) | (1L << ONCE))) != 0)) ) {
-				_errHandler.recoverInline(this);
-				} else {
-					consume();
-				}
-				setState(40);
-				match(LPAREN);
-				setState(41);
-				implyExpr();
-				setState(42);
-				match(RPAREN);
-				}
-				break;
-			case UNTIL:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(44);
-				match(UNTIL);
-				setState(45);
-				match(LPAREN);
-				setState(46);
-				implyExpr();
-				setState(47);
-				match(COMMA);
-				setState(48);
-				implyExpr();
-				setState(49);
-				match(RPAREN);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(38);
+			implyExpr();
 			}
 		}
 		catch (RecognitionException re) {
@@ -360,20 +295,20 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(53);
+			setState(40);
 			orExpr();
-			setState(56);
+			setState(43);
 			_la = _input.LA(1);
 			if (_la==IMPLY || _la==IMPLY_NEXT) {
 				{
-				setState(54);
+				setState(41);
 				_la = _input.LA(1);
 				if ( !(_la==IMPLY || _la==IMPLY_NEXT) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(55);
+				setState(42);
 				orExpr();
 				}
 			}
@@ -423,21 +358,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(58);
+			setState(45);
 			xorExpr();
-			setState(63);
+			setState(50);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==OR) {
 				{
 				{
-				setState(59);
+				setState(46);
 				match(OR);
-				setState(60);
+				setState(47);
 				xorExpr();
 				}
 				}
-				setState(65);
+				setState(52);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -486,21 +421,21 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(66);
+			setState(53);
 			andExpr();
-			setState(71);
+			setState(58);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==XOR) {
 				{
 				{
-				setState(67);
+				setState(54);
 				match(XOR);
-				setState(68);
+				setState(55);
 				andExpr();
 				}
 				}
-				setState(73);
+				setState(60);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -555,27 +490,27 @@ public class PropertyLanguageParser extends Parser {
 		enterRule(_localctx, 12, RULE_andExpr);
 		int _la;
 		try {
-			setState(93);
+			setState(80);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(74);
+				setState(61);
 				eqExpr();
-				setState(79);
+				setState(66);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==AND) {
 					{
 					{
-					setState(75);
+					setState(62);
 					match(AND);
-					setState(76);
+					setState(63);
 					eqExpr();
 					}
 					}
-					setState(81);
+					setState(68);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
@@ -584,30 +519,30 @@ public class PropertyLanguageParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(82);
+				setState(69);
 				eqExpr();
-				setState(90);
+				setState(77);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==DOUBLE_HASH) {
 					{
 					{
-					setState(83);
+					setState(70);
 					match(DOUBLE_HASH);
-					setState(85);
+					setState(72);
 					_la = _input.LA(1);
 					if (_la==NUM) {
 						{
-						setState(84);
+						setState(71);
 						match(NUM);
 						}
 					}
 
-					setState(87);
+					setState(74);
 					eqExpr();
 					}
 					}
-					setState(92);
+					setState(79);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
@@ -656,20 +591,20 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(95);
+			setState(82);
 			timeAtom();
-			setState(98);
+			setState(85);
 			_la = _input.LA(1);
 			if (_la==EQ || _la==NEQ) {
 				{
-				setState(96);
+				setState(83);
 				_la = _input.LA(1);
 				if ( !(_la==EQ || _la==NEQ) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(97);
+				setState(84);
 				timeAtom();
 				}
 			}
@@ -715,23 +650,23 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(102);
+			setState(89);
 			_la = _input.LA(1);
 			if (_la==HASH || _la==AT) {
 				{
-				setState(100);
+				setState(87);
 				_la = _input.LA(1);
 				if ( !(_la==HASH || _la==AT) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(101);
+				setState(88);
 				match(NUM);
 				}
 			}
 
-			setState(104);
+			setState(91);
 			nAtom();
 			}
 		}
@@ -772,16 +707,16 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(107);
+			setState(94);
 			_la = _input.LA(1);
 			if (_la==NOT) {
 				{
-				setState(106);
+				setState(93);
 				match(NOT);
 				}
 			}
 
-			setState(109);
+			setState(96);
 			atom();
 			}
 		}
@@ -799,14 +734,22 @@ public class PropertyLanguageParser extends Parser {
 	public static class AtomContext extends ParserRuleContext {
 		public TerminalNode ID() { return getToken(PropertyLanguageParser.ID, 0); }
 		public TerminalNode LPAREN() { return getToken(PropertyLanguageParser.LPAREN, 0); }
-		public BaseExprContext baseExpr() {
-			return getRuleContext(BaseExprContext.class,0);
+		public List<BaseExprContext> baseExpr() {
+			return getRuleContexts(BaseExprContext.class);
+		}
+		public BaseExprContext baseExpr(int i) {
+			return getRuleContext(BaseExprContext.class,i);
 		}
 		public TerminalNode RPAREN() { return getToken(PropertyLanguageParser.RPAREN, 0); }
 		public TerminalNode ROSE() { return getToken(PropertyLanguageParser.ROSE, 0); }
 		public TerminalNode FELL() { return getToken(PropertyLanguageParser.FELL, 0); }
 		public TerminalNode STABLE() { return getToken(PropertyLanguageParser.STABLE, 0); }
 		public TerminalNode CHANGED() { return getToken(PropertyLanguageParser.CHANGED, 0); }
+		public TerminalNode ALWAYS() { return getToken(PropertyLanguageParser.ALWAYS, 0); }
+		public TerminalNode NEVER() { return getToken(PropertyLanguageParser.NEVER, 0); }
+		public TerminalNode ONCE() { return getToken(PropertyLanguageParser.ONCE, 0); }
+		public TerminalNode UNTIL() { return getToken(PropertyLanguageParser.UNTIL, 0); }
+		public TerminalNode COMMA() { return getToken(PropertyLanguageParser.COMMA, 0); }
 		public TerminalNode High() { return getToken(PropertyLanguageParser.High, 0); }
 		public TerminalNode Low() { return getToken(PropertyLanguageParser.Low, 0); }
 		public AtomContext(ParserRuleContext parent, int invokingState) {
@@ -828,23 +771,23 @@ public class PropertyLanguageParser extends Parser {
 		enterRule(_localctx, 20, RULE_atom);
 		int _la;
 		try {
-			setState(123);
+			setState(122);
 			switch (_input.LA(1)) {
 			case ID:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(111);
+				setState(98);
 				match(ID);
 				}
 				break;
 			case LPAREN:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(112);
+				setState(99);
 				match(LPAREN);
-				setState(113);
+				setState(100);
 				baseExpr();
-				setState(114);
+				setState(101);
 				match(RPAREN);
 				}
 				break;
@@ -854,32 +797,69 @@ public class PropertyLanguageParser extends Parser {
 			case CHANGED:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(116);
+				setState(103);
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ROSE) | (1L << FELL) | (1L << STABLE) | (1L << CHANGED))) != 0)) ) {
 				_errHandler.recoverInline(this);
 				} else {
 					consume();
 				}
-				setState(117);
+				setState(104);
 				match(LPAREN);
-				setState(118);
+				setState(105);
 				baseExpr();
-				setState(119);
+				setState(106);
+				match(RPAREN);
+				}
+				break;
+			case ALWAYS:
+			case NEVER:
+			case ONCE:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(108);
+				_la = _input.LA(1);
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ALWAYS) | (1L << NEVER) | (1L << ONCE))) != 0)) ) {
+				_errHandler.recoverInline(this);
+				} else {
+					consume();
+				}
+				setState(109);
+				match(LPAREN);
+				setState(110);
+				baseExpr();
+				setState(111);
+				match(RPAREN);
+				}
+				break;
+			case UNTIL:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(113);
+				match(UNTIL);
+				setState(114);
+				match(LPAREN);
+				setState(115);
+				baseExpr();
+				setState(116);
+				match(COMMA);
+				setState(117);
+				baseExpr();
+				setState(118);
 				match(RPAREN);
 				}
 				break;
 			case High:
-				enterOuterAlt(_localctx, 4);
+				enterOuterAlt(_localctx, 6);
 				{
-				setState(121);
+				setState(120);
 				match(High);
 				}
 				break;
 			case Low:
-				enterOuterAlt(_localctx, 5);
+				enterOuterAlt(_localctx, 7);
 				{
-				setState(122);
+				setState(121);
 				match(Low);
 				}
 				break;
@@ -899,38 +879,37 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3!\u0080\4\2\t\2\4"+
-		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
-		"\13\4\f\t\f\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\5\3\"\n\3\3\3\3\3\3\3"+
-		"\5\3\'\n\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4\66"+
-		"\n\4\3\5\3\5\3\5\5\5;\n\5\3\6\3\6\3\6\7\6@\n\6\f\6\16\6C\13\6\3\7\3\7"+
-		"\3\7\7\7H\n\7\f\7\16\7K\13\7\3\b\3\b\3\b\7\bP\n\b\f\b\16\bS\13\b\3\b\3"+
-		"\b\3\b\5\bX\n\b\3\b\7\b[\n\b\f\b\16\b^\13\b\5\b`\n\b\3\t\3\t\3\t\5\te"+
-		"\n\t\3\n\3\n\5\ni\n\n\3\n\3\n\3\13\5\13n\n\13\3\13\3\13\3\f\3\f\3\f\3"+
-		"\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\5\f~\n\f\3\f\2\2\r\2\4\6\b\n\f\16\20"+
-		"\22\24\26\2\7\3\2\32\34\3\2\17\20\3\2\r\16\4\2\23\23\25\25\3\2\26\31\u0086"+
-		"\2\30\3\2\2\2\4&\3\2\2\2\6\65\3\2\2\2\b\67\3\2\2\2\n<\3\2\2\2\fD\3\2\2"+
-		"\2\16_\3\2\2\2\20a\3\2\2\2\22h\3\2\2\2\24m\3\2\2\2\26}\3\2\2\2\30\31\5"+
-		"\4\3\2\31\32\7\2\2\3\32\3\3\2\2\2\33\'\5\6\4\2\34\35\7\36\2\2\35!\7\21"+
-		"\2\2\36\37\5\6\4\2\37 \7 \2\2 \"\3\2\2\2!\36\3\2\2\2!\"\3\2\2\2\"#\3\2"+
-		"\2\2#$\5\6\4\2$%\7\22\2\2%\'\3\2\2\2&\33\3\2\2\2&\34\3\2\2\2\'\5\3\2\2"+
-		"\2(\66\5\b\5\2)*\t\2\2\2*+\7\21\2\2+,\5\b\5\2,-\7\22\2\2-\66\3\2\2\2."+
-		"/\7\35\2\2/\60\7\21\2\2\60\61\5\b\5\2\61\62\7 \2\2\62\63\5\b\5\2\63\64"+
-		"\7\22\2\2\64\66\3\2\2\2\65(\3\2\2\2\65)\3\2\2\2\65.\3\2\2\2\66\7\3\2\2"+
-		"\2\67:\5\n\6\289\t\3\2\29;\5\n\6\2:8\3\2\2\2:;\3\2\2\2;\t\3\2\2\2<A\5"+
-		"\f\7\2=>\7\n\2\2>@\5\f\7\2?=\3\2\2\2@C\3\2\2\2A?\3\2\2\2AB\3\2\2\2B\13"+
-		"\3\2\2\2CA\3\2\2\2DI\5\16\b\2EF\7\13\2\2FH\5\16\b\2GE\3\2\2\2HK\3\2\2"+
-		"\2IG\3\2\2\2IJ\3\2\2\2J\r\3\2\2\2KI\3\2\2\2LQ\5\20\t\2MN\7\t\2\2NP\5\20"+
-		"\t\2OM\3\2\2\2PS\3\2\2\2QO\3\2\2\2QR\3\2\2\2R`\3\2\2\2SQ\3\2\2\2T\\\5"+
-		"\20\t\2UW\7\24\2\2VX\7\37\2\2WV\3\2\2\2WX\3\2\2\2XY\3\2\2\2Y[\5\20\t\2"+
-		"ZU\3\2\2\2[^\3\2\2\2\\Z\3\2\2\2\\]\3\2\2\2]`\3\2\2\2^\\\3\2\2\2_L\3\2"+
-		"\2\2_T\3\2\2\2`\17\3\2\2\2ad\5\22\n\2bc\t\4\2\2ce\5\22\n\2db\3\2\2\2d"+
-		"e\3\2\2\2e\21\3\2\2\2fg\t\5\2\2gi\7\37\2\2hf\3\2\2\2hi\3\2\2\2ij\3\2\2"+
-		"\2jk\5\24\13\2k\23\3\2\2\2ln\7\f\2\2ml\3\2\2\2mn\3\2\2\2no\3\2\2\2op\5"+
-		"\26\f\2p\25\3\2\2\2q~\7\5\2\2rs\7\21\2\2st\5\6\4\2tu\7\22\2\2u~\3\2\2"+
-		"\2vw\t\6\2\2wx\7\21\2\2xy\5\6\4\2yz\7\22\2\2z~\3\2\2\2{~\7\3\2\2|~\7\4"+
-		"\2\2}q\3\2\2\2}r\3\2\2\2}v\3\2\2\2}{\3\2\2\2}|\3\2\2\2~\27\3\2\2\2\20"+
-		"!&\65:AIQW\\_dhm}";
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3!\177\4\2\t\2\4\3"+
+		"\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13"+
+		"\4\f\t\f\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\5\3\"\n\3\3\3\3\3\3\3\5\3"+
+		"\'\n\3\3\4\3\4\3\5\3\5\3\5\5\5.\n\5\3\6\3\6\3\6\7\6\63\n\6\f\6\16\6\66"+
+		"\13\6\3\7\3\7\3\7\7\7;\n\7\f\7\16\7>\13\7\3\b\3\b\3\b\7\bC\n\b\f\b\16"+
+		"\bF\13\b\3\b\3\b\3\b\5\bK\n\b\3\b\7\bN\n\b\f\b\16\bQ\13\b\5\bS\n\b\3\t"+
+		"\3\t\3\t\5\tX\n\t\3\n\3\n\5\n\\\n\n\3\n\3\n\3\13\5\13a\n\13\3\13\3\13"+
+		"\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3"+
+		"\f\3\f\3\f\3\f\3\f\3\f\3\f\5\f}\n\f\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24"+
+		"\26\2\7\3\2\17\20\3\2\r\16\4\2\23\23\25\25\3\2\26\31\3\2\32\34\u0085\2"+
+		"\30\3\2\2\2\4&\3\2\2\2\6(\3\2\2\2\b*\3\2\2\2\n/\3\2\2\2\f\67\3\2\2\2\16"+
+		"R\3\2\2\2\20T\3\2\2\2\22[\3\2\2\2\24`\3\2\2\2\26|\3\2\2\2\30\31\5\4\3"+
+		"\2\31\32\7\2\2\3\32\3\3\2\2\2\33\'\5\6\4\2\34\35\7\36\2\2\35!\7\21\2\2"+
+		"\36\37\5\6\4\2\37 \7 \2\2 \"\3\2\2\2!\36\3\2\2\2!\"\3\2\2\2\"#\3\2\2\2"+
+		"#$\5\6\4\2$%\7\22\2\2%\'\3\2\2\2&\33\3\2\2\2&\34\3\2\2\2\'\5\3\2\2\2("+
+		")\5\b\5\2)\7\3\2\2\2*-\5\n\6\2+,\t\2\2\2,.\5\n\6\2-+\3\2\2\2-.\3\2\2\2"+
+		".\t\3\2\2\2/\64\5\f\7\2\60\61\7\n\2\2\61\63\5\f\7\2\62\60\3\2\2\2\63\66"+
+		"\3\2\2\2\64\62\3\2\2\2\64\65\3\2\2\2\65\13\3\2\2\2\66\64\3\2\2\2\67<\5"+
+		"\16\b\289\7\13\2\29;\5\16\b\2:8\3\2\2\2;>\3\2\2\2<:\3\2\2\2<=\3\2\2\2"+
+		"=\r\3\2\2\2><\3\2\2\2?D\5\20\t\2@A\7\t\2\2AC\5\20\t\2B@\3\2\2\2CF\3\2"+
+		"\2\2DB\3\2\2\2DE\3\2\2\2ES\3\2\2\2FD\3\2\2\2GO\5\20\t\2HJ\7\24\2\2IK\7"+
+		"\37\2\2JI\3\2\2\2JK\3\2\2\2KL\3\2\2\2LN\5\20\t\2MH\3\2\2\2NQ\3\2\2\2O"+
+		"M\3\2\2\2OP\3\2\2\2PS\3\2\2\2QO\3\2\2\2R?\3\2\2\2RG\3\2\2\2S\17\3\2\2"+
+		"\2TW\5\22\n\2UV\t\3\2\2VX\5\22\n\2WU\3\2\2\2WX\3\2\2\2X\21\3\2\2\2YZ\t"+
+		"\4\2\2Z\\\7\37\2\2[Y\3\2\2\2[\\\3\2\2\2\\]\3\2\2\2]^\5\24\13\2^\23\3\2"+
+		"\2\2_a\7\f\2\2`_\3\2\2\2`a\3\2\2\2ab\3\2\2\2bc\5\26\f\2c\25\3\2\2\2d}"+
+		"\7\5\2\2ef\7\21\2\2fg\5\6\4\2gh\7\22\2\2h}\3\2\2\2ij\t\5\2\2jk\7\21\2"+
+		"\2kl\5\6\4\2lm\7\22\2\2m}\3\2\2\2no\t\6\2\2op\7\21\2\2pq\5\6\4\2qr\7\22"+
+		"\2\2r}\3\2\2\2st\7\35\2\2tu\7\21\2\2uv\5\6\4\2vw\7 \2\2wx\5\6\4\2xy\7"+
+		"\22\2\2y}\3\2\2\2z}\7\3\2\2{}\7\4\2\2|d\3\2\2\2|e\3\2\2\2|i\3\2\2\2|n"+
+		"\3\2\2\2|s\3\2\2\2|z\3\2\2\2|{\3\2\2\2}\27\3\2\2\2\17!&-\64<DJORW[`|";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

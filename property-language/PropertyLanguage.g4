@@ -23,8 +23,6 @@ tempExpr
 
 baseExpr
 	: implyExpr
-	| (ALWAYS|NEVER|ONCE) LPAREN implyExpr RPAREN
-	| UNTIL LPAREN implyExpr COMMA implyExpr RPAREN
 	;
 
 implyExpr
@@ -60,6 +58,8 @@ atom
 	: ID
 	| LPAREN baseExpr RPAREN
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
+	| (ALWAYS|NEVER|ONCE) LPAREN baseExpr RPAREN
+	| UNTIL LPAREN baseExpr COMMA baseExpr RPAREN
 	| High
 	| Low
 	;
