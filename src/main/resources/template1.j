@@ -60,7 +60,7 @@ public class CodeSimulator {
 		// final int STATE_BUF_SIZE = 1 << {STATE_BIT_COUNT};
 		//@formatter:on
 
-		final int DISCOVERED_BUF_SIZE = 100000;
+		final int DISCOVERED_BUF_SIZE = STATE_BUF_SIZE;
 
 		boolean printStateList = false;
 
