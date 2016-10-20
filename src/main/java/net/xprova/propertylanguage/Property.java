@@ -1,5 +1,7 @@
 package net.xprova.propertylanguage;
 
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +74,18 @@ public class Property {
 
 	public void print() {
 
-		print("", true);
+		try {
+
+			PrintStream out = new PrintStream(System.out, true, "UTF-8");
+
+			print("", true, out);
+
+		} catch (UnsupportedEncodingException e) {
+
+			System.out.println("(internal error, could not print property)");
+
+		}
+
 	}
 
 	public boolean isTerminal() {
@@ -196,19 +209,19 @@ public class Property {
 
 	}
 
-	private void print(String prefix, boolean isTail) {
+	private void print(String prefix, boolean isTail, PrintStream out) {
 
 		String n = delay != 0 ? String.format("%s (delay %d)", name, delay) : name;
 
-		System.out.println(prefix + (isTail ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ") + n);
+		out.println(prefix + (isTail ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ") + n);
 
 		if (children != null) {
 
 			for (int i = 0; i < children.size() - 1; i++)
-				children.get(i).print(prefix + (isTail ? "    " : "\u2502   "), false);
+				children.get(i).print(prefix + (isTail ? "    " : "\u2502   "), false, out);
 
 			if (children.size() > 0)
-				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u2502   "), true);
+				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u2502   "), true, out);
 
 		}
 	}
