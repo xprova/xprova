@@ -1,0 +1,7 @@
+library load lib/xprova.v
+
+read -b examples/fifo/fifo.v
+
+assert ~(empty & full)
+
+prove -kg
