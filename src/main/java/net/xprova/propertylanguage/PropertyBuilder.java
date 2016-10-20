@@ -284,9 +284,7 @@ public class PropertyBuilder {
 
 		if (c0.equals(LPAREN)) {
 
-			Property expr = parseAST(root.getChild(1));
-
-			return Property.build(LPAREN).setChild(expr);
+			return parseAST(root.getChild(1));
 
 		}
 
