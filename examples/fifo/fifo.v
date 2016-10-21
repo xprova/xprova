@@ -1,6 +1,6 @@
 `define SIZE 2
 
-`define FIFO_DEPTH_LOG2 3
+`define FIFO_DEPTH_LOG2 2
 
 `define FIFO_DEPTH (1<<`FIFO_DEPTH_LOG2)
 

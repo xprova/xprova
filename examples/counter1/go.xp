@@ -1,0 +1,10 @@
+library load lib/xprova.v
+
+read -b examples/counter1/counter1.v
+
+assert ~count[7]
+
+prove -kg
+
+dot -e=CK,RS,ST --pdf output/netlist.pdf
+
