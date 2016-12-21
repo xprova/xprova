@@ -409,11 +409,23 @@ public class CodeGenerator {
 
 		HashMap<String, Integer> identifiers = getIdentifiers(graph);
 
-		for (Property p : assumptions)
-			expandMultibit(p, identifiers);
+		for (Property p : assumptions) {
 
-		for (Property p : assertions)
-			expandMultibit(p, identifiers);
+			int bits = expandMultibit(p, identifiers);
+
+			if (bits > 0)
+				throw new Exception("property is a multi-bit expression:\n" + p);
+
+		}
+
+		for (Property p : assertions) {
+
+			int bits = expandMultibit(p, identifiers);
+
+			if (bits > 0)
+				throw new Exception("property is a multi-bit expression:\n" + p);
+
+		}
 
 		// Step 1: Add properties to graph
 
