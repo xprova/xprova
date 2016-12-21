@@ -1,7 +1,9 @@
 package net.xprova.propertylanguage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,11 +13,58 @@ public class Property {
 
 	public int delay;
 
+	// bitWidth: 0 stands for "not specified yet" and -1 for "variable" (i.e.
+	// arbitrarily expandable, for constants)
+
 	public List<Property> children;
 
 	public static Property build(String name) {
 
 		return new Property(name);
+
+	}
+
+	private static String getVerilogArrayName(String arrName, int index) {
+
+		return String.format("%s[%d]", arrName, index);
+
+	}
+
+	public static Property slice(Property other, int index) {
+
+		// returns a deep copy of `other` where each multi-bit net is replaced
+		// with its item of index `index`
+
+		if (other.isTerminal()) {
+
+			Property p = new Property(other);
+
+			p.name = getVerilogArrayName(other.name, index);
+
+			return p;
+
+
+		} else {
+
+			Property p = new Property(other);
+
+			// replace p's children with deep copies
+
+			ArrayList<Property> newChildren = new ArrayList<Property>();
+
+			for (int i=0; i<p.children.size(); i++) {
+
+				Property c = other.children.get(i);
+
+				newChildren.add(slice(c, index));
+
+			}
+
+			p.setChildren(newChildren);
+
+			return p;
+
+		}
 
 	}
 
@@ -59,6 +108,8 @@ public class Property {
 		this.name = name;
 
 		this.children = new ArrayList<Property>();
+
+		this.delay = 0;
 
 	}
 
@@ -209,9 +260,26 @@ public class Property {
 
 	}
 
+	@Override
+	public String toString() {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		PrintStream ps = new PrintStream(baos);
+
+		print("", true, ps);
+
+		String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+
+		return content;
+
+	}
+
 	private void print(String prefix, boolean isTail, PrintStream out) {
 
-		String n = delay != 0 ? String.format("%s (delay %d)", name, delay) : name;
+		String n = name;
+
+		n += (delay != 0) ? String.format(" (delay %d)", delay) : "";
 
 		out.println(prefix + (isTail ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ") + n);
 

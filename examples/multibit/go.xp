@@ -1,0 +1,10 @@
+library load lib/xprova.v
+
+read -b examples/multibit/multibit.v
+
+assert x == y
+
+prove -kg
+
+dot -e=CK,RS,ST --pdf output/netlist.pdf
+

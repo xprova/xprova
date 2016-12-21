@@ -1,6 +1,7 @@
 package net.xprova.simulations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -89,6 +90,68 @@ public class CodeGenerator {
 		graph.addVertex(v);
 
 		return v;
+
+	}
+
+	private static int expandMultibit(Property root, HashMap<String, Integer> identifiers) throws Exception {
+
+		// this function performs a top-bottom traversal of a property,
+		// re-writing and condensing multi-bit expressions into single bit ones
+
+		// for example:
+		// (x & y) == 1
+		// where x and y are 2-bit nets, is converted to:
+		// (x[0] & y[0] == 1) & (x[1] & y[1] == 0)
+
+		if (root.isTerminal()) {
+
+			Integer bitWidth = identifiers.get(root.name);
+
+			if (bitWidth == null) {
+
+				throw new Exception("unrecognized identifier: " + root.name);
+
+			} else {
+
+				return bitWidth;
+			}
+
+		} else {
+
+			ArrayList<Integer> childBitWidths = new ArrayList<Integer>();
+
+			for (Property child : root.children)
+				childBitWidths.add(expandMultibit(child, identifiers));
+
+			int count = childBitWidths.get(0);
+
+			for (int x : childBitWidths)
+				if (x != count)
+					throw new Exception("mismatched operand sizes: " + root);
+
+			final String[] groupingOps = { PropertyBuilder.EQ, PropertyBuilder.NEQ, PropertyBuilder.NOT };
+
+			if (Arrays.asList(groupingOps).contains(root.name)) {
+
+				ArrayList<Property> propArray = new ArrayList<Property>();
+
+				for (int i = 0; i < count; i++)
+					propArray.add(Property.slice(root, i));
+
+				root.name = PropertyBuilder.AND;
+				root.delay = 0;
+
+				root.setChildren(propArray);
+
+				return 1;
+
+			} else {
+
+				return count;
+
+			}
+
+		}
 
 	}
 
@@ -317,8 +380,29 @@ public class CodeGenerator {
 
 	}
 
+	private static HashMap<String, Integer> getIdentifiers(NetlistGraph graph) throws Exception {
+
+		HashMap<String, Integer> result = new HashMap<String, Integer>();
+
+		for (Vertex net : graph.getNets())
+			result.put(net.arrayName, net.arraySize);
+
+		return result;
+
+	}
+
 	public static ArrayList<String> generate(NetlistGraph graph, ArrayList<Property> assumptions,
 			ArrayList<Property> assertions, String templateCode) throws Exception {
+
+		// Step 0: Expand multi-bit property expressions
+
+		HashMap<String, Integer> identifiers = getIdentifiers(graph);
+
+		for (Property p : assumptions)
+			expandMultibit(p, identifiers);
+
+		for (Property p : assertions)
+			expandMultibit(p, identifiers);
 
 		// Step 1: Add properties to graph
 
