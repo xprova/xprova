@@ -131,7 +131,7 @@ public class CodeGenerator {
 
 			final String[] groupingOps = { PropertyBuilder.EQ, PropertyBuilder.NEQ, PropertyBuilder.NOT };
 
-			if (Arrays.asList(groupingOps).contains(root.name)) {
+			if (Arrays.asList(groupingOps).contains(root.name) && (count > 1)) {
 
 				ArrayList<Property> propArray = new ArrayList<Property>();
 
@@ -380,12 +380,23 @@ public class CodeGenerator {
 
 	}
 
+	private static String getVerilogArrayName(String arrName, int index) {
+
+		return String.format("%s[%d]", arrName, index);
+
+	}
+
 	private static HashMap<String, Integer> getIdentifiers(NetlistGraph graph) throws Exception {
 
 		HashMap<String, Integer> result = new HashMap<String, Integer>();
 
-		for (Vertex net : graph.getNets())
+		for (Vertex net : graph.getNets()) {
+
 			result.put(net.arrayName, net.arraySize);
+
+			for (int i = 0; i < net.arraySize; i++)
+				result.put(getVerilogArrayName(net.arrayName, i), 1);
+		}
 
 		return result;
 
