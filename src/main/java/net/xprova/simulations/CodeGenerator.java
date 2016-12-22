@@ -283,7 +283,8 @@ public class CodeGenerator {
 
 		// a block with one input (input) and one output (flopOutput)
 
-		// returns high until input is low then returns low forever
+		// returns high until input is low then returns low forever (starting
+		// from the same cycle)
 
 		Vertex and = addPropertyModule(graph, "AND");
 
@@ -307,7 +308,7 @@ public class CodeGenerator {
 
 		graph.addConnection(input, and, "b");
 
-		return flopOutput;
+		return flopInput;
 
 	}
 
