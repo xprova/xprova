@@ -28,7 +28,7 @@ public class CodeGenerator {
 	// internalNets: nets that are not input, q or ignored
 	//
 	// flopMap: map from flip-flop output (q) to input (d) nets
-	//
+
 	// jNetNames: Java-friendly net names
 	//
 	// assigns: combinations assignments
@@ -90,95 +90,6 @@ public class CodeGenerator {
 		graph.addVertex(v);
 
 		return v;
-
-	}
-
-	private static int expandMultibit(Property root, HashMap<String, Integer> identifiers) throws Exception {
-
-		// this function performs a top-bottom traversal of a property,
-		// re-writing and condensing multi-bit expressions into single bit ones
-
-		// for example:
-		// (x & y) == 1
-		// where x and y are 2-bit nets, is converted to:
-		// (x[0] & y[0] == 1) & (x[1] & y[1] == 0)
-
-		if (root.isTerminal()) {
-
-			Integer bitWidth = identifiers.get(root.name);
-
-			if (bitWidth == null) {
-
-				throw new Exception("unrecognized identifier: " + root.name);
-
-			} else {
-
-				return bitWidth;
-			}
-
-		} else {
-
-			ArrayList<Integer> childBitWidths = new ArrayList<Integer>();
-
-			for (Property child : root.children)
-				childBitWidths.add(expandMultibit(child, identifiers));
-
-			int count = childBitWidths.get(0);
-
-			for (int x : childBitWidths)
-				if (x != count)
-					throw new Exception("mismatched operand sizes: " + root);
-
-			final String[] groupingOps = { PropertyBuilder.EQ, PropertyBuilder.NEQ, PropertyBuilder.NOT };
-
-			final String[] reductionOps = { PropertyBuilder.ANY, PropertyBuilder.ALL };
-
-			if (Arrays.asList(groupingOps).contains(root.name) && (count > 1)) {
-
-				ArrayList<Property> propArray = new ArrayList<Property>();
-
-				for (int i = 0; i < count; i++)
-					propArray.add(Property.slice(root, i));
-
-				root.name = PropertyBuilder.AND;
-
-				root.setChildren(propArray);
-
-				return 1;
-
-			} else if (Arrays.asList(reductionOps).contains(root.name) && (count > 1)) {
-
-				Property innerExpr = root.children.get(0);
-
-				ArrayList<Property> propArray = new ArrayList<Property>();
-
-				for (int i = 0; i < count; i++)
-					propArray.add(Property.slice(innerExpr, i));
-
-				root.name = root.name.equals(PropertyBuilder.ALL) ? PropertyBuilder.AND : PropertyBuilder.OR;
-
-				root.setChildren(propArray);
-
-				return 1;
-
-			} else if (Arrays.asList(reductionOps).contains(root.name) && (count == 1)) {
-
-				// special case;" $any(x)" or "$all(x)" where "x" is a single-bit
-				// unwrap $any/$all
-
-				Property innerExpr = root.children.get(0);
-
-				root.copyFrom(innerExpr);
-
-				return 1;
-
-			} else {
-
-				return count;
-
-			}
-
-		}
 
 	}
 
@@ -439,7 +350,7 @@ public class CodeGenerator {
 
 		for (Property p : assumptions) {
 
-			int bits = expandMultibit(p, identifiers);
+			int bits = PropertyBuilder.expandMultibit(p, identifiers);
 
 			if (bits > 1)
 				throw new Exception("property is a multi-bit expression:\n" + p);
@@ -448,7 +359,7 @@ public class CodeGenerator {
 
 		for (Property p : assertions) {
 
-			int bits = expandMultibit(p, identifiers);
+			int bits = PropertyBuilder.expandMultibit(p, identifiers);
 
 			if (bits > 1)
 				throw new Exception("property is a multi-bit expression:\n" + p);
@@ -877,11 +788,15 @@ public class CodeGenerator {
 
 			HashSet<Vertex> toVisitNext = new HashSet<Vertex>();
 
-			final String[] strAND = {"{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2}", " & {PREFIX2}%s{POSTFIX2}", ";"};
-			final String[] strNAND = {"{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2}", " & {PREFIX2}%s{POSTFIX2}", ");"};
-			final String[] strOR = {"{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2}", " | {PREFIX2}%s{POSTFIX2}", ";"};
-			final String[] strNOR = {"{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2}", " | {PREFIX2}%s{POSTFIX2}", ");"};
-			final String[] strXOR = {"{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2}", " ^ {PREFIX2}%s{POSTFIX2})", ";"};
+			final String[] strAND = { "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2}", " & {PREFIX2}%s{POSTFIX2}",
+					";" };
+			final String[] strNAND = { "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2}", " & {PREFIX2}%s{POSTFIX2}",
+					");" };
+			final String[] strOR = { "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2}", " | {PREFIX2}%s{POSTFIX2}", ";" };
+			final String[] strNOR = { "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2}", " | {PREFIX2}%s{POSTFIX2}",
+					");" };
+			final String[] strXOR = { "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2}", " ^ {PREFIX2}%s{POSTFIX2})",
+					";" };
 
 			final String strNOT = "{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};";
 			final String strCASSIGN = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
@@ -906,9 +821,10 @@ public class CodeGenerator {
 
 				String nNameJ = jNetNames.get(n);
 
-				// note: the arrays `combFuns` and `combFunParts` must contain elements in a corresponding order
-				final String[] combFuns = new String[] {"AND", "NAND", "OR", "NOR", "XOR"};
-				final String[][] combFunParts = new String[][] {strAND, strNAND, strOR, strNOR, strXOR};
+				// note: the arrays `combFuns` and `combFunParts` must contain
+				// elements in a corresponding order
+				final String[] combFuns = new String[] { "AND", "NAND", "OR", "NOR", "XOR" };
+				final String[][] combFunParts = new String[][] { strAND, strNAND, strOR, strNOR, strXOR };
 
 				String net1 = inputs.size() > 0 ? jNetNames.get(inputs.get(0)) : "";
 
@@ -923,7 +839,7 @@ public class CodeGenerator {
 
 					line = String.format(combParts[0], nNameJ, net1);
 
-					for (int i=1; i<inputs.size(); i++) {
+					for (int i = 1; i < inputs.size(); i++) {
 
 						String netI = jNetNames.get(inputs.get(i));
 

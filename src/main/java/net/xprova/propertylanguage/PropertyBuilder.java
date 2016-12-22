@@ -1,6 +1,8 @@
 package net.xprova.propertylanguage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -382,6 +384,95 @@ public class PropertyBuilder {
 		root.print();
 
 		return root;
+
+	}
+
+	public static int expandMultibit(Property root, HashMap<String, Integer> identifiers) throws Exception {
+
+		// this function performs a top-bottom traversal of a property,
+		// re-writing and condensing multi-bit expressions into single bit ones
+
+		// for example:
+		// (x & y) == 1
+		// where x and y are 2-bit nets, is converted to:
+		// (x[0] & y[0] == 1) & (x[1] & y[1] == 0)
+
+		if (root.isTerminal()) {
+
+			Integer bitWidth = identifiers.get(root.name);
+
+			if (bitWidth == null) {
+
+				throw new Exception("unrecognized identifier: " + root.name);
+
+			} else {
+
+				return bitWidth;
+			}
+
+		} else {
+
+			ArrayList<Integer> childBitWidths = new ArrayList<Integer>();
+
+			for (Property child : root.children)
+				childBitWidths.add(expandMultibit(child, identifiers));
+
+			int count = childBitWidths.get(0);
+
+			for (int x : childBitWidths)
+				if (x != count)
+					throw new Exception("mismatched operand sizes: " + root);
+
+			final String[] groupingOps = { EQ, NEQ, NOT };
+
+			final String[] reductionOps = { ANY, ALL };
+
+			if (Arrays.asList(groupingOps).contains(root.name) && (count > 1)) {
+
+				ArrayList<Property> propArray = new ArrayList<Property>();
+
+				for (int i = 0; i < count; i++)
+					propArray.add(Property.slice(root, i));
+
+				root.name = AND;
+
+				root.setChildren(propArray);
+
+				return 1;
+
+			} else if (Arrays.asList(reductionOps).contains(root.name) && (count > 1)) {
+
+				Property innerExpr = root.children.get(0);
+
+				ArrayList<Property> propArray = new ArrayList<Property>();
+
+				for (int i = 0; i < count; i++)
+					propArray.add(Property.slice(innerExpr, i));
+
+				root.name = root.name.equals(ALL) ? AND : OR;
+
+				root.setChildren(propArray);
+
+				return 1;
+
+			} else if (Arrays.asList(reductionOps).contains(root.name) && (count == 1)) {
+
+				// special case;" $any(x)" or "$all(x)" where "x" is a single-bit
+				// unwrap $any/$all
+
+				Property innerExpr = root.children.get(0);
+
+				root.copyFrom(innerExpr);
+
+				return 1;
+
+			} else {
+
+				return count;
+
+			}
+
+		}
 
 	}
 
