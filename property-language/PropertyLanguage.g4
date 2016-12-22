@@ -58,7 +58,7 @@ atom
 	: ID
 	| LPAREN baseExpr RPAREN
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
-	| (ALWAYS|NEVER|ONCE) LPAREN baseExpr RPAREN
+	| (ALWAYS|NEVER|ONCE|ANY|ALL) LPAREN baseExpr RPAREN
 	| UNTIL LPAREN baseExpr COMMA baseExpr RPAREN
 	| High
 	| Low
@@ -174,6 +174,14 @@ ONCE
 
 UNTIL
 	: '$until'
+	;
+
+ANY
+	: '$any'
+	;
+
+ALL
+	: '$all'
 	;
 
 EVENTUALLY

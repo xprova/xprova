@@ -1,5 +1,7 @@
 package net.xprova.propertylanguage;
 
+import java.util.Arrays;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
@@ -34,6 +36,8 @@ public class PropertyBuilder {
 	public static final String UNTIL = "$until";
 	public static final String HIGH = "1";
 	public static final String LOW = "0";
+	public static final String ANY = "$any";
+	public static final String ALL = "$all";
 
 	private static void rewriteSyntaticSugar(Property root) {
 
@@ -105,7 +109,7 @@ public class PropertyBuilder {
 		if (root.name.equals(STABLE)) {
 
 			Property c1 = new Property(root.children.get(0));
-			Property c2 = new Property(root.children.get(1));
+			Property c2 = new Property(root.children.get(0));
 
 			c2.delay += 1;
 
@@ -120,7 +124,7 @@ public class PropertyBuilder {
 		if (root.name.equals(CHANGED)) {
 
 			Property c1 = new Property(root.children.get(0));
-			Property c2 = new Property(root.children.get(1));
+			Property c2 = new Property(root.children.get(0));
 
 			c2.delay += 1;
 
@@ -204,8 +208,9 @@ public class PropertyBuilder {
 		String c0 = root.getChild(0).getText();
 		String c1 = root.getChild(1).getText();
 
-		if (ROSE.equals(c0) || FELL.equals(c0) || STABLE.equals(c0) || CHANGED.equals(c0) || ALWAYS.equals(c0)
-				|| NEVER.equals(c0) || ONCE.equals(c0)) {
+		final String[] funcs = {ROSE, FELL, STABLE, CHANGED, ALWAYS, NEVER, ONCE, ANY, ALL};
+
+		if (Arrays.asList(funcs).contains(c0)) {
 
 			Property child = parseAST(root.getChild(2));
 

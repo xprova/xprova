@@ -43,7 +43,6 @@ public class Property {
 
 			return p;
 
-
 		} else {
 
 			Property p = new Property(other);
@@ -52,7 +51,7 @@ public class Property {
 
 			ArrayList<Property> newChildren = new ArrayList<Property>();
 
-			for (int i=0; i<p.children.size(); i++) {
+			for (int i = 0; i < p.children.size(); i++) {
 
 				Property c = other.children.get(i);
 
@@ -120,6 +119,16 @@ public class Property {
 		this.delay = other.delay;
 
 		setChildren(other.children);
+
+	}
+
+	public void copyFrom(Property other) {
+
+		this.name = other.name;
+
+		this.delay = other.delay;
+
+		this.children = other.children;
 
 	}
 
