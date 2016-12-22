@@ -233,9 +233,9 @@ public class CodeSimulator {
 				transitions--;
 			}
 
-			int[] result = new int[rList.size()];
+			int[] result = new int[distance + 1];
 
-			for (int j = 0; j < rList.size(); j++)
+			for (int j = 0; j < distance + 1; j++)
 				result[j] = rList.pop();
 
 			return result;
