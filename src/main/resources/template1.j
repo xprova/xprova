@@ -85,7 +85,7 @@ public class CodeSimulator {
 		toVisitArr[0] = initial;
 		int toVisitArrOccupied = 1;
 
-		int distance = 1;
+		int distance = 0;
 
 		int in; // input vector
 
@@ -99,8 +99,6 @@ public class CodeSimulator {
 		// This possibility is here (unwisely?) ignored
 
 		// note: an actual state of Integer.
-
-		parentState[initial] = -1; // marked parentState as visited
 
 		long statesDiscovered = 0;
 
@@ -175,13 +173,13 @@ public class CodeSimulator {
 					// In the code below we logically AND all assumptions
 					// and assertions.
 
-					// We don't want any property to evaluate to false if
-					// until we're at least {MAXDELAY} away from the initial state.
-					// This is {MAXDELAY} is the max depth of flip-flop chains within
-					// the property.
+					// We don't want any property to evaluate to false until
+					// we're at least {MAXDELAY} transitions away from the
+					// initial state, where {MAXDELAY} is the max depth of
+					// flip-flop chains within the property.
 
-					// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? 0 : -1);
-					// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? 0 : -1);
+					// all_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? 0 : -1);
+					// all_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? 0 : -1);
 
 					if (all_assumptions == -1 && all_assertions == 0) {
 
@@ -219,7 +217,9 @@ public class CodeSimulator {
 
 			int currentState = violationState;
 
-			while (currentState != initial) {
+			int transitions = distance;
+
+			while (transitions > 0) {
 
 				if (printStateList)
 					System.out.println("currentState = " + getBinary(currentState, stateBitCount)
@@ -229,11 +229,13 @@ public class CodeSimulator {
 				rList.add(inputVector[currentState]);
 
 				currentState = parentState[currentState];
+
+				transitions--;
 			}
 
-			int[] result = new int[distance];
+			int[] result = new int[rList.size()];
 
-			for (int j = 0; j < distance; j++)
+			for (int j = 0; j < rList.size(); j++)
 				result[j] = rList.pop();
 
 			return result;

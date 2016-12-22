@@ -131,6 +131,8 @@ public class CodeGenerator {
 
 			final String[] groupingOps = { PropertyBuilder.EQ, PropertyBuilder.NEQ, PropertyBuilder.NOT };
 
+			final String[] reductionOps = { PropertyBuilder.ANY, PropertyBuilder.ALL };
+
 			if (Arrays.asList(groupingOps).contains(root.name) && (count > 1)) {
 
 				ArrayList<Property> propArray = new ArrayList<Property>();
@@ -139,9 +141,34 @@ public class CodeGenerator {
 					propArray.add(Property.slice(root, i));
 
 				root.name = PropertyBuilder.AND;
-				root.delay = 0;
 
 				root.setChildren(propArray);
+
+				return 1;
+
+			} else if (Arrays.asList(reductionOps).contains(root.name) && (count > 1)) {
+
+				Property innerExpr = root.children.get(0);
+
+				ArrayList<Property> propArray = new ArrayList<Property>();
+
+				for (int i = 0; i < count; i++)
+					propArray.add(Property.slice(innerExpr, i));
+
+				root.name = root.name.equals(PropertyBuilder.ALL) ? PropertyBuilder.AND : PropertyBuilder.OR;
+
+				root.setChildren(propArray);
+
+				return 1;
+
+			} else if (Arrays.asList(reductionOps).contains(root.name) && (count == 1)) {
+
+				// special case;" $any(x)" or "$all(x)" where "x" is a single-bit
+				// unwrap $any/$all
+
+				Property innerExpr = root.children.get(0);
+
+				root.copyFrom(innerExpr);
 
 				return 1;
 
@@ -242,8 +269,9 @@ public class CodeGenerator {
 
 		}
 
-		if (root.name.equals(PropertyBuilder.AND) || root.name.equals(PropertyBuilder.OR)
-				|| root.name.equals(PropertyBuilder.XOR)) {
+		final String[] comb = { PropertyBuilder.AND, PropertyBuilder.OR, PropertyBuilder.XOR };
+
+		if (Arrays.asList(comb).contains(root.name)) {
 
 			// AND/OR/XOR gate
 
@@ -413,7 +441,7 @@ public class CodeGenerator {
 
 			int bits = expandMultibit(p, identifiers);
 
-			if (bits > 0)
+			if (bits > 1)
 				throw new Exception("property is a multi-bit expression:\n" + p);
 
 		}
@@ -422,7 +450,7 @@ public class CodeGenerator {
 
 			int bits = expandMultibit(p, identifiers);
 
-			if (bits > 0)
+			if (bits > 1)
 				throw new Exception("property is a multi-bit expression:\n" + p);
 
 		}
@@ -849,12 +877,13 @@ public class CodeGenerator {
 
 			HashSet<Vertex> toVisitNext = new HashSet<Vertex>();
 
-			final String strAND = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2};";
-			final String strNAND = "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});";
-			final String strOR = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2};";
-			final String strNOR = "{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2} | {PREFIX2}%s{POSTFIX2});";
+			final String[] strAND = {"{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2}", " & {PREFIX2}%s{POSTFIX2}", ";"};
+			final String[] strNAND = {"{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2}", " & {PREFIX2}%s{POSTFIX2}", ");"};
+			final String[] strOR = {"{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2}", " | {PREFIX2}%s{POSTFIX2}", ";"};
+			final String[] strNOR = {"{PREFIX1}%s{POSTFIX1} = ~({PREFIX2}%s{POSTFIX2}", " | {PREFIX2}%s{POSTFIX2}", ");"};
+			final String[] strXOR = {"{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2}", " ^ {PREFIX2}%s{POSTFIX2})", ";"};
+
 			final String strNOT = "{PREFIX1}%s{POSTFIX1} = ~{PREFIX2}%s{POSTFIX2};";
-			final String strXOR = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} ^ {PREFIX2}%s{POSTFIX2});";
 			final String strCASSIGN = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
 			final String strMUX2 = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} & ~{PREFIX2}%s{POSTFIX2}) | ({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});";
 			final String strX2H = "{PREFIX1}%s{POSTFIX1} = (({PREFIX2}%s{POSTFIX2} != 0) & ({PREFIX2}%s{POSTFIX2} != -1)) ? -1 : 0 ;";
@@ -877,35 +906,36 @@ public class CodeGenerator {
 
 				String nNameJ = jNetNames.get(n);
 
+				// note: the arrays `combFuns` and `combFunParts` must contain elements in a corresponding order
+				final String[] combFuns = new String[] {"AND", "NAND", "OR", "NOR", "XOR"};
+				final String[][] combFunParts = new String[][] {strAND, strNAND, strOR, strNOR, strXOR};
+
 				String net1 = inputs.size() > 0 ? jNetNames.get(inputs.get(0)) : "";
-				String net2 = inputs.size() > 1 ? jNetNames.get(inputs.get(1)) : "";
 
 				if ("DFF".equals(driver.subtype))
 					continue;
 
-				if ("AND".equals(driver.subtype)) {
+				int combInd = Arrays.asList(combFuns).indexOf(driver.subtype);
 
-					line = String.format(strAND, nNameJ, net1, net2);
+				if (combInd != -1) {
 
-				} else if ("NAND".equals(driver.subtype)) {
+					String[] combParts = combFunParts[combInd];
 
-					line = String.format(strNAND, nNameJ, net1, net2);
+					line = String.format(combParts[0], nNameJ, net1);
 
-				} else if ("OR".equals(driver.subtype)) {
+					for (int i=1; i<inputs.size(); i++) {
 
-					line = String.format(strOR, nNameJ, net1, net2);
+						String netI = jNetNames.get(inputs.get(i));
 
-				} else if ("NOR".equals(driver.subtype)) {
+						line += String.format(combParts[1], netI);
 
-					line = String.format(strNOR, nNameJ, net1, net2);
+					}
+
+					line += combParts[2];
 
 				} else if ("NOT".equals(driver.subtype)) {
 
 					line = String.format(strNOT, nNameJ, net1);
-
-				} else if ("XOR".equals(driver.subtype)) {
-
-					line = String.format(strXOR, nNameJ, net1, net2);
 
 				} else if (VerilogParser.CASSIGN_MOD.equals(driver.subtype)) {
 
