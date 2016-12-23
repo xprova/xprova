@@ -333,7 +333,50 @@ public class CodeGenerator {
 
 		}
 
+		if (root.name.equals(PropertyBuilder.WHEN)) {
+
+			Vertex trigger = addProperty(graph, root.children.get(0), clk, rst, set);
+
+			Vertex expr = addProperty(graph, root.children.get(1), clk, rst, set);
+
+			Vertex output = insertWhenBlock(graph, trigger, expr, clk, rst, set);
+
+			return output;
+
+		}
+
 		throw new Exception("property operator not yet implemented");
+
+	}
+
+	private static Vertex insertWhenBlock(NetlistGraph graph, Vertex trigger, Vertex expr, Vertex clk, Vertex rst,
+			Vertex set) throws Exception {
+
+		Vertex muxOutput = addPropertyNet(graph);
+
+		Vertex flopOutput = addPropertyNet(graph);
+
+		Vertex flop = addPropertyModule(graph, "DFF");
+
+		Vertex mux = addPropertyModule(graph, "MUX2");
+
+		graph.addConnection(flopOutput, mux, "a");
+
+		graph.addConnection(expr, mux, "b");
+
+		graph.addConnection(mux, muxOutput, "y");
+
+		graph.addConnection(trigger, mux, "s");
+
+		graph.addConnection(muxOutput, flop, "D");
+
+		graph.addConnection(flop, flopOutput, "Q");
+
+		graph.addConnection(set, flop, "RS");
+
+		graph.addConnection(clk, flop, "CK");
+
+		return flopOutput;
 
 	}
 

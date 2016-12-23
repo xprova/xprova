@@ -38,6 +38,7 @@ public class PropertyBuilder {
 	public static final String NEVER = "$never";
 	public static final String EVENTUALLY = "$eventually";
 	public static final String UNTIL = "$until";
+	public static final String WHEN = "$when";
 	public static final String HIGH = "1";
 	public static final String LOW = "0";
 	public static final String ANY = "$any";
@@ -319,13 +320,13 @@ public class PropertyBuilder {
 
 		}
 
-		if (c0.equals(UNTIL)) {
+		if (c0.equals(UNTIL) | c0.equals(WHEN)) {
 
 			Property trigger = parseAST(root.getChild(2));
 
 			Property expr = parseAST(root.getChild(4));
 
-			return Property.build(UNTIL).addChild(trigger).addChild(expr);
+			return Property.build(c0).addChild(trigger).addChild(expr);
 
 		}
 

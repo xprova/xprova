@@ -59,7 +59,7 @@ atom
 	| LPAREN baseExpr RPAREN
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
 	| (ALWAYS|NEVER|ONCE|ANY|ALL) LPAREN baseExpr RPAREN
-	| UNTIL LPAREN baseExpr COMMA baseExpr RPAREN
+	| (UNTIL|WHEN) LPAREN baseExpr COMMA baseExpr RPAREN
 	| NUM
 	| High
 	| Low
@@ -192,6 +192,10 @@ ONCE
 
 UNTIL
 	: '$until'
+	;
+
+WHEN
+	: '$when'
 	;
 
 ANY
