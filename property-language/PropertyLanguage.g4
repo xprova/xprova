@@ -60,6 +60,7 @@ atom
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
 	| (ALWAYS|NEVER|ONCE|ANY|ALL) LPAREN baseExpr RPAREN
 	| UNTIL LPAREN baseExpr COMMA baseExpr RPAREN
+	| NUM
 	| High
 	| Low
 	;

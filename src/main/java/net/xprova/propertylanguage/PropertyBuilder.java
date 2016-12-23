@@ -134,23 +134,33 @@ public class PropertyBuilder {
 
 		}
 
-		// (x == y) into ~(x ^ y)
+		// (x == y) into $all(~(x ^ y))
 
 		if (root.name.equals(EQ)) {
 
-			Property xorNode = new Property(root);
+			Property x = root.children.get(0);
+			Property y = root.children.get(1);
 
-			xorNode.name = XOR;
+			Property xorNode = Property.build(XOR).addChild(x).addChild(y);
+
+			Property notNode = Property.build(NOT).setChild(xorNode);
+
+			root.setName(ALL).setChild(notNode);
 
 			root.setChild(xorNode).name = NOT;
 
 		}
 
-		// (x != y) into (x ^ y)
+		// (x != y) into $any(x ^ y)
 
 		if (root.name.equals(NEQ)) {
 
-			root.name = XOR;
+			Property x = root.children.get(0);
+			Property y = root.children.get(1);
+
+			Property xorNode = Property.build(XOR).addChild(x).addChild(y);
+
+			root.setName(ANY).setChild(xorNode);
 
 		}
 
@@ -210,7 +220,7 @@ public class PropertyBuilder {
 		String c0 = root.getChild(0).getText();
 		String c1 = root.getChild(1).getText();
 
-		final String[] funcs = {ROSE, FELL, STABLE, CHANGED, ALWAYS, NEVER, ONCE, ANY, ALL};
+		final String[] funcs = { ROSE, FELL, STABLE, CHANGED, ALWAYS, NEVER, ONCE, ANY, ALL };
 
 		if (Arrays.asList(funcs).contains(c0)) {
 
@@ -387,6 +397,8 @@ public class PropertyBuilder {
 
 	}
 
+
+
 	public static int expandMultibit(Property root, HashMap<String, Integer> identifiers) throws Exception {
 
 		// this function performs a top-bottom traversal of a property,
@@ -399,29 +411,62 @@ public class PropertyBuilder {
 
 		if (root.isTerminal()) {
 
-			Integer bitWidth = identifiers.get(root.name);
+			if (root.isNumber()) {
 
-			if (bitWidth == null) {
-
-				throw new Exception("unrecognized identifier: " + root.name);
+				return -1; // arbitrary bit width
 
 			} else {
 
-				return bitWidth;
+				// not a number, must be an identifier
+
+				Integer bitWidth = identifiers.get(root.name);
+
+				if (bitWidth == null) {
+
+					throw new Exception("unrecognized identifier: " + root.name);
+
+				} else {
+
+					return bitWidth;
+				}
+
 			}
 
 		} else {
 
+			// First, check if all children have the same bit-width
+
+			// Generate a list of fixed bit-widths
+
 			ArrayList<Integer> childBitWidths = new ArrayList<Integer>();
 
-			for (Property child : root.children)
-				childBitWidths.add(expandMultibit(child, identifiers));
+			for (Property child : root.children) {
 
-			int count = childBitWidths.get(0);
+				int r = expandMultibit(child, identifiers);
+
+				// we ignore r = -1 because it indicates the child has an
+				// arbitrary bit-width (i.e. child is a constant)
+
+				if (r != -1)
+					childBitWidths.add(r);
+
+			}
+
+			// Second, check that all items in childBitWidths are equal
 
 			for (int x : childBitWidths)
-				if (x != count)
-					throw new Exception("mismatched operand sizes: " + root);
+				if (x != childBitWidths.get(0))
+					throw new Exception("mismatched operand sizes: \n" + root);
+
+			// Third, determine bit width
+
+			int count;
+
+			if (!childBitWidths.isEmpty())
+				count = childBitWidths.get(0);
+			else
+				count = 32; // default if all children have arbitrary bit-widths
+
 
 			final String[] groupingOps = { EQ, NEQ, NOT };
 
@@ -457,7 +502,8 @@ public class PropertyBuilder {
 
 			} else if (Arrays.asList(reductionOps).contains(root.name) && (count == 1)) {
 
-				// special case;" $any(x)" or "$all(x)" where "x" is a single-bit
+				// special case;" $any(x)" or "$all(x)" where "x" is a
+				// single-bit
 				// unwrap $any/$all
 
 				Property innerExpr = root.children.get(0);

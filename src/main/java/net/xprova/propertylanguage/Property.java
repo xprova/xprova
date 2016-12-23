@@ -24,6 +24,12 @@ public class Property {
 
 	}
 
+	public boolean isNumber() {
+
+		return name.matches("\\d*\\d+");
+
+	}
+
 	private static String getVerilogArrayName(String arrName, int index) {
 
 		return String.format("%s[%d]", arrName, index);
@@ -39,7 +45,19 @@ public class Property {
 
 			Property p = new Property(other);
 
-			p.name = getVerilogArrayName(other.name, index);
+			if (p.isNumber()) {
+
+				int val = Integer.parseInt(other.name);
+
+				int bit = (val >> index) & 1;
+
+				return new Property("" + bit);
+
+			} else {
+
+				p.name = getVerilogArrayName(other.name, index);
+
+			}
 
 			return p;
 
@@ -301,5 +319,13 @@ public class Property {
 				children.get(children.size() - 1).print(prefix + (isTail ? "    " : "\u2502   "), true, out);
 
 		}
+	}
+
+	public Property setName(String name) {
+
+		this.name = name;
+
+		return this;
+
 	}
 }
