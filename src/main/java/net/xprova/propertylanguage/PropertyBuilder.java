@@ -1,8 +1,6 @@
 package net.xprova.propertylanguage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -131,36 +129,6 @@ public class PropertyBuilder {
 			c2.delay += 1;
 
 			root.setChild(c1).addChild(c2).name = XOR;
-
-		}
-
-		// (x == y) into $all(~(x ^ y))
-
-		if (root.name.equals(EQ)) {
-
-			Property x = root.children.get(0);
-			Property y = root.children.get(1);
-
-			Property xorNode = Property.build(XOR).addChild(x).addChild(y);
-
-			Property notNode = Property.build(NOT).setChild(xorNode);
-
-			root.setName(ALL).setChild(notNode);
-
-			root.setChild(xorNode).name = NOT;
-
-		}
-
-		// (x != y) into $any(x ^ y)
-
-		if (root.name.equals(NEQ)) {
-
-			Property x = root.children.get(0);
-			Property y = root.children.get(1);
-
-			Property xorNode = Property.build(XOR).addChild(x).addChild(y);
-
-			root.setName(ANY).setChild(xorNode);
 
 		}
 
@@ -394,131 +362,6 @@ public class PropertyBuilder {
 		root.print();
 
 		return root;
-
-	}
-
-
-
-	public static int expandMultibit(Property root, HashMap<String, Integer> identifiers) throws Exception {
-
-		// this function performs a top-bottom traversal of a property,
-		// re-writing and condensing multi-bit expressions into single bit ones
-
-		// for example:
-		// (x & y) == 1
-		// where x and y are 2-bit nets, is converted to:
-		// (x[0] & y[0] == 1) & (x[1] & y[1] == 0)
-
-		if (root.isTerminal()) {
-
-			if (root.isNumber()) {
-
-				return -1; // arbitrary bit width
-
-			} else {
-
-				// not a number, must be an identifier
-
-				Integer bitWidth = identifiers.get(root.name);
-
-				if (bitWidth == null) {
-
-					throw new Exception("unrecognized identifier: " + root.name);
-
-				} else {
-
-					return bitWidth;
-				}
-
-			}
-
-		} else {
-
-			// First, check if all children have the same bit-width
-
-			// Generate a list of fixed bit-widths
-
-			ArrayList<Integer> childBitWidths = new ArrayList<Integer>();
-
-			for (Property child : root.children) {
-
-				int r = expandMultibit(child, identifiers);
-
-				// we ignore r = -1 because it indicates the child has an
-				// arbitrary bit-width (i.e. child is a constant)
-
-				if (r != -1)
-					childBitWidths.add(r);
-
-			}
-
-			// Second, check that all items in childBitWidths are equal
-
-			for (int x : childBitWidths)
-				if (x != childBitWidths.get(0))
-					throw new Exception("mismatched operand sizes: \n" + root);
-
-			// Third, determine bit width
-
-			int count;
-
-			if (!childBitWidths.isEmpty())
-				count = childBitWidths.get(0);
-			else
-				count = 32; // default if all children have arbitrary bit-widths
-
-
-			final String[] groupingOps = { EQ, NEQ, NOT };
-
-			final String[] reductionOps = { ANY, ALL };
-
-			if (Arrays.asList(groupingOps).contains(root.name) && (count > 1)) {
-
-				ArrayList<Property> propArray = new ArrayList<Property>();
-
-				for (int i = 0; i < count; i++)
-					propArray.add(Property.slice(root, i));
-
-				root.name = AND;
-
-				root.setChildren(propArray);
-
-				return 1;
-
-			} else if (Arrays.asList(reductionOps).contains(root.name) && (count > 1)) {
-
-				Property innerExpr = root.children.get(0);
-
-				ArrayList<Property> propArray = new ArrayList<Property>();
-
-				for (int i = 0; i < count; i++)
-					propArray.add(Property.slice(innerExpr, i));
-
-				root.name = root.name.equals(ALL) ? AND : OR;
-
-				root.setChildren(propArray);
-
-				return 1;
-
-			} else if (Arrays.asList(reductionOps).contains(root.name) && (count == 1)) {
-
-				// special case;" $any(x)" or "$all(x)" where "x" is a
-				// single-bit
-				// unwrap $any/$all
-
-				Property innerExpr = root.children.get(0);
-
-				root.copyFrom(innerExpr);
-
-				return 1;
-
-			} else {
-
-				return count;
-
-			}
-
-		}
 
 	}
 

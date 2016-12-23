@@ -79,7 +79,7 @@ public class CodeGenerator {
 
 		do {
 
-			inputName = "*" + subtype.toLowerCase() + i;
+			inputName = "*" + subtype.toLowerCase() + "_" + i;
 
 			i++;
 
@@ -156,13 +156,53 @@ public class CodeGenerator {
 
 				return tie1Output;
 
+			} else if (root.isNumber()) {
+
+				Vertex driver = addPropertyModule(graph, "CONST");
+
+				driver.tag = root.name;
+
+				Vertex net = addPropertyNet(graph);
+
+				graph.addConnection(driver, net, "y");
+
+				return net;
+
 			} else {
 
 				Vertex v = graph.getVertex(root.name);
 
 				if (v == null) {
 
-					throw new Exception("graph does not contain identifier " + root.name);
+					Vertex v0 = graph.getVertex(root.name + "[0]");
+
+					if (v0 == null) {
+
+						throw new Exception("graph does not contain identifier " + root.name);
+
+					} else {
+
+						// `root.name` refers to a net array
+
+						Vertex g = addPropertyModule(graph, "GROUP");
+
+						int count = v0.arraySize;
+
+						for (int i=0; i<count; i++) {
+
+							Vertex vi = graph.getVertex(String.format("%s[%d]", root.name, i));
+
+							graph.addConnection(vi, g, "" + i);
+
+						}
+
+						Vertex gout = addPropertyNet(graph);
+
+						graph.addConnection(g, gout, "y");
+
+						return gout;
+
+					}
 
 				} else {
 
@@ -252,25 +292,41 @@ public class CodeGenerator {
 
 			// create a liveness net
 
-			Vertex liveNet = null;
-
 			if (root.children.size() == 2) {
 
 				Vertex trigger = addProperty(graph, root.children.get(0), clk, rst, set);
 
 				Vertex expr = addProperty(graph, root.children.get(1), clk, rst, set);
 
-				liveNet = insertTwoInputEventuallyBlock(graph, trigger, expr, clk, set, rst);
+				return insertTwoInputEventuallyBlock(graph, trigger, expr, clk, set, rst);
 
 			} else if (root.children.size() == 1) {
 
 				Vertex expr = addProperty(graph, root.children.get(0), clk, rst, set);
 
-				liveNet = insetSingleInputEventuallyBlock(graph, expr, clk, set, rst);
+				return insetSingleInputEventuallyBlock(graph, expr, clk, set, rst);
 
 			}
 
-			return liveNet;
+		}
+
+		if (root.name.equals(PropertyBuilder.EQ) | root.name.equals(PropertyBuilder.NEQ)) {
+
+			Vertex op1 = addProperty(graph, root.children.get(0), clk, rst, set);
+
+			Vertex op2 = addProperty(graph, root.children.get(1), clk, rst, set);
+
+			Vertex mod = addPropertyModule(graph, root.name);
+
+			Vertex output = addPropertyNet(graph);
+
+			graph.addConnection(op1, mod);
+
+			graph.addConnection(op2, mod);
+
+			graph.addConnection(mod, output);
+
+			return output;
 
 		}
 
@@ -320,52 +376,8 @@ public class CodeGenerator {
 
 	}
 
-	private static String getVerilogArrayName(String arrName, int index) {
-
-		return String.format("%s[%d]", arrName, index);
-
-	}
-
-	private static HashMap<String, Integer> getIdentifiers(NetlistGraph graph) throws Exception {
-
-		HashMap<String, Integer> result = new HashMap<String, Integer>();
-
-		for (Vertex net : graph.getNets()) {
-
-			result.put(net.arrayName, net.arraySize);
-
-			for (int i = 0; i < net.arraySize; i++)
-				result.put(getVerilogArrayName(net.arrayName, i), 1);
-		}
-
-		return result;
-
-	}
-
 	public static ArrayList<String> generate(NetlistGraph graph, ArrayList<Property> assumptions,
 			ArrayList<Property> assertions, String templateCode) throws Exception {
-
-		// Step 0: Expand multi-bit property expressions
-
-		HashMap<String, Integer> identifiers = getIdentifiers(graph);
-
-		for (Property p : assumptions) {
-
-			int bits = PropertyBuilder.expandMultibit(p, identifiers);
-
-			if (bits > 1)
-				throw new Exception("property is a multi-bit expression:\n" + p);
-
-		}
-
-		for (Property p : assertions) {
-
-			int bits = PropertyBuilder.expandMultibit(p, identifiers);
-
-			if (bits > 1)
-				throw new Exception("property is a multi-bit expression:\n" + p);
-
-		}
 
 		// Step 1: Add properties to graph
 
@@ -783,6 +795,16 @@ public class CodeGenerator {
 
 		}
 
+		for (Vertex v : graph.getModulesByType("CONST")) {
+
+			Vertex vd = graph.getNet(v, "y");
+
+			processed.add(vd);
+
+			assigns.add(String.format("{PREFIX1}%s{POSTFIX1} = %s;", jNetNames.get(vd), v.tag));
+
+		}
+
 		toVisit = netGraph.bfs(processed, 1, false);
 
 		while (!toVisit.isEmpty()) {
@@ -803,6 +825,10 @@ public class CodeGenerator {
 			final String strCASSIGN = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2};";
 			final String strMUX2 = "{PREFIX1}%s{POSTFIX1} = ({PREFIX2}%s{POSTFIX2} & ~{PREFIX2}%s{POSTFIX2}) | ({PREFIX2}%s{POSTFIX2} & {PREFIX2}%s{POSTFIX2});";
 			final String strX2H = "{PREFIX1}%s{POSTFIX1} = (({PREFIX2}%s{POSTFIX2} != 0) & ({PREFIX2}%s{POSTFIX2} != -1)) ? -1 : 0 ;";
+			final String strEQ = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} == {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
+			final String strNEQ = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} != {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
+			final String strGroup_A = "{PREFIX1}%s{POSTFIX1} = 0;";
+			final String strGroup_B = "{PREFIX1}%s{POSTFIX1} += ({PREFIX1}%s{POSTFIX1} & 1) << %d;";
 
 			for (Vertex n : toVisit) {
 
@@ -850,13 +876,19 @@ public class CodeGenerator {
 
 					line += combParts[2];
 
+					assigns.add(line);
+
 				} else if ("NOT".equals(driver.subtype)) {
 
 					line = String.format(strNOT, nNameJ, net1);
 
+					assigns.add(line);
+
 				} else if (VerilogParser.CASSIGN_MOD.equals(driver.subtype)) {
 
 					line = String.format(strCASSIGN, nNameJ, net1);
+
+					assigns.add(line);
 
 				} else if ("MUX2".equals(driver.subtype)) {
 
@@ -866,17 +898,51 @@ public class CodeGenerator {
 
 					line = String.format(strMUX2, nNameJ, netA, netS, netB, netS);
 
+					assigns.add(line);
+
 				} else if ("X2H".equals(driver.subtype)) {
 
 					line = String.format(strX2H, nNameJ, net1, net1);
+
+					assigns.add(line);
+
+				} else if ("==".equals(driver.subtype)) {
+
+					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+
+					line = String.format(strEQ, nNameJ, net1, net2);
+
+					assigns.add(line);
+
+				} else if ("!=".equals(driver.subtype)) {
+
+					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+
+					line = String.format(strNEQ, nNameJ, net1, net2);
+
+					assigns.add(line);
+
+				} else if ("GROUP".equals(driver.subtype)) {
+
+					line = String.format(strGroup_A, nNameJ);
+
+					assigns.add(line);
+
+					for (int i = 0; i < inputs.size(); i++) {
+
+						String netI = jNetNames.get(graph.getNet(driver, "" + i));
+
+						line = String.format(strGroup_B, nNameJ, netI, i);
+
+						assigns.add(line);
+
+					}
 
 				} else {
 
 					throw new Exception("unrecognized gate " + driver.subtype);
 
 				}
-
-				assigns.add(line);
 
 				processed.add(n);
 

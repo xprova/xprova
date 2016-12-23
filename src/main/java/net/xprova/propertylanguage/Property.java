@@ -30,61 +30,6 @@ public class Property {
 
 	}
 
-	private static String getVerilogArrayName(String arrName, int index) {
-
-		return String.format("%s[%d]", arrName, index);
-
-	}
-
-	public static Property slice(Property other, int index) {
-
-		// returns a deep copy of `other` where each multi-bit net is replaced
-		// with its item of index `index`
-
-		if (other.isTerminal()) {
-
-			Property p = new Property(other);
-
-			if (p.isNumber()) {
-
-				int val = Integer.parseInt(other.name);
-
-				int bit = (val >> index) & 1;
-
-				return new Property("" + bit);
-
-			} else {
-
-				p.name = getVerilogArrayName(other.name, index);
-
-			}
-
-			return p;
-
-		} else {
-
-			Property p = new Property(other);
-
-			// replace p's children with deep copies
-
-			ArrayList<Property> newChildren = new ArrayList<Property>();
-
-			for (int i = 0; i < p.children.size(); i++) {
-
-				Property c = other.children.get(i);
-
-				newChildren.add(slice(c, index));
-
-			}
-
-			p.setChildren(newChildren);
-
-			return p;
-
-		}
-
-	}
-
 	public Property delay(int delay) {
 
 		this.delay = delay;
