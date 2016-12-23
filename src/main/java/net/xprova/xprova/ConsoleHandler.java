@@ -258,7 +258,7 @@ public class ConsoleHandler {
 			"Usage:",
 			"  dot [--ignore-edges e1,e2,...] [--ignore-vertices v1,v2,...]",
 			"      [--type fng] [--to flipflop] [--combine v1,v2,...]",
-			"      [--pdf] <output_file>",
+			"      [--pdf] [--module-types] <output_file>",
 			"",
 			"Options:",
 			"  -e --ignore-edges e1,e2,...     exclude edges from graph",
@@ -266,7 +266,8 @@ public class ConsoleHandler {
 			"  -o --to <flipflop>              export sub-graph of flipflop and its combinational logic",
 			"  -t --type fng                   include (f)lip-flops, (n)ets and/or (g)ates",
 			"  -c --combine v1,v2,...          combine group of vertices into a single vertex",
-			"  -p --pdf                        output a PDF file directly (requires DOT)"
+			"  -p --pdf                        output a PDF file directly (requires DOT)",
+			"  -m --module-types               label modules with types instead of instance names"
 		}
 	)
 	//@formatter:on
@@ -287,6 +288,8 @@ public class ConsoleHandler {
 				Option.builder("c").longOpt("combine").hasArg().build(),
 
 				Option.builder("p").longOpt("pdf").build(),
+
+				Option.builder("m").longOpt("module-types").build(),
 
 		};
 
@@ -392,7 +395,9 @@ public class ConsoleHandler {
 
 		}
 
-		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(current);
+		boolean useModuleTypeLabels = line.hasOption("m");
+
+		NetlistGraphDotFormatter formatter = new NetlistGraphDotFormatter(current, useModuleTypeLabels);
 
 		if (line.hasOption("ignore-edges")) {
 
