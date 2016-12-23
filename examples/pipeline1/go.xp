@@ -1,0 +1,11 @@
+library load lib/xprova.v
+
+read -b examples/pipeline1/pipeline1.v
+
+assume $always(busy |-> ~ena)
+
+assert valid |-> (data_out == $when(ena, data_in))
+
+prove -kg
+
+dot -e=CK,RS,ST -m --pdf output/netlist.pdf
