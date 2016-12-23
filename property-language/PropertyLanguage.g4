@@ -43,7 +43,7 @@ andExpr
 	;
 
 eqExpr
-	: timeAtom ( (EQ|NEQ) timeAtom)?
+	: timeAtom ( (EQ|NEQ|LT|GT|LE|GE) timeAtom)?
 	;
 
 timeAtom
@@ -116,6 +116,23 @@ EQ
 NEQ
 	: '!='
 	;
+
+LT
+	: '<'
+	;
+
+GT
+	: '>'
+	;
+
+LE
+	: '<='
+	;
+
+GE
+	: '>='
+	;
+
 
 IMPLY
 	: '|->'

@@ -188,7 +188,7 @@ public class CodeGenerator {
 
 						int count = v0.arraySize;
 
-						for (int i=0; i<count; i++) {
+						for (int i = 0; i < count; i++) {
 
 							Vertex vi = graph.getVertex(String.format("%s[%d]", root.name, i));
 
@@ -310,7 +310,10 @@ public class CodeGenerator {
 
 		}
 
-		if (root.name.equals(PropertyBuilder.EQ) | root.name.equals(PropertyBuilder.NEQ)) {
+		final String[] twoOps = { PropertyBuilder.EQ, PropertyBuilder.NEQ, PropertyBuilder.LT, PropertyBuilder.GT,
+				PropertyBuilder.LE, PropertyBuilder.GE };
+
+		if (Arrays.asList(twoOps).contains(root.name)) {
 
 			Vertex op1 = addProperty(graph, root.children.get(0), clk, rst, set);
 
@@ -827,6 +830,10 @@ public class CodeGenerator {
 			final String strX2H = "{PREFIX1}%s{POSTFIX1} = (({PREFIX2}%s{POSTFIX2} != 0) & ({PREFIX2}%s{POSTFIX2} != -1)) ? -1 : 0 ;";
 			final String strEQ = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} == {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
 			final String strNEQ = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} != {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
+			final String strLT = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} < {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
+			final String strGT = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} > {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
+			final String strLE = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} <= {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
+			final String strGE = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} >= {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
 			final String strGroup_A = "{PREFIX1}%s{POSTFIX1} = 0;";
 			final String strGroup_B = "{PREFIX1}%s{POSTFIX1} += ({PREFIX1}%s{POSTFIX1} & 1) << %d;";
 
@@ -919,6 +926,38 @@ public class CodeGenerator {
 					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
 
 					line = String.format(strNEQ, nNameJ, net1, net2);
+
+					assigns.add(line);
+
+				} else if ("<".equals(driver.subtype)) {
+
+					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+
+					line = String.format(strLT, nNameJ, net1, net2);
+
+					assigns.add(line);
+
+				} else if (">".equals(driver.subtype)) {
+
+					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+
+					line = String.format(strGT, nNameJ, net1, net2);
+
+					assigns.add(line);
+
+				} else if ("<=".equals(driver.subtype)) {
+
+					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+
+					line = String.format(strLE, nNameJ, net1, net2);
+
+					assigns.add(line);
+
+				} else if (">=".equals(driver.subtype)) {
+
+					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+
+					line = String.format(strGE, nNameJ, net1, net2);
 
 					assigns.add(line);
 

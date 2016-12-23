@@ -19,6 +19,10 @@ public class PropertyBuilder {
 	public static final String OR = "|";
 	public static final String EQ = "==";
 	public static final String NEQ = "!=";
+	public static final String LT = "<";
+	public static final String GT = ">";
+	public static final String LE = "<=";
+	public static final String GE = ">=";
 	public static final String IMPLY = "|->";
 	public static final String IMPLY_NEXT = "|=>";
 	public static final String LPAREN = "(";
@@ -258,7 +262,9 @@ public class PropertyBuilder {
 
 		}
 
-		if (EQ.equals(c1) || NEQ.equals(c1) || IMPLY.equals(c1) || IMPLY_NEXT.equals(c1)) {
+		final String[] twoOps = { EQ, NEQ, IMPLY, IMPLY_NEXT, LT, GT, LE, GE };
+
+		if (Arrays.asList(twoOps).contains(c1)) {
 
 			Property op1 = parseAST(root.getChild(0));
 			Property op2 = parseAST(root.getChild(2));
