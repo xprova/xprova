@@ -39,7 +39,7 @@ xorExpr
 
 andExpr
 	: eqExpr (AND eqExpr)*
-	| eqExpr (DOUBLE_HASH(NUM)? eqExpr)*
+	| eqExpr (DOUBLE_HASH(INTEGER)? eqExpr)*
 	;
 
 eqExpr
@@ -47,7 +47,7 @@ eqExpr
 	;
 
 timeAtom
-	: ( (HASH|AT) NUM)? nAtom
+	: ( (HASH|AT) INTEGER)? nAtom
 	;
 
 nAtom
@@ -60,20 +60,10 @@ atom
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
 	| (ALWAYS|NEVER|ONCE|ANY|ALL) LPAREN baseExpr RPAREN
 	| (UNTIL|WHEN) LPAREN baseExpr COMMA baseExpr RPAREN
-	| NUM
-	| High
-	| Low
+	| INTEGER
 	;
 
 // lexer rules
-
-High
-	: '1'
-	;
-
-Low
-	: '0'
-	;
 
 ID
 	: Simple_identifier
@@ -210,7 +200,7 @@ EVENTUALLY
 	: '$eventually'
 	;
 
-NUM
+INTEGER
 	: [0-9] +
 	;
 

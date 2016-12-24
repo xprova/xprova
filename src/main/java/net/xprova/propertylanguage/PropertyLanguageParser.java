@@ -17,11 +17,11 @@ public class PropertyLanguageParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		High=1, Low=2, ID=3, Simple_identifier=4, Bit_identifier=5, Escaped_identifier=6, 
-		AND=7, OR=8, XOR=9, NOT=10, EQ=11, NEQ=12, LT=13, GT=14, LE=15, GE=16, 
-		IMPLY=17, IMPLY_NEXT=18, LPAREN=19, RPAREN=20, HASH=21, DOUBLE_HASH=22, 
-		AT=23, ROSE=24, FELL=25, STABLE=26, CHANGED=27, ALWAYS=28, NEVER=29, ONCE=30, 
-		UNTIL=31, WHEN=32, ANY=33, ALL=34, EVENTUALLY=35, NUM=36, COMMA=37, WS=38;
+		ID=1, Simple_identifier=2, Bit_identifier=3, Escaped_identifier=4, AND=5, 
+		OR=6, XOR=7, NOT=8, EQ=9, NEQ=10, LT=11, GT=12, LE=13, GE=14, IMPLY=15, 
+		IMPLY_NEXT=16, LPAREN=17, RPAREN=18, HASH=19, DOUBLE_HASH=20, AT=21, ROSE=22, 
+		FELL=23, STABLE=24, CHANGED=25, ALWAYS=26, NEVER=27, ONCE=28, UNTIL=29, 
+		WHEN=30, ANY=31, ALL=32, EVENTUALLY=33, INTEGER=34, COMMA=35, WS=36;
 	public static final int
 		RULE_property = 0, RULE_tempExpr = 1, RULE_baseExpr = 2, RULE_implyExpr = 3, 
 		RULE_orExpr = 4, RULE_xorExpr = 5, RULE_andExpr = 6, RULE_eqExpr = 7, 
@@ -32,18 +32,18 @@ public class PropertyLanguageParser extends Parser {
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'1'", "'0'", null, null, null, null, "'&'", "'|'", "'^'", "'~'", 
-		"'=='", "'!='", "'<'", "'>'", "'<='", "'>='", "'|->'", "'|=>'", "'('", 
-		"')'", "'#'", "'##'", "'@'", "'$rose'", "'$fell'", "'$stable'", "'$changed'", 
-		"'$always'", "'$never'", "'$once'", "'$until'", "'$when'", "'$any'", "'$all'", 
-		"'$eventually'", null, "','"
+		null, null, null, null, null, "'&'", "'|'", "'^'", "'~'", "'=='", "'!='", 
+		"'<'", "'>'", "'<='", "'>='", "'|->'", "'|=>'", "'('", "')'", "'#'", "'##'", 
+		"'@'", "'$rose'", "'$fell'", "'$stable'", "'$changed'", "'$always'", "'$never'", 
+		"'$once'", "'$until'", "'$when'", "'$any'", "'$all'", "'$eventually'", 
+		null, "','"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, "High", "Low", "ID", "Simple_identifier", "Bit_identifier", "Escaped_identifier", 
+		null, "ID", "Simple_identifier", "Bit_identifier", "Escaped_identifier", 
 		"AND", "OR", "XOR", "NOT", "EQ", "NEQ", "LT", "GT", "LE", "GE", "IMPLY", 
 		"IMPLY_NEXT", "LPAREN", "RPAREN", "HASH", "DOUBLE_HASH", "AT", "ROSE", 
 		"FELL", "STABLE", "CHANGED", "ALWAYS", "NEVER", "ONCE", "UNTIL", "WHEN", 
-		"ANY", "ALL", "EVENTUALLY", "NUM", "COMMA", "WS"
+		"ANY", "ALL", "EVENTUALLY", "INTEGER", "COMMA", "WS"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -167,8 +167,6 @@ public class PropertyLanguageParser extends Parser {
 		try {
 			setState(36);
 			switch (_input.LA(1)) {
-			case High:
-			case Low:
 			case ID:
 			case NOT:
 			case LPAREN:
@@ -185,7 +183,7 @@ public class PropertyLanguageParser extends Parser {
 			case WHEN:
 			case ANY:
 			case ALL:
-			case NUM:
+			case INTEGER:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(25);
@@ -473,9 +471,9 @@ public class PropertyLanguageParser extends Parser {
 		public TerminalNode DOUBLE_HASH(int i) {
 			return getToken(PropertyLanguageParser.DOUBLE_HASH, i);
 		}
-		public List<TerminalNode> NUM() { return getTokens(PropertyLanguageParser.NUM); }
-		public TerminalNode NUM(int i) {
-			return getToken(PropertyLanguageParser.NUM, i);
+		public List<TerminalNode> INTEGER() { return getTokens(PropertyLanguageParser.INTEGER); }
+		public TerminalNode INTEGER(int i) {
+			return getToken(PropertyLanguageParser.INTEGER, i);
 		}
 		public AndExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -541,7 +539,7 @@ public class PropertyLanguageParser extends Parser {
 					case 1:
 						{
 						setState(71);
-						match(NUM);
+						match(INTEGER);
 						}
 						break;
 					}
@@ -637,7 +635,7 @@ public class PropertyLanguageParser extends Parser {
 		public NAtomContext nAtom() {
 			return getRuleContext(NAtomContext.class,0);
 		}
-		public TerminalNode NUM() { return getToken(PropertyLanguageParser.NUM, 0); }
+		public TerminalNode INTEGER() { return getToken(PropertyLanguageParser.INTEGER, 0); }
 		public TerminalNode HASH() { return getToken(PropertyLanguageParser.HASH, 0); }
 		public TerminalNode AT() { return getToken(PropertyLanguageParser.AT, 0); }
 		public TimeAtomContext(ParserRuleContext parent, int invokingState) {
@@ -673,7 +671,7 @@ public class PropertyLanguageParser extends Parser {
 					consume();
 				}
 				setState(88);
-				match(NUM);
+				match(INTEGER);
 				}
 			}
 
@@ -764,9 +762,7 @@ public class PropertyLanguageParser extends Parser {
 		public TerminalNode COMMA() { return getToken(PropertyLanguageParser.COMMA, 0); }
 		public TerminalNode UNTIL() { return getToken(PropertyLanguageParser.UNTIL, 0); }
 		public TerminalNode WHEN() { return getToken(PropertyLanguageParser.WHEN, 0); }
-		public TerminalNode NUM() { return getToken(PropertyLanguageParser.NUM, 0); }
-		public TerminalNode High() { return getToken(PropertyLanguageParser.High, 0); }
-		public TerminalNode Low() { return getToken(PropertyLanguageParser.Low, 0); }
+		public TerminalNode INTEGER() { return getToken(PropertyLanguageParser.INTEGER, 0); }
 		public AtomContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -786,7 +782,7 @@ public class PropertyLanguageParser extends Parser {
 		enterRule(_localctx, 20, RULE_atom);
 		int _la;
 		try {
-			setState(123);
+			setState(121);
 			switch (_input.LA(1)) {
 			case ID:
 				enterOuterAlt(_localctx, 1);
@@ -872,25 +868,11 @@ public class PropertyLanguageParser extends Parser {
 				match(RPAREN);
 				}
 				break;
-			case NUM:
+			case INTEGER:
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(120);
-				match(NUM);
-				}
-				break;
-			case High:
-				enterOuterAlt(_localctx, 7);
-				{
-				setState(121);
-				match(High);
-				}
-				break;
-			case Low:
-				enterOuterAlt(_localctx, 8);
-				{
-				setState(122);
-				match(Low);
+				match(INTEGER);
 				}
 				break;
 			default:
@@ -909,38 +891,37 @@ public class PropertyLanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3(\u0080\4\2\t\2\4"+
-		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
-		"\13\4\f\t\f\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\5\3\"\n\3\3\3\3\3\3\3"+
-		"\5\3\'\n\3\3\4\3\4\3\5\3\5\3\5\5\5.\n\5\3\6\3\6\3\6\7\6\63\n\6\f\6\16"+
-		"\6\66\13\6\3\7\3\7\3\7\7\7;\n\7\f\7\16\7>\13\7\3\b\3\b\3\b\7\bC\n\b\f"+
-		"\b\16\bF\13\b\3\b\3\b\3\b\5\bK\n\b\3\b\7\bN\n\b\f\b\16\bQ\13\b\5\bS\n"+
-		"\b\3\t\3\t\3\t\5\tX\n\t\3\n\3\n\5\n\\\n\n\3\n\3\n\3\13\5\13a\n\13\3\13"+
-		"\3\13\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f"+
-		"\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\5\f~\n\f\3\f\2\2\r\2\4\6\b\n\f\16"+
-		"\20\22\24\26\2\b\3\2\23\24\3\2\r\22\4\2\27\27\31\31\3\2\32\35\4\2\36 "+
-		"#$\3\2!\"\u0087\2\30\3\2\2\2\4&\3\2\2\2\6(\3\2\2\2\b*\3\2\2\2\n/\3\2\2"+
-		"\2\f\67\3\2\2\2\16R\3\2\2\2\20T\3\2\2\2\22[\3\2\2\2\24`\3\2\2\2\26}\3"+
-		"\2\2\2\30\31\5\4\3\2\31\32\7\2\2\3\32\3\3\2\2\2\33\'\5\6\4\2\34\35\7%"+
-		"\2\2\35!\7\25\2\2\36\37\5\6\4\2\37 \7\'\2\2 \"\3\2\2\2!\36\3\2\2\2!\""+
-		"\3\2\2\2\"#\3\2\2\2#$\5\6\4\2$%\7\26\2\2%\'\3\2\2\2&\33\3\2\2\2&\34\3"+
-		"\2\2\2\'\5\3\2\2\2()\5\b\5\2)\7\3\2\2\2*-\5\n\6\2+,\t\2\2\2,.\5\n\6\2"+
-		"-+\3\2\2\2-.\3\2\2\2.\t\3\2\2\2/\64\5\f\7\2\60\61\7\n\2\2\61\63\5\f\7"+
-		"\2\62\60\3\2\2\2\63\66\3\2\2\2\64\62\3\2\2\2\64\65\3\2\2\2\65\13\3\2\2"+
-		"\2\66\64\3\2\2\2\67<\5\16\b\289\7\13\2\29;\5\16\b\2:8\3\2\2\2;>\3\2\2"+
-		"\2<:\3\2\2\2<=\3\2\2\2=\r\3\2\2\2><\3\2\2\2?D\5\20\t\2@A\7\t\2\2AC\5\20"+
-		"\t\2B@\3\2\2\2CF\3\2\2\2DB\3\2\2\2DE\3\2\2\2ES\3\2\2\2FD\3\2\2\2GO\5\20"+
-		"\t\2HJ\7\30\2\2IK\7&\2\2JI\3\2\2\2JK\3\2\2\2KL\3\2\2\2LN\5\20\t\2MH\3"+
-		"\2\2\2NQ\3\2\2\2OM\3\2\2\2OP\3\2\2\2PS\3\2\2\2QO\3\2\2\2R?\3\2\2\2RG\3"+
-		"\2\2\2S\17\3\2\2\2TW\5\22\n\2UV\t\3\2\2VX\5\22\n\2WU\3\2\2\2WX\3\2\2\2"+
-		"X\21\3\2\2\2YZ\t\4\2\2Z\\\7&\2\2[Y\3\2\2\2[\\\3\2\2\2\\]\3\2\2\2]^\5\24"+
-		"\13\2^\23\3\2\2\2_a\7\f\2\2`_\3\2\2\2`a\3\2\2\2ab\3\2\2\2bc\5\26\f\2c"+
-		"\25\3\2\2\2d~\7\5\2\2ef\7\25\2\2fg\5\6\4\2gh\7\26\2\2h~\3\2\2\2ij\t\5"+
-		"\2\2jk\7\25\2\2kl\5\6\4\2lm\7\26\2\2m~\3\2\2\2no\t\6\2\2op\7\25\2\2pq"+
-		"\5\6\4\2qr\7\26\2\2r~\3\2\2\2st\t\7\2\2tu\7\25\2\2uv\5\6\4\2vw\7\'\2\2"+
-		"wx\5\6\4\2xy\7\26\2\2y~\3\2\2\2z~\7&\2\2{~\7\3\2\2|~\7\4\2\2}d\3\2\2\2"+
-		"}e\3\2\2\2}i\3\2\2\2}n\3\2\2\2}s\3\2\2\2}z\3\2\2\2}{\3\2\2\2}|\3\2\2\2"+
-		"~\27\3\2\2\2\17!&-\64<DJORW[`}";
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3&~\4\2\t\2\4\3\t\3"+
+		"\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f"+
+		"\t\f\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\5\3\"\n\3\3\3\3\3\3\3\5\3\'\n"+
+		"\3\3\4\3\4\3\5\3\5\3\5\5\5.\n\5\3\6\3\6\3\6\7\6\63\n\6\f\6\16\6\66\13"+
+		"\6\3\7\3\7\3\7\7\7;\n\7\f\7\16\7>\13\7\3\b\3\b\3\b\7\bC\n\b\f\b\16\bF"+
+		"\13\b\3\b\3\b\3\b\5\bK\n\b\3\b\7\bN\n\b\f\b\16\bQ\13\b\5\bS\n\b\3\t\3"+
+		"\t\3\t\5\tX\n\t\3\n\3\n\5\n\\\n\n\3\n\3\n\3\13\5\13a\n\13\3\13\3\13\3"+
+		"\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f"+
+		"\3\f\3\f\3\f\3\f\3\f\5\f|\n\f\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24\26\2\b"+
+		"\3\2\21\22\3\2\13\20\4\2\25\25\27\27\3\2\30\33\4\2\34\36!\"\3\2\37 \u0083"+
+		"\2\30\3\2\2\2\4&\3\2\2\2\6(\3\2\2\2\b*\3\2\2\2\n/\3\2\2\2\f\67\3\2\2\2"+
+		"\16R\3\2\2\2\20T\3\2\2\2\22[\3\2\2\2\24`\3\2\2\2\26{\3\2\2\2\30\31\5\4"+
+		"\3\2\31\32\7\2\2\3\32\3\3\2\2\2\33\'\5\6\4\2\34\35\7#\2\2\35!\7\23\2\2"+
+		"\36\37\5\6\4\2\37 \7%\2\2 \"\3\2\2\2!\36\3\2\2\2!\"\3\2\2\2\"#\3\2\2\2"+
+		"#$\5\6\4\2$%\7\24\2\2%\'\3\2\2\2&\33\3\2\2\2&\34\3\2\2\2\'\5\3\2\2\2("+
+		")\5\b\5\2)\7\3\2\2\2*-\5\n\6\2+,\t\2\2\2,.\5\n\6\2-+\3\2\2\2-.\3\2\2\2"+
+		".\t\3\2\2\2/\64\5\f\7\2\60\61\7\b\2\2\61\63\5\f\7\2\62\60\3\2\2\2\63\66"+
+		"\3\2\2\2\64\62\3\2\2\2\64\65\3\2\2\2\65\13\3\2\2\2\66\64\3\2\2\2\67<\5"+
+		"\16\b\289\7\t\2\29;\5\16\b\2:8\3\2\2\2;>\3\2\2\2<:\3\2\2\2<=\3\2\2\2="+
+		"\r\3\2\2\2><\3\2\2\2?D\5\20\t\2@A\7\7\2\2AC\5\20\t\2B@\3\2\2\2CF\3\2\2"+
+		"\2DB\3\2\2\2DE\3\2\2\2ES\3\2\2\2FD\3\2\2\2GO\5\20\t\2HJ\7\26\2\2IK\7$"+
+		"\2\2JI\3\2\2\2JK\3\2\2\2KL\3\2\2\2LN\5\20\t\2MH\3\2\2\2NQ\3\2\2\2OM\3"+
+		"\2\2\2OP\3\2\2\2PS\3\2\2\2QO\3\2\2\2R?\3\2\2\2RG\3\2\2\2S\17\3\2\2\2T"+
+		"W\5\22\n\2UV\t\3\2\2VX\5\22\n\2WU\3\2\2\2WX\3\2\2\2X\21\3\2\2\2YZ\t\4"+
+		"\2\2Z\\\7$\2\2[Y\3\2\2\2[\\\3\2\2\2\\]\3\2\2\2]^\5\24\13\2^\23\3\2\2\2"+
+		"_a\7\n\2\2`_\3\2\2\2`a\3\2\2\2ab\3\2\2\2bc\5\26\f\2c\25\3\2\2\2d|\7\3"+
+		"\2\2ef\7\23\2\2fg\5\6\4\2gh\7\24\2\2h|\3\2\2\2ij\t\5\2\2jk\7\23\2\2kl"+
+		"\5\6\4\2lm\7\24\2\2m|\3\2\2\2no\t\6\2\2op\7\23\2\2pq\5\6\4\2qr\7\24\2"+
+		"\2r|\3\2\2\2st\t\7\2\2tu\7\23\2\2uv\5\6\4\2vw\7%\2\2wx\5\6\4\2xy\7\24"+
+		"\2\2y|\3\2\2\2z|\7$\2\2{d\3\2\2\2{e\3\2\2\2{i\3\2\2\2{n\3\2\2\2{s\3\2"+
+		"\2\2{z\3\2\2\2|\27\3\2\2\2\17!&-\64<DJORW[`{";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
