@@ -6,15 +6,13 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Property {
 
 	public String name;
 
 	public int delay;
-
-	// bitWidth: 0 stands for "not specified yet" and -1 for "variable" (i.e.
-	// arbitrarily expandable, for constants)
 
 	public List<Property> children;
 
@@ -202,33 +200,33 @@ public class Property {
 
 	}
 
-	public void groupDelays() {
+	public void groupDelays(Map<String, Integer> identifiers) {
 
 		// this is the reverse operation of flatten
 
 		// it minimises the sum of delays across all nodes, effectively mapping
 		// an expression like (@1 a & @1 b) to (@1 (a & b))
 
-		if (isTerminal()) {
-
-			return;
-
-		} else {
+		if (!isTerminal()) {
 
 			for (Property c : children)
-				c.groupDelays();
+				c.groupDelays(identifiers);
+
+			if (name != "{") {
+
+				int minChildDelay = Integer.MAX_VALUE;
+
+				for (Property c : children)
+					minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
+
+				for (Property c : children)
+					c.delay -= minChildDelay;
+
+				delay += minChildDelay;
+
+			}
 
 		}
-
-		int minChildDelay = Integer.MAX_VALUE;
-
-		for (Property c : children)
-			minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
-
-		for (Property c : children)
-			c.delay -= minChildDelay;
-
-		delay += minChildDelay;
 
 	}
 

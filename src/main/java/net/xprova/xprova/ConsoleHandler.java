@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -760,6 +761,7 @@ public class ConsoleHandler {
 
 	}
 
+	//@formatter:off
 	@Command(
 		description = "generate state space graph",
 		help = {
@@ -767,6 +769,7 @@ public class ConsoleHandler {
 			"  space"
 		}
 	)
+	//@formatter:on
 	public void space() throws Exception {
 
 		// code:
@@ -815,7 +818,7 @@ public class ConsoleHandler {
 
 		out.println("Executing compiled code ...");
 
-		int genExitCode = executeProgram(runCodeGenCmd, true, true);
+		executeProgram(runCodeGenCmd, true, true); // TODO: check exit code and report if failed
 
 	}
 
@@ -1012,7 +1015,7 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		assumptions.add(PropertyBuilder.build(pStr));
+		assumptions.add(PropertyBuilder.build(pStr, getIdentifiers()));
 
 	}
 
@@ -1030,7 +1033,7 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		assertions.add(PropertyBuilder.build(pStr));
+		assertions.add(PropertyBuilder.build(pStr, getIdentifiers()));
 	}
 
 	//@formatter:off
@@ -1461,6 +1464,24 @@ public class ConsoleHandler {
 		File temp = new File(tempDir, filename);
 
 		return temp.getAbsolutePath();
+
+	}
+
+	private Map<String, Integer> getIdentifiers() throws Exception {
+
+		assertDesignLoaded();
+
+		HashMap<String, Integer> result = new HashMap<String, Integer>();
+
+		for (Vertex n : current.getNets()) {
+
+			String arrName = n.arraySize > 0 ? n.arrayName : n.name;
+
+			result.put(arrName, n.arraySize);
+
+		}
+
+		return result;
 
 	}
 

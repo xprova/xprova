@@ -1,6 +1,7 @@
 package net.xprova.propertylanguage;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -164,17 +165,45 @@ public class PropertyBuilder {
 
 	}
 
-	private static Property parseAST(ParseTree root) throws Exception {
+	private static Property parseAST(ParseTree root, Map<String, Integer> identifiers) throws Exception {
 
 		if (root.getChildCount() == 1) {
 
 			if (root.getPayload() instanceof AtomContext) {
 
-				return Property.build(root.getText());
+				String id = root.getText();
+
+				Integer bits = identifiers.get(id);
+
+				if (bits == null) {
+
+					throw new Exception("unrecognized identifier: " + id);
+
+				} else if (bits == 1) {
+
+					return Property.build(root.getText());
+
+				} else {
+
+					// multiple bits, insert grouping operator
+
+					Property g = Property.build("{");
+
+					for (int i=0; i<bits; i++) {
+
+						String strChild = String.format("%s[%d]", id, i);
+
+						g.addChild(Property.build(strChild));
+
+					}
+
+					return g;
+
+				}
 
 			} else {
 
-				return parseAST(root.getChild(0));
+				return parseAST(root.getChild(0), identifiers);
 
 			}
 
@@ -184,7 +213,7 @@ public class PropertyBuilder {
 
 			// NOT
 
-			Property child = parseAST(root.getChild(1));
+			Property child = parseAST(root.getChild(1), identifiers);
 
 			return Property.build(root.getChild(0).getText()).setChild(child);
 
@@ -197,7 +226,7 @@ public class PropertyBuilder {
 
 		if (Arrays.asList(funcs).contains(c0)) {
 
-			Property child = parseAST(root.getChild(2));
+			Property child = parseAST(root.getChild(2), identifiers);
 
 			return Property.build(c0).setChild(child);
 
@@ -208,7 +237,7 @@ public class PropertyBuilder {
 			Property result = Property.build(c1);
 
 			for (int i = 0; i < root.getChildCount(); i += 2)
-				result.addChild(parseAST(root.getChild(i)));
+				result.addChild(parseAST(root.getChild(i), identifiers));
 
 			return result;
 
@@ -249,7 +278,7 @@ public class PropertyBuilder {
 
 					// this is an identifier
 
-					Property childNode = parseAST(ci);
+					Property childNode = parseAST(ci, identifiers);
 
 					childNode.delay -= cumDelay;
 
@@ -267,8 +296,8 @@ public class PropertyBuilder {
 
 		if (Arrays.asList(twoOps).contains(c1)) {
 
-			Property op1 = parseAST(root.getChild(0));
-			Property op2 = parseAST(root.getChild(2));
+			Property op1 = parseAST(root.getChild(0), identifiers);
+			Property op2 = parseAST(root.getChild(2), identifiers);
 
 			return Property.build(c1).addChild(op1).addChild(op2);
 
@@ -276,13 +305,13 @@ public class PropertyBuilder {
 
 		if (c0.equals(LPAREN)) {
 
-			return parseAST(root.getChild(1));
+			return parseAST(root.getChild(1), identifiers);
 
 		}
 
 		if (c0.equals(AT)) {
 
-			Property expr = parseAST(root.getChild(2));
+			Property expr = parseAST(root.getChild(2), identifiers);
 
 			int delay = Integer.valueOf(c1);
 
@@ -292,7 +321,7 @@ public class PropertyBuilder {
 
 		if (c0.equals(HASH)) {
 
-			Property child = parseAST(root.getChild(2));
+			Property child = parseAST(root.getChild(2), identifiers);
 
 			int delay = -Integer.valueOf(c1);
 
@@ -304,15 +333,15 @@ public class PropertyBuilder {
 
 			if (root.getChildCount() == 6) {
 
-				Property trigger = parseAST(root.getChild(2));
+				Property trigger = parseAST(root.getChild(2), identifiers);
 
-				Property expr = parseAST(root.getChild(4));
+				Property expr = parseAST(root.getChild(4), identifiers);
 
 				return Property.build(EVENTUALLY).addChild(trigger).addChild(expr);
 
 			} else if (root.getChildCount() == 4) {
 
-				Property expr = parseAST(root.getChild(2));
+				Property expr = parseAST(root.getChild(2), identifiers);
 
 				return Property.build(EVENTUALLY).addChild(expr);
 
@@ -322,9 +351,9 @@ public class PropertyBuilder {
 
 		if (c0.equals(UNTIL) | c0.equals(WHEN)) {
 
-			Property trigger = parseAST(root.getChild(2));
+			Property trigger = parseAST(root.getChild(2), identifiers);
 
-			Property expr = parseAST(root.getChild(4));
+			Property expr = parseAST(root.getChild(4), identifiers);
 
 			return Property.build(c0).addChild(trigger).addChild(expr);
 
@@ -336,7 +365,7 @@ public class PropertyBuilder {
 
 	}
 
-	public static Property build(String str) throws Exception {
+	public static Property build(String str, Map<String, Integer> identifiers) throws Exception {
 
 		// step 1: generate property AST
 
@@ -352,7 +381,7 @@ public class PropertyBuilder {
 
 		// step 2: traverse AST to generate expression tree
 
-		Property root = parseAST(e.getChild(0));
+		Property root = parseAST(e.getChild(0), identifiers);
 
 		// step 3: process syntactic sugar
 
@@ -364,7 +393,7 @@ public class PropertyBuilder {
 
 		root.addDelayRecur(-root.getMinDelay(0));
 
-		root.groupDelays();
+		root.groupDelays(identifiers);
 
 		root.print();
 

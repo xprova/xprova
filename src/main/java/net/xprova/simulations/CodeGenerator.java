@@ -174,35 +174,7 @@ public class CodeGenerator {
 
 				if (v == null) {
 
-					Vertex v0 = graph.getVertex(root.name + "[0]");
-
-					if (v0 == null) {
-
-						throw new Exception("graph does not contain identifier " + root.name);
-
-					} else {
-
-						// `root.name` refers to a net array
-
-						Vertex g = addPropertyModule(graph, "GROUP");
-
-						int count = v0.arraySize;
-
-						for (int i = 0; i < count; i++) {
-
-							Vertex vi = graph.getVertex(String.format("%s[%d]", root.name, i));
-
-							graph.addConnection(vi, g, "" + i);
-
-						}
-
-						Vertex gout = addPropertyNet(graph);
-
-						graph.addConnection(g, gout, "y");
-
-						return gout;
-
-					}
+					throw new Exception("graph does not contain identifier " + root.name);
 
 				} else {
 
@@ -344,6 +316,27 @@ public class CodeGenerator {
 			return output;
 
 		}
+
+		if (root.name.equals("{")) {
+
+			Vertex g = addPropertyModule(graph, "GROUP");
+
+			for (int i = 0; i < root.children.size(); i++) {
+
+				Vertex child = addProperty(graph, root.children.get(i), clk, rst, set);
+
+				graph.addConnection(child, g, "" + i);
+
+			}
+
+			Vertex gout = addPropertyNet(graph);
+
+			graph.addConnection(g, gout, "y");
+
+			return gout;
+
+		}
+
 
 		throw new Exception("property operator not yet implemented");
 
