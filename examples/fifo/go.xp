@@ -1,8 +1,38 @@
 library load lib/xprova.v
 
-read -b examples/fifo/fifo.v
+read -b examples/fifo/fifo2.v
+
+# assumptions about the environment:
+
+# 1. write is never asserted when the fifo is full
+
+assume full |=> ~write
+
+# 2. read is never asserted whenthe fifo is empty
+
+assume empty |=> ~read
+
+# assertions:
+
+# 1. the fifo is never both empty and full
 
 assert ~(empty & full)
-assert empty & write |=> ~empty
+
+# 2. when write is asserted, the fifo is not empty the folowing cycle
+
+assert write |=> ~empty
+
+# 3. when read is asserted, the fifo is not full the folowing cycle
+
+assert read |=> ~full
+
+# 4. If a single write was performed, then as soon as the fifo is not empty,
+# item_out has the same value item_in had when write was asserted
+
+assert ($always($once(write) |=> ~write)) |-> (~empty |-> (item_out == $when(write, item_in)))
+
+# prove
 
 prove -kg
+
+dot -e=CK,RS,ST -m --pdf output/netlist.pdf
