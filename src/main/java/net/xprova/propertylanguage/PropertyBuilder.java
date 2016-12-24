@@ -160,6 +160,62 @@ public class PropertyBuilder {
 
 		}
 
+		// $when(t, {x1, x2, ...}) into {$when(t, x1), $when(t, x2), ...}
+		// same for other functions in group1 below
+
+		final String[] group1 = { WHEN, UNTIL };
+
+		if (Arrays.asList(group1).contains(root.name)) {
+
+			Property t = root.children.get(0);
+
+			Property expr = root.children.get(1);
+
+			if (expr.name.equals("{")) {
+
+				String oldRootName = root.name;
+
+				root.setName("{").children.clear();
+
+				for (Property x : expr.children) {
+
+					Property when = Property.build(oldRootName).addChild(t).addChild(x);
+
+					root.addChild(when);
+
+				}
+
+			}
+
+		}
+
+		// $always({x1, x2, ...}) into {$always(x1), $always(t, x2), ...}
+		// same for other functions in group2 below
+
+		final String[] group2 = { ROSE, FELL, STABLE, CHANGED, ALWAYS, NEVER, ONCE };
+
+		if (Arrays.asList(group2).contains(root.name)) {
+
+			Property expr = root.children.get(0);
+
+			if (expr.name.equals("{")) {
+
+				String oldRootName = root.name;
+
+				root.setName("{").children.clear();
+
+				for (Property x : expr.children) {
+
+					Property when = Property.build(oldRootName).addChild(x);
+
+					root.addChild(when);
+
+				}
+
+			}
+
+		}
+
 		for (Property c : root.children)
 			rewriteSyntaticSugar(c);
 
@@ -189,7 +245,7 @@ public class PropertyBuilder {
 
 					Property g = Property.build("{");
 
-					for (int i=0; i<bits; i++) {
+					for (int i = 0; i < bits; i++) {
 
 						String strChild = String.format("%s[%d]", id, i);
 
