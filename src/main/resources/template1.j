@@ -7,8 +7,8 @@ import java.util.Stack;
 
 public class CodeSimulator {
 
-	public static final int L = 0;
-	public static final int H = -1;
+	public static final long L = 0;
+	public static final long H = -1;
 
 	public static void main(String args[]) throws Exception {
 
@@ -17,7 +17,7 @@ public class CodeSimulator {
 
 		CodeSimulator sim1 = new CodeSimulator();
 
-		int initial = sim1.getResetState();
+		long initial = sim1.getResetState();
 
 		File  txtFile = null;
 
@@ -30,7 +30,7 @@ public class CodeSimulator {
 
 		}
 
-		int[] counterExample = sim1.exploreSpace(initial);
+		long[] counterExample = sim1.exploreSpace(initial);
 
 		if (counterExample != null) {
 
@@ -45,14 +45,14 @@ public class CodeSimulator {
 
 	}
 
-	public int getResetState() {
+	public long getResetState() {
 
 		// return {RESET_STATE};
 
 	}
 
 	@SuppressWarnings("unused")
-	public int[] exploreSpace(int initial) throws Exception {
+	public long[] exploreSpace(long initial) throws Exception {
 
 		// method parameters:
 
@@ -64,7 +64,7 @@ public class CodeSimulator {
 
 		boolean printStateList = false;
 
-		final int UNDISCOVERED = 0x55555555;
+		final long UNDISCOVERED = 0x55555555;
 
 		// method body:
 
@@ -74,23 +74,23 @@ public class CodeSimulator {
 		//@formatter:on
 
 		//@formatter:off
-		// int {STATE_BIT} = -(initial >> {STATE_BIT_INDEX} & 1);
+		// long {STATE_BIT} = -(initial >> {STATE_BIT_INDEX} & 1);
 		//@formatter:on
 
 		//@formatter:off
-		// int {NON_STATE_BIT};
+		// long {NON_STATE_BIT};
 		//@formatter:on
 
-		int[] toVisitArr = new int[1];
+		long[] toVisitArr = new long[1];
 		toVisitArr[0] = initial;
-		int toVisitArrOccupied = 1;
+		long toVisitArrOccupied = 1;
 
 		int distance = 0;
 
-		int in; // input vector
+		long in; // input vector
 
-		int[] parentState = new int[STATE_BUF_SIZE];
-		int[] inputVector = new int[STATE_BUF_SIZE];
+		long[] parentState = new long[STATE_BUF_SIZE];
+		long[] inputVector = new long[STATE_BUF_SIZE];
 
 		Arrays.fill(parentState, UNDISCOVERED);
 
@@ -102,18 +102,18 @@ public class CodeSimulator {
 
 		long statesDiscovered = 0;
 
-		int violationState = UNDISCOVERED;
+		long violationState = UNDISCOVERED;
 
-		int[][] buf = new int[2][DISCOVERED_BUF_SIZE];
+		long[][] buf = new long[2][DISCOVERED_BUF_SIZE];
 
 		int bufSelector = 0;
 
-		int state = initial;
+		long state = initial;
 
-		int all_assumptions;
-		int all_assertions;
+		long all_assumptions;
+		long all_assertions;
 
-		Stack<Integer> rList = new Stack<Integer>();
+		Stack<Long> rList = new Stack<Long>();
 
 		System.out.println("Starting search ...");
 
@@ -123,7 +123,7 @@ public class CodeSimulator {
 
 			bufSelector = 1 - bufSelector;
 
-			int[] toVisitNextArr = buf[bufSelector];
+			long[] toVisitNextArr = buf[bufSelector];
 
 			int toVisitNextArrOccupied = 0;
 
@@ -137,23 +137,25 @@ public class CodeSimulator {
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
 				//@formatter:on
 
-				int inputPermutes = 1 << (inputBitCount);
+				long inputPermutes = 1 << (inputBitCount);
 
 				for (in = 0; in < inputPermutes; in++) {
 
 					//@formatter:off
-					// int {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
+					// long {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
 					//@formatter:on
 
 					//@formatter:off
 					// {COMB_ASSIGN}
 					//@formatter:on
 
-					int nxState = 0;
+					long nxState2 = 0;
 
 					//@formatter:off
-					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
+					// nxState2 |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 					//@formatter:on
+
+					int nxState = (int) nxState2;
 
 					if (parentState[nxState] == UNDISCOVERED) {
 
@@ -215,7 +217,7 @@ public class CodeSimulator {
 
 			System.out.printf("Counter-example found (distance = %d)!\n", distance);
 
-			int currentState = violationState;
+			int currentState = (int) violationState;
 
 			int transitions = distance;
 
@@ -228,12 +230,12 @@ public class CodeSimulator {
 
 				rList.add(inputVector[currentState]);
 
-				currentState = parentState[currentState];
+				currentState = (int) parentState[currentState];
 
 				transitions--;
 			}
 
-			int[] result = new int[distance + 1];
+			long[] result = new long[distance + 1];
 
 			for (int j = 0; j < distance + 1; j++)
 				result[j] = rList.pop();
@@ -279,29 +281,29 @@ public class CodeSimulator {
 		//@formatter:on
 	}
 
-	public void simulate(int initial, int[] inputs, File txtFile) throws Exception {
+	public void simulate(long initial, long[] inputs, File txtFile) throws Exception {
 
 		ArrayList<String> sigNames = getSignalNames();
 
-		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
+		ArrayList<long[]> waveforms = simulate_internal(initial, inputs);
 
 		if (txtFile != null)
 			generateTextFile(sigNames, waveforms, txtFile);
 
 	}
 
-	private ArrayList<int[]> simulate_internal(int initial, int[] inputs) {
+	private ArrayList<long[]> simulate_internal(long initial, long[] inputs) {
 
 		int cycles = inputs.length;
 
 		//@formatter:off
-		// int[] {STATE_BIT} = new int[cycles];
+		// long[] {STATE_BIT} = new long[cycles];
 
-		// int[] {INPUT_BIT} = new int[cycles];
+		// long[] {INPUT_BIT} = new long[cycles];
 
 		// {STATE_BIT}[0] = -(initial >> {STATE_BIT_INDEX} & 1);
 
-		// int[] {NON_STATE_BIT} = new int[cycles];
+		// long[] {NON_STATE_BIT} = new long[cycles];
 		//@formatter:on
 
 		for (int i = 0; i < cycles; i++) {
@@ -321,7 +323,7 @@ public class CodeSimulator {
 
 		}
 
-		ArrayList<int[]> waveforms = new ArrayList<int[]>();
+		ArrayList<long[]> waveforms = new ArrayList<long[]>();
 
 		//@formatter:off
 		// waveforms.add({STATE_BIT});
@@ -334,14 +336,14 @@ public class CodeSimulator {
 		return waveforms;
 	}
 
-	private String getBinary(int num, int digits) {
+	private String getBinary(long num, long digits) {
 
 		String bitFmt = String.format("%%%ds", digits);
 
-		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
+		return String.format(bitFmt, Long.toBinaryString(num)).replace(' ', '0');
 	}
 
-	private void generateTextFile(ArrayList<String> sigNames, ArrayList<int[]> waveforms, File txtFile)
+	private void generateTextFile(ArrayList<String> sigNames, ArrayList<long[]> waveforms, File txtFile)
 			throws FileNotFoundException {
 
 		// prepare file content
@@ -361,11 +363,11 @@ public class CodeSimulator {
 
 			StringBuilder sb = new StringBuilder(l);
 
-			int[] sigWaveform = waveforms.get(i);
+			long[] sigWaveform = waveforms.get(i);
 
 			for (int j = 0; j < sigWaveform.length; j++) {
 
-				int v = sigWaveform[j];
+				long v = sigWaveform[j];
 
 				if (v == -1)
 					sb.append("1");
