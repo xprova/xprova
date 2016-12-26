@@ -887,7 +887,7 @@ public class ConsoleHandler {
 
 		boolean useDepthTemplate = line.hasOption("d");
 
-		final String codeGenTemplateFile = useDepthTemplate ? "template2.j" : "template1.j";
+		final String codeGenTemplateFile = useDepthTemplate ? "template2.j" : "template4.j";
 
 		final String codeGenClassName = "CodeSimulator";
 
@@ -905,7 +905,7 @@ public class ConsoleHandler {
 
 		String compileCmd = "javac " + javaFile;
 
-		String runCodeGenCmd = String.format("java -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
+		String runCodeGenCmd = String.format("java -Xms512M -Xmx2048M -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
 
 		// generate code
 
