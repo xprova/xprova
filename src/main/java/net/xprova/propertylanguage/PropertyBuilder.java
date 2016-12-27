@@ -460,8 +460,6 @@ public class PropertyBuilder {
 
 		root.groupDelays(identifiers);
 
-		root.print();
-
 		return root;
 
 	}

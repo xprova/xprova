@@ -1509,9 +1509,10 @@ public class ConsoleHandler {
 
 		for (Vertex n : current.getNets()) {
 
-			String arrName = n.arraySize > 0 ? n.arrayName : n.name;
+			result.put(n.name, 1);
 
-			result.put(arrName, n.arraySize);
+			if (n.arraySize > 0)
+				result.put(n.arrayName, n.arraySize);
 
 		}
 
