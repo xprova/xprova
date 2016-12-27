@@ -45,6 +45,8 @@ public class PropertyBuilder {
 	public static final String ANY = "$any";
 	public static final String ALL = "$all";
 
+	public static final String[] comparisonOps = { EQ, NEQ, LT, GT, LE, GE };
+
 	private static void rewriteSyntaticSugar(Property root) {
 
 		// $until(x,y) into $never(x) |-> y

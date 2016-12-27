@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -225,6 +226,61 @@ public class Property {
 			delay += minChildDelay;
 
 		}
+
+	}
+
+	public int recurCheck(Map<String, Integer> identifiers, boolean insideGroup) throws Exception {
+
+		// this function checks for the unsupported property expression constructs:
+		//
+		// 1. delayed multi-bit identifiers
+		// 2. comparison between identifiers of different bit widths
+
+		int bits;
+
+		if (isTerminal()) {
+
+			bits = isNumber() ? -1 : identifiers.get(name);
+
+		} else {
+
+			ArrayList<Integer> childBits = new ArrayList<Integer>();
+
+			for (Property c : children) {
+
+				int b = c.recurCheck(identifiers, insideGroup || name.equals("{"));
+
+				if (b != -1)
+					childBits.add(b);
+
+			}
+
+			// check that all children have the same bit width
+
+			for (int b : childBits)
+				if (b != childBits.get(0))
+					throw new Exception("bit width mismatch in property expression");
+
+			if (name.equals("{")) {
+
+				bits = children.size();
+
+			} else if (Arrays.asList(PropertyBuilder.comparisonOps).contains(name)) {
+
+				bits = 1;
+
+			} else {
+
+				bits = childBits.isEmpty() ? -1 : childBits.get(0);
+
+			}
+
+		}
+
+		if (bits != 1 && delay != 0)
+			throw new Exception("Found a delayed multi-bit net in property expression:\n" + toString());
+
+		return bits;
 
 	}
 
