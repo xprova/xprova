@@ -229,6 +229,10 @@ public class PropertyBuilder {
 
 				String id = root.getText();
 
+				if (isInteger(id)) {
+					return Property.build(id);
+				}
+
 				Integer bits = identifiers.get(id);
 
 				if (bits == null) {
@@ -419,6 +423,11 @@ public class PropertyBuilder {
 
 		throw new Exception("error while traversing property AST");
 
+	}
+
+	private static boolean isInteger(String str) {
+
+		return str.matches("\\d+(\\d+)?");
 	}
 
 	public static Property build(String str, Map<String, Integer> identifiers) throws Exception {
