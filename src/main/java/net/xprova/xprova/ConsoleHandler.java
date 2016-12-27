@@ -818,7 +818,9 @@ public class ConsoleHandler {
 
 		out.println("Executing compiled code ...");
 
-		executeProgram(runCodeGenCmd, true, true); // TODO: check exit code and report if failed
+		// TODO: check exit code and report if failed:
+
+		executeProgram(runCodeGenCmd, true, true);
 
 	}
 
@@ -887,7 +889,7 @@ public class ConsoleHandler {
 
 		boolean useDepthTemplate = line.hasOption("d");
 
-		final String codeGenTemplateFile = useDepthTemplate ? "template2.j" : "template4.j";
+		final String codeGenTemplateFile = useDepthTemplate ? "template2.j" : "template1.j";
 
 		final String codeGenClassName = "CodeSimulator";
 
@@ -905,7 +907,8 @@ public class ConsoleHandler {
 
 		String compileCmd = "javac " + javaFile;
 
-		String runCodeGenCmd = String.format("java -Xmx6g  -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
+		String runCodeGenCmd = String.format("java -Xmx6g  -classpath %s %s %s", getTempFile(""), codeGenClassName,
+				txtArg);
 
 		// generate code
 
@@ -942,6 +945,9 @@ public class ConsoleHandler {
 
 		if (genExitCode == 100) {
 
+			// 100 is a special exit code for terminating successfully after
+			// finding a counter-example
+
 			boolean runGtkwave = line.hasOption("g");
 
 			boolean printToConsole = line.hasOption("p");
@@ -973,6 +979,10 @@ public class ConsoleHandler {
 					counter.printWaveJSON(System.out);
 
 			}
+
+		} else if (genExitCode != 0) {
+
+			throw new Exception("state space exploration failed");
 
 		}
 
@@ -1015,7 +1025,13 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		assumptions.add(PropertyBuilder.build(pStr, getIdentifiers()));
+		Property p = PropertyBuilder.build(pStr, getIdentifiers());
+
+		System.out.println("Assumption : " + pStr);
+
+		p.print();
+
+		assumptions.add(p);
 
 	}
 
@@ -1033,7 +1049,13 @@ public class ConsoleHandler {
 
 		String pStr = String.join(" ", args);
 
-		assertions.add(PropertyBuilder.build(pStr, getIdentifiers()));
+		Property p = PropertyBuilder.build(pStr, getIdentifiers());
+
+		System.out.println("Assertion : " + pStr);
+
+		p.print();
+
+		assertions.add(p);
 	}
 
 	//@formatter:off
@@ -1165,23 +1187,35 @@ public class ConsoleHandler {
 
 		BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 
-		String s;
+		String sErr = "", sOut = "";
 
-		do {
+		ArrayList<String> errLines = new ArrayList<String>();
 
-			while ((s = stdError.readLine()) != null)
-				if (showOutput)
-					out.println(s);
+		// stderr of the process must be read to prevent the process from
+		// blocking. The read err lines are current stored in a list so that the
+		// can be printed after stdout messages (the latter printed as they are
+		// read)
 
-			while ((s = stdInput.readLine()) != null)
-				if (showOutput)
-					out.println(s);
+		if (waitFor)
+			while (sErr != null || sOut != null) {
 
-		} while (proc.isAlive() && waitFor);
+				sErr = stdError.readLine();
+				sOut = stdInput.readLine();
+
+				if (sErr != null)
+					errLines.add(sErr);
+
+				if (sOut != null)
+					System.out.println(sOut);
+
+			}
 
 		stdInput.close();
 
 		stdError.close();
+
+		for (String s : errLines)
+			System.out.println(s);
 
 		if (waitFor) {
 
