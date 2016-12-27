@@ -905,7 +905,7 @@ public class ConsoleHandler {
 
 		String compileCmd = "javac " + javaFile;
 
-		String runCodeGenCmd = String.format("java -Xms512M -Xmx2048M -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
+		String runCodeGenCmd = String.format("java -Xmx6g  -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
 
 		// generate code
 
