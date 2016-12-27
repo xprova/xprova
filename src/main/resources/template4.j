@@ -53,13 +53,48 @@ public class CodeSimulator {
 
 	public int getHash(long key, int bank) {
 
-		return bank == 0 ? (int) key : (int) (key >> 32);
+		if (bank == 0) {
+
+			return (int) key;
+
+		} else {
+
+			key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+			key = key ^ (key >>> 31);
+			key = key * 21; // key = (key + (key << 2)) + (key << 4);
+			key = key ^ (key >>> 11);
+			key = key + (key << 6);
+			key = key ^ (key >>> 22);
+			return (int) key;
+		}
 
 	}
 
 	public int calIndex(int bank, int hash, int field) {
 
 		return hash * (3 * 2) + (bank * 3) + field;
+
+	}
+
+	public String getByteSize(long bytes) {
+
+		if (bytes < 1024) {
+
+			return String.format("%d bytes", bytes);
+
+		} else if (bytes < 1024 * 1024) {
+
+			return String.format("%1.2f KB", (float) bytes / 1024);
+
+		} else if (bytes < 1024 * 1024 * 1024) {
+
+			return String.format("%1.2f MB", (float) bytes / 1024 / 1024);
+
+		} else {
+
+			return String.format("%1.2f GB", (float) bytes / 1024 / 1024 / 1024);
+
+		}
 
 	}
 
@@ -70,9 +105,9 @@ public class CodeSimulator {
 
 		final int DISCOVERED_BUF_SIZE = 1 << 24;
 
-		final int cucko_swap_maximum = 50;
+		final int cucko_swap_maximum = 150;
 
-		final int BUF_SIZE_2_LOG2 = 26;
+		final int BUF_SIZE_2_LOG2 = 25;
 
 		final boolean printStateList = false;
 
@@ -94,7 +129,7 @@ public class CodeSimulator {
 
 		// initialize hash table
 
-		int TAB_SIZE = 6 * BUF_SIZE_2;
+		int TAB_SIZE = 2 * 6 * BUF_SIZE_2;
 
 		long[] TAB = new long[TAB_SIZE];
 
@@ -114,7 +149,9 @@ public class CodeSimulator {
 
 		int distance = 0;
 
-		long statesDiscovered = 0;
+		long statesVisited = 0;
+
+		long statesDiscovered = 1;
 
 		long state = 0;
 
@@ -124,9 +161,9 @@ public class CodeSimulator {
 
 		// performance counters
 
-		long found_counter = 0;
+		long cache_hit_counter = 0;
 
-		long notfound_counter = 0;
+		long cache_miss_counter = 0;
 
 		long total_cuckoo_swaps = 0;
 
@@ -152,7 +189,7 @@ public class CodeSimulator {
 
 				state = toVisitArr[i1];
 
-				statesDiscovered += 1;
+				statesVisited += 1;
 
 				//@formatter:off
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
@@ -173,10 +210,8 @@ public class CodeSimulator {
 					long nxState2 = 0;
 
 					//@formatter:off
-					// nxState2 |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
+					// nxState2 |= {NEXT_STATE_BIT} & ((long) 1 << {STATE_BIT_INDEX});
 					//@formatter:on
-
-					boolean use_cuckoo = true;
 
 					boolean found = false;
 
@@ -203,14 +238,17 @@ public class CodeSimulator {
 
 					}
 
-					found_counter += found ? 1 : 0;
-					notfound_counter += found ? 0 : 1;
+					cache_hit_counter += found ? 1 : 0;
+
+					cache_miss_counter += found ? 0 : 1;
 
 					if (!found) {
 
 						toVisitNextArr[toVisitNextArrOccupied] = nxState2;
 
 						toVisitNextArrOccupied += 1;
+
+						statesDiscovered += 1;
 
 						// attempt to insert record in `table`
 
@@ -252,6 +290,8 @@ public class CodeSimulator {
 
 								bank = 1 - bank;
 
+								total_cuckoo_swaps += 1;
+
 							} else {
 
 								TAB[calIndex(bank, hash, 0)] = insert_record_state;
@@ -261,7 +301,6 @@ public class CodeSimulator {
 							}
 
 							swap_counter += 1;
-							total_cuckoo_swaps += 1;
 
 							if (swap_counter > cucko_swap_maximum)
 								throw new Exception("maximum number of cuckoo swaps reached");
@@ -310,19 +349,37 @@ public class CodeSimulator {
 
 		double searchTime = (endTime - startTime) / 1e9;
 
-		System.out.printf("Completed search in %f seconds\n", searchTime);
+		long cache_accesses = cache_hit_counter + cache_miss_counter;
 
-		System.out.printf("States discovered = %d\n", statesDiscovered);
+		double found_perc = 1.0 * cache_hit_counter / cache_accesses * 100;
 
-		System.out.printf("Total cuckoo swaps = %d\n", total_cuckoo_swaps);
+		double notfound_perc = 1.0 * cache_miss_counter / cache_accesses * 100;
 
-		System.out.printf("Total cuckoo insertions = %d\n", total_cuckoo_insertions);
+		System.out.printf("Completed search in %1.2f sec\n\n", searchTime);
 
-		System.out.printf("average cuckoo swaps = %f\n", 1.0 * total_cuckoo_swaps / total_cuckoo_insertions);
+		System.out.printf("State bits                    : %d\n", getStateBitCount());
 
-		System.out.printf("found_counter = %d\n", found_counter);
+		System.out.printf("Input bits                    : %d\n", getInputBitCount());
 
-		System.out.printf("notfound_counter = %d\n", notfound_counter);
+		System.out.printf("Cache size                    : %s\n", getByteSize(2 * 3 * 8 * ((long) 1 << BUF_SIZE_2_LOG2+1)));
+
+		System.out.printf("State array size              : %s\n", getByteSize(2 * 8 * (DISCOVERED_BUF_SIZE)));
+
+		System.out.printf("States visited                : %d\n", statesVisited);
+
+		System.out.printf("States discovered             : %d\n", statesDiscovered);
+
+		System.out.printf("Cuckoo swaps (total)          : %d\n", total_cuckoo_swaps);
+
+		System.out.printf("Cuckoo swaps (mean / insert)  : %f\n", 1.0 * total_cuckoo_swaps / total_cuckoo_insertions);
+
+		System.out.printf("Cuckoo insertions (total)     : %d\n", total_cuckoo_insertions);
+
+		System.out.printf("Cache hits                    : %d (%1.1f%%)\n", cache_hit_counter, found_perc);
+
+		System.out.printf("Cache misses                  : %d (%1.1f%%)\n", cache_miss_counter, notfound_perc);
+
+		System.out.println("");
 
 		if (!rList.isEmpty()) {
 
@@ -365,7 +422,8 @@ public class CodeSimulator {
 
 				}
 
-				// end of cuckoo section
+				if (!found)
+					throw new Exception("Error while generating counter-example: state not present in cache");
 
 				transitions--;
 			}
