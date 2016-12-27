@@ -103,11 +103,11 @@ public class CodeSimulator {
 
 		// method parameters:
 
-		final int DISCOVERED_BUF_SIZE = 1 << 24;
+		final int DISCOVERED_BUF_SIZE = 1 << 27;
 
 		final int cucko_swap_maximum = 150;
 
-		final int BUF_SIZE_2_LOG2 = 25;
+		final int BUF_SIZE_2_LOG2 = 24;
 
 		final boolean printStateList = false;
 
@@ -363,7 +363,7 @@ public class CodeSimulator {
 
 		System.out.printf("Cache size                    : %s\n", getByteSize(2 * 3 * 8 * ((long) 1 << BUF_SIZE_2_LOG2+1)));
 
-		System.out.printf("State array size              : %s\n", getByteSize(2 * 8 * (DISCOVERED_BUF_SIZE)));
+		System.out.printf("State array size              : %s\n", getByteSize(2 * 8 * ((long) DISCOVERED_BUF_SIZE)));
 
 		System.out.printf("States visited                : %d\n", statesVisited);
 
