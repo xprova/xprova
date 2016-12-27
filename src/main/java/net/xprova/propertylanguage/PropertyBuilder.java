@@ -216,6 +216,18 @@ public class PropertyBuilder {
 
 		}
 
+		// unwrap parenthesis around single child
+
+		if (root.name.equals("(") && root.children.size() == 1) {
+
+			Property c = root.children.get(0);
+
+			int newDelay = root.delay + c.delay;
+
+			root.copyFrom(c).delay(newDelay);
+
+		}
+
 		for (Property c : root.children)
 			rewriteSyntaticSugar(c);
 
