@@ -295,11 +295,11 @@ public class CodeGenerator {
 
 			Vertex output = addPropertyNet(graph);
 
-			graph.addConnection(op1, mod);
+			graph.addConnection(op1, mod, "a");
 
-			graph.addConnection(op2, mod);
+			graph.addConnection(op2, mod, "b");
 
-			graph.addConnection(mod, output);
+			graph.addConnection(mod, output, "y");
 
 			return output;
 
@@ -967,33 +967,37 @@ public class CodeGenerator {
 
 				} else if ("<".equals(driver.subtype)) {
 
-					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+					String netA = jNetNames.get(graph.getNet(driver, "a"));
+					String netB = jNetNames.get(graph.getNet(driver, "b"));
 
-					line = String.format(strLT, nNameJ, net1, net2);
+					line = String.format(strLT, nNameJ, netA, netB);
 
 					assigns.add(line);
 
 				} else if (">".equals(driver.subtype)) {
 
-					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+					String netA = jNetNames.get(graph.getNet(driver, "a"));
+					String netB = jNetNames.get(graph.getNet(driver, "b"));
 
-					line = String.format(strGT, nNameJ, net1, net2);
+					line = String.format(strGT, nNameJ, netA, netB);
 
 					assigns.add(line);
 
 				} else if ("<=".equals(driver.subtype)) {
 
-					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+					String netA = jNetNames.get(graph.getNet(driver, "a"));
+					String netB = jNetNames.get(graph.getNet(driver, "b"));
 
-					line = String.format(strLE, nNameJ, net1, net2);
+					line = String.format(strLE, nNameJ, netA, netB);
 
 					assigns.add(line);
 
 				} else if (">=".equals(driver.subtype)) {
 
-					String net2 = inputs.size() > 0 ? jNetNames.get(inputs.get(1)) : "";
+					String netA = jNetNames.get(graph.getNet(driver, "a"));
+					String netB = jNetNames.get(graph.getNet(driver, "b"));
 
-					line = String.format(strGE, nNameJ, net1, net2);
+					line = String.format(strGE, nNameJ, netA, netB);
 
 					assigns.add(line);
 
