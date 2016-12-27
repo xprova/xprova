@@ -83,13 +83,15 @@ public class Property {
 
 	}
 
-	public void copyFrom(Property other) {
+	public Property copyFrom(Property other) {
 
 		this.name = other.name;
 
 		this.delay = other.delay;
 
 		this.children = other.children;
+
+		return this;
 
 	}
 
@@ -212,19 +214,15 @@ public class Property {
 			for (Property c : children)
 				c.groupDelays(identifiers);
 
-			if (name != "{") {
+			int minChildDelay = Integer.MAX_VALUE;
 
-				int minChildDelay = Integer.MAX_VALUE;
+			for (Property c : children)
+				minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
 
-				for (Property c : children)
-					minChildDelay = c.delay < minChildDelay ? c.delay : minChildDelay;
+			for (Property c : children)
+				c.delay -= minChildDelay;
 
-				for (Property c : children)
-					c.delay -= minChildDelay;
-
-				delay += minChildDelay;
-
-			}
+			delay += minChildDelay;
 
 		}
 
