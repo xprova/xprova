@@ -87,9 +87,9 @@ public class CodeSimulator {
 
 		int in = 0; // input vector
 
-		int statesDiscovered = 1;
+		int statesDiscovered = 0;
 
-		int statesVisited = 0;
+		int statesVisited = -1; // to offset the two visits to `initial`
 
 		boolean counter_example_found = false;
 
@@ -159,42 +159,51 @@ public class CodeSimulator {
 					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 					//@formatter:on
 
-					if ((parentState[nxState] & DMASK) == 0) {
-
-						statesDiscovered++;
-
-						toVisitNextArr[toVisitNextArrOccupied] = nxState;
-
-						toVisitNextArrOccupied++;
-
-						parentState[nxState] = state | DMASK;
-
-						inputVector[nxState] = in;
-
-					}
+					// check assumptions
 
 					union_assumptions = H;
 
 					union_assertions = H;
 
-					// In the code below we logically AND all assumptions
-					// and assertions.
-
-					// We don't want any property to evaluate to false until
-					// we're at least {MAXDELAY} transitions away from the
-					// initial state, where {MAXDELAY} is the max depth of
-					// flip-flop chains within the property.
-
 					//@formatter:off
 					// union_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? L : H);
+					//@formatter:on
+
+					//@formatter:off
 					// union_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? L : H);
 					//@formatter:on
 
-					if (union_assumptions == H && union_assertions == L) {
+					if (union_assumptions == H) {
 
-						counter_example_found = true;
+						// check assertions
 
-						break search_loop;
+						if (union_assertions == L) {
+
+							counter_example_found = true;
+
+							break search_loop;
+
+						}
+
+						// Note: we check if state is discovered only if all
+						// assumptions hold. This avoids accessing
+						// `parentState` when it's not really needed.
+
+						boolean undiscovered = (parentState[nxState] & DMASK) == 0;
+
+						if (undiscovered) {
+
+							statesDiscovered++;
+
+							toVisitNextArr[toVisitNextArrOccupied] = nxState;
+
+							toVisitNextArrOccupied++;
+
+							parentState[nxState] = state | DMASK;
+
+							inputVector[nxState] = in;
+
+						}
 
 					}
 
