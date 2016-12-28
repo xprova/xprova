@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.Stack;
 
@@ -54,28 +55,61 @@ public class CodeSimulator {
 	@SuppressWarnings("unused")
 	public int[] exploreSpace(int initial) throws Exception {
 
+		int stateBitCount = getStateBitCount();
+
+		int inputBitCount = getInputBitCount();
+
+		int DMASK = 1 << 31;
+
 		// method parameters:
 
-		//@formatter:off
-		// final int STATE_BUF_SIZE = 1 << {STATE_BIT_COUNT};
-		//@formatter:on
+		final int STATE_BUF_SIZE = 1 << stateBitCount;
 
-		final int DISCOVERED_BUF_SIZE = STATE_BUF_SIZE;
+		final int DISCOVERED_BUF_SIZE = 1 << stateBitCount - 2;
 
 		boolean printStateList = false;
 
-		final int UNDISCOVERED = 0x55555555;
-
-		// method body:
-
-		int stateBitCount = getStateBitCount();
-		int inputBitCount = getInputBitCount();
+		// memory usage checks:
 
 		if (stateBitCount > 29)
 			throw new Exception(String.format("Memory requirements exceed 4 GB (state bits = %d)", stateBitCount));
 
 		if (inputBitCount > 32)
 			throw new Exception(String.format("Input vector not representable as int type (input bits = %d)", inputBitCount));
+
+		// search variables
+
+		int[] toVisitArr = { initial };
+
+		int toVisitArrOccupied = 1;
+
+		int distance = 0;
+
+		int in = 0; // input vector
+
+		int statesDiscovered = 1;
+
+		int statesVisited = 0;
+
+		boolean counter_example_found = false;
+
+		int bufSelector = 0;
+
+		int state = initial;
+
+		int union_assumptions;
+
+		int union_assertions;
+
+		// state LUT and discovery arrays
+
+		int[] parentState = new int[STATE_BUF_SIZE];
+
+		int[] inputVector = new int[STATE_BUF_SIZE];
+
+		int[][] buf = new int[2][DISCOVERED_BUF_SIZE];
+
+		// net declarations
 
 		//@formatter:off
 		// int {STATE_BIT} = -(initial >> {STATE_BIT_INDEX} & 1);
@@ -85,45 +119,11 @@ public class CodeSimulator {
 		// int {NON_STATE_BIT};
 		//@formatter:on
 
-		int[] toVisitArr = new int[1];
-		toVisitArr[0] = initial;
-		int toVisitArrOccupied = 1;
-
-		int distance = 0;
-
-		int in; // input vector
-
-		int[] parentState = new int[STATE_BUF_SIZE];
-		int[] inputVector = new int[STATE_BUF_SIZE];
-
-		Arrays.fill(parentState, UNDISCOVERED);
-
-		// note: a state having the value UNDISCOVERED
-		// will pose an issue to the algorithm below.
-		// This possibility is here (unwisely?) ignored
-
-		// note: an actual state of Integer.
-
-		int statesDiscovered = 0;
-
-		int violationState = UNDISCOVERED;
-
-		int[][] buf = new int[2][DISCOVERED_BUF_SIZE];
-
-		int bufSelector = 0;
-
-		int state = initial;
-
-		int all_assumptions;
-		int all_assertions;
-
-		Stack<Integer> rList = new Stack<Integer>();
-
 		System.out.println("Starting search ...");
 
 		long startTime = System.nanoTime();
 
-		loop1: while (toVisitArrOccupied > 0) {
+		search_loop: while (toVisitArrOccupied > 0) {
 
 			bufSelector = 1 - bufSelector;
 
@@ -135,7 +135,7 @@ public class CodeSimulator {
 
 				state = toVisitArr[i1];
 
-				statesDiscovered += 1;
+				statesVisited++;
 
 				//@formatter:off
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
@@ -159,20 +159,23 @@ public class CodeSimulator {
 					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 					//@formatter:on
 
-					if (parentState[nxState] == UNDISCOVERED) {
+					if ((parentState[nxState] & DMASK) == 0) {
+
+						statesDiscovered++;
 
 						toVisitNextArr[toVisitNextArrOccupied] = nxState;
 
-						toVisitNextArrOccupied += 1;
+						toVisitNextArrOccupied++;
 
-						parentState[nxState] = state;
+						parentState[nxState] = state | DMASK;
 
 						inputVector[nxState] = in;
 
 					}
 
-					all_assumptions = -1;
-					all_assertions = -1;
+					union_assumptions = H;
+
+					union_assertions = H;
 
 					// In the code below we logically AND all assumptions
 					// and assertions.
@@ -183,17 +186,15 @@ public class CodeSimulator {
 					// flip-flop chains within the property.
 
 					//@formatter:off
-					// all_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? 0 : -1);
-					// all_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? 0 : -1);
+					// union_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? L : H);
+					// union_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? L : H);
 					//@formatter:on
 
-					if (all_assumptions == -1 && all_assertions == 0) {
+					if (union_assumptions == H && union_assertions == L) {
 
-						violationState = state;
+						counter_example_found = true;
 
-						rList.push(in);
-
-						break loop1;
+						break search_loop;
 
 					}
 
@@ -205,7 +206,7 @@ public class CodeSimulator {
 
 			toVisitArrOccupied = toVisitNextArrOccupied;
 
-			distance = distance + 1;
+			distance++;
 
 		}
 
@@ -215,15 +216,29 @@ public class CodeSimulator {
 
 		System.out.printf("Completed search in %f seconds\n", searchTime);
 
-		System.out.printf("States discovered = %d\n", statesDiscovered);
+		System.out.printf("State bits                     : %d\n", getStateBitCount());
 
-		if (violationState != UNDISCOVERED) {
+		System.out.printf("Input bits                     : %d\n", getInputBitCount());
 
-			System.out.printf("Counter-example found (distance = %d)!\n", distance);
+		System.out.printf("State LUT                      : %s\n", getByteSize(8 * ((long) STATE_BUF_SIZE)));
 
-			int currentState = violationState;
+		System.out.printf("State discovery buffer         : %s\n", getByteSize(8 * ((long) DISCOVERED_BUF_SIZE)));
+
+		System.out.printf("States visited                 : %d\n", statesVisited);
+
+		System.out.printf("States discovered              : %d\n", statesDiscovered);
+
+		if (counter_example_found) {
+
+			System.out.printf("Counter-example found in %d cycles\n", distance);
+
+			int currentState = state; // violation state
 
 			int transitions = distance;
+
+			Stack<Integer> rList = new Stack<Integer>();
+
+			rList.push(in);
 
 			while (transitions > 0) {
 
@@ -234,7 +249,7 @@ public class CodeSimulator {
 
 				rList.add(inputVector[currentState]);
 
-				currentState = parentState[currentState];
+				currentState = parentState[currentState] & ~DMASK;
 
 				transitions--;
 			}
@@ -256,19 +271,22 @@ public class CodeSimulator {
 
 	}
 
-	public ArrayList<String> getSignalNames() {
+	public List<String> getSignalNames() {
 
 		ArrayList<String> result = new ArrayList<String>();
 
-		//@formatter:off
-		// result.add("{STATE_BIT_ORG}");
+		String[] signalNames = {
 
-		// result.add("{INPUT_BIT_ORG}");
+			// "{STATE_BIT_ORG}",
 
-		// result.add("{NON_STATE_BIT_ORG}");
-		//@formatter:on
+			// "{INPUT_BIT_ORG}",
 
-		return result;
+			// "{NON_STATE_BIT_ORG}",
+
+		};
+
+		return Arrays.asList(signalNames);
+
 	}
 
 	public int getStateBitCount() {
@@ -287,7 +305,7 @@ public class CodeSimulator {
 
 	public void simulate(int initial, int[] inputs, File txtFile) throws Exception {
 
-		ArrayList<String> sigNames = getSignalNames();
+		List<String> sigNames = getSignalNames();
 
 		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
 
@@ -347,7 +365,7 @@ public class CodeSimulator {
 		return String.format(bitFmt, Integer.toBinaryString(num)).replace(' ', '0');
 	}
 
-	private void generateTextFile(ArrayList<String> sigNames, ArrayList<int[]> waveforms, File txtFile)
+	private void generateTextFile(List<String> sigNames, ArrayList<int[]> waveforms, File txtFile)
 			throws FileNotFoundException {
 
 		// prepare file content
@@ -397,6 +415,28 @@ public class CodeSimulator {
 			fout.println(l);
 
 		fout.close();
+
+	}
+
+	public String getByteSize(long bytes) {
+
+		if (bytes < 1024) {
+
+			return String.format("%d bytes", bytes);
+
+		} else if (bytes < 1024 * 1024) {
+
+			return String.format("%1.2f KB", (float) bytes / 1024);
+
+		} else if (bytes < 1024 * 1024 * 1024) {
+
+			return String.format("%1.2f MB", (float) bytes / 1024 / 1024);
+
+		} else {
+
+			return String.format("%1.2f GB", (float) bytes / 1024 / 1024 / 1024);
+
+		}
 
 	}
 
