@@ -53,20 +53,14 @@ public class CodeSimulator {
 
 	public int getHash(long key, int bank) {
 
-		if (bank == 0) {
+		key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+		key = key ^ (key >>> 31);
+		key = key * 21; // key = (key + (key << 2)) + (key << 4);
+		key = key ^ (key >>> 11);
+		key = key + (key << 6);
+		key = key ^ (key >>> 22);
 
-			return (int) key;
-
-		} else {
-
-			key = (~key) + (key << 18); // key = (key << 18) - key - 1;
-			key = key ^ (key >>> 31);
-			key = key * 21; // key = (key + (key << 2)) + (key << 4);
-			key = key ^ (key >>> 11);
-			key = key + (key << 6);
-			key = key ^ (key >>> 22);
-			return (int) key;
-		}
+		return bank == 0 ? (int) key : (int) (key >> 32);
 
 	}
 
@@ -103,11 +97,11 @@ public class CodeSimulator {
 
 		// method parameters:
 
-		final int DISCOVERED_BUF_SIZE = 1 << 27;
+		final int DISCOVERED_BUF_SIZE = 1 << 24;
 
 		final int cucko_swap_maximum = 150;
 
-		final int BUF_SIZE_2_LOG2 = 24;
+		final int BUF_SIZE_2_LOG2 = 25;
 
 		final boolean printStateList = false;
 
@@ -149,9 +143,9 @@ public class CodeSimulator {
 
 		int distance = 0;
 
-		long statesVisited = 0;
+		long statesVisited = -1; // to offset the two visits to `initial`
 
-		long statesDiscovered = 1;
+		long statesDiscovered = 0;
 
 		long state = 0;
 
@@ -189,7 +183,7 @@ public class CodeSimulator {
 
 				state = toVisitArr[i1];
 
-				statesVisited += 1;
+				statesVisited++;
 
 				//@formatter:off
 				// {STATE_BIT} = -(state >> {STATE_BIT_INDEX} & 1);
@@ -213,107 +207,121 @@ public class CodeSimulator {
 					// nxState2 |= {NEXT_STATE_BIT} & ((long) 1 << {STATE_BIT_INDEX});
 					//@formatter:on
 
-					boolean found = false;
+					// check assumptions
 
-					for (int bank = 0; bank < 2; bank++) {
+					long union_assumptions = H;
 
-						int hash = getHash(nxState2, bank);
+					//@formatter:off
+					// union_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? L : H);
+					//@formatter:on
 
-						hash &= (1 << BUF_SIZE_2_LOG2) - 1;
+					if (union_assumptions == H) {
 
-						long recorded_inpVec = TAB[calIndex(bank, hash, 2)];
+						boolean found = false;
 
-						boolean occupied = (recorded_inpVec & DMASK) != 0;
+						for (int bank = 0; bank < 2; bank++) {
 
-						if (occupied) {
-
-							long recorded_state = TAB[calIndex(bank, hash, 0)];
-
-							found = (recorded_state == nxState2);
-
-							if (found)
-								break;
-
-						}
-
-					}
-
-					cache_hit_counter += found ? 1 : 0;
-
-					cache_miss_counter += found ? 0 : 1;
-
-					if (!found) {
-
-						toVisitNextArr[toVisitNextArrOccupied] = nxState2;
-
-						toVisitNextArrOccupied += 1;
-
-						statesDiscovered += 1;
-
-						// attempt to insert record in `table`
-
-						int bank = 0;
-
-						long insert_record_state = nxState2;
-						long insert_record_parent = state;
-						long insert_record_inpVec = in;
-
-						boolean occupied = true;
-
-						int swap_counter = 0;
-
-						total_cuckoo_insertions += 1;
-
-						while (occupied) {
-
-							int hash = getHash(insert_record_state, bank);
+							int hash = getHash(nxState2, bank);
 
 							hash &= (1 << BUF_SIZE_2_LOG2) - 1;
 
 							long recorded_inpVec = TAB[calIndex(bank, hash, 2)];
 
-							occupied = (recorded_inpVec & DMASK) != 0;
+							boolean occupied = (recorded_inpVec & DMASK) != 0;
 
 							if (occupied) {
 
-								long temp_insert_record_state = TAB[calIndex(bank, hash, 0)];
-								long temp_insert_record_parent = TAB[calIndex(bank, hash, 1)];
-								long temp_insert_record_inpVec = TAB[calIndex(bank, hash, 2)];
+								long recorded_state = TAB[calIndex(bank, hash, 0)];
 
-								TAB[calIndex(bank, hash, 0)] = insert_record_state;
-								TAB[calIndex(bank, hash, 1)] = insert_record_parent;
-								TAB[calIndex(bank, hash, 2)] = insert_record_inpVec | DMASK;
+								found = (recorded_state == nxState2);
 
-								insert_record_state = temp_insert_record_state;
-								insert_record_parent = temp_insert_record_parent;
-								insert_record_inpVec = temp_insert_record_inpVec;
-
-								bank = 1 - bank;
-
-								total_cuckoo_swaps += 1;
-
-							} else {
-
-								TAB[calIndex(bank, hash, 0)] = insert_record_state;
-								TAB[calIndex(bank, hash, 1)] = insert_record_parent;
-								TAB[calIndex(bank, hash, 2)] = insert_record_inpVec | DMASK;
+								if (found)
+									break;
 
 							}
 
-							swap_counter += 1;
+						}
 
-							if (swap_counter > cucko_swap_maximum)
-								throw new Exception("maximum number of cuckoo swaps reached");
+						if (found) {
+
+							cache_hit_counter++;
+
+						} else {
+
+							cache_miss_counter++;
+
+							statesDiscovered++;
+
+							toVisitNextArr[toVisitNextArrOccupied] = nxState2;
+
+							toVisitNextArrOccupied++;
+
+							// attempt to insert record in `table`
+
+							int bank = 0;
+
+							long insert_record_state = nxState2;
+							long insert_record_parent = state;
+							long insert_record_inpVec = in;
+
+							boolean occupied = true;
+
+							int swap_counter = 0;
+
+							total_cuckoo_insertions++;
+
+							while (occupied) {
+
+								int hash = getHash(insert_record_state, bank);
+
+								hash &= (1 << BUF_SIZE_2_LOG2) - 1;
+
+								long recorded_inpVec = TAB[calIndex(bank, hash, 2)];
+
+								occupied = (recorded_inpVec & DMASK) != 0;
+
+								if (occupied) {
+
+									long temp_insert_record_state = TAB[calIndex(bank, hash, 0)];
+									long temp_insert_record_parent = TAB[calIndex(bank, hash, 1)];
+									long temp_insert_record_inpVec = TAB[calIndex(bank, hash, 2)];
+
+									TAB[calIndex(bank, hash, 0)] = insert_record_state;
+									TAB[calIndex(bank, hash, 1)] = insert_record_parent;
+									TAB[calIndex(bank, hash, 2)] = insert_record_inpVec | DMASK;
+
+									insert_record_state = temp_insert_record_state;
+									insert_record_parent = temp_insert_record_parent;
+									insert_record_inpVec = temp_insert_record_inpVec;
+
+									bank = 1 - bank;
+
+									total_cuckoo_swaps++;
+
+								} else {
+
+									TAB[calIndex(bank, hash, 0)] = insert_record_state;
+									TAB[calIndex(bank, hash, 1)] = insert_record_parent;
+									TAB[calIndex(bank, hash, 2)] = insert_record_inpVec | DMASK;
+
+								}
+
+								swap_counter++;
+
+								if (swap_counter > cucko_swap_maximum)
+									throw new Exception("maximum number of cuckoo swaps reached");
+
+							}
 
 						}
 
 					}
 
-					long all_assumptions = -1;
-					long all_assertions = -1;
 
 					// In the code below we logically AND all assumptions
 					// and assertions.
+
+					long union_assertions = H;
 
 					// We don't want any property to evaluate to false until
 					// we're at least {MAXDELAY} transitions away from the
@@ -321,11 +329,10 @@ public class CodeSimulator {
 					// flip-flop chains within the property.
 
 					//@formatter:off
-					// all_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? 0 : -1);
-					// all_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? 0 : -1);
+					// union_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? L : H);
 					//@formatter:on
 
-					if (all_assumptions == -1 && all_assertions == 0) {
+					if (union_assumptions == H && union_assertions == L) {
 
 						rList.push(in);
 
@@ -341,7 +348,7 @@ public class CodeSimulator {
 
 			toVisitArrOccupied = toVisitNextArrOccupied;
 
-			distance = distance + 1;
+			distance++;
 
 		}
 
@@ -374,6 +381,8 @@ public class CodeSimulator {
 		System.out.printf("Cuckoo swaps (mean / insert)  : %f\n", 1.0 * total_cuckoo_swaps / total_cuckoo_insertions);
 
 		System.out.printf("Cuckoo insertions (total)     : %d\n", total_cuckoo_insertions);
+
+		System.out.printf("Cache utilization             : %s\n", getByteSize(3 * 8 * total_cuckoo_insertions));
 
 		System.out.printf("Cache hits                    : %d (%1.1f%%)\n", cache_hit_counter, found_perc);
 
