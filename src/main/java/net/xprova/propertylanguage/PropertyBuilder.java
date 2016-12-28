@@ -40,8 +40,6 @@ public class PropertyBuilder {
 	public static final String EVENTUALLY = "$eventually";
 	public static final String UNTIL = "$until";
 	public static final String WHEN = "$when";
-	public static final String HIGH = "1";
-	public static final String LOW = "0";
 	public static final String ANY = "$any";
 	public static final String ALL = "$all";
 

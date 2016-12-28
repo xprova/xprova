@@ -137,26 +137,7 @@ public class CodeGenerator {
 
 		if (root.isTerminal()) {
 
-			boolean isHigh = root.name.equals(PropertyBuilder.HIGH);
-			boolean isLow = root.name.equals(PropertyBuilder.LOW);
-
-			if (isHigh | isLow) {
-
-				String tieModName = isHigh ? "TIE1" : "TIE0";
-
-				Vertex tieMod = addPropertyModule(graph, tieModName);
-
-				Vertex tie1Output = addPropertyNet(graph);
-
-				graph.addVertex(tieMod);
-
-				graph.addVertex(tie1Output);
-
-				graph.addConnection(tieMod, tie1Output, "y");
-
-				return tie1Output;
-
-			} else if (root.isNumber()) {
+			if (root.isNumber()) {
 
 				Vertex driver = addPropertyModule(graph, "CONST");
 
