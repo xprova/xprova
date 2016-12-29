@@ -1196,19 +1196,15 @@ public class ConsoleHandler {
 		// can be printed after stdout messages (the latter printed as they are
 		// read)
 
-		if (waitFor)
-			while (sErr != null || sOut != null) {
+		if (waitFor) {
 
-				sErr = stdError.readLine();
-				sOut = stdInput.readLine();
+			while ((sErr = stdError.readLine()) != null)
+				errLines.add(sErr);
 
-				if (sErr != null)
-					errLines.add(sErr);
+			while ((sOut = stdInput.readLine()) != null)
+				System.out.println(sOut);
 
-				if (sOut != null)
-					System.out.println(sOut);
-
-			}
+		}
 
 		stdInput.close();
 
