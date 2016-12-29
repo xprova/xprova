@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -145,9 +146,13 @@ public class CodeSimulator {
 
 		long statesVisited = -1; // to offset the two visits to `initial`
 
+		boolean counter_example_found = false;
+
 		long statesDiscovered = 0;
 
 		long state = 0;
+
+		long in = 0;
 
 		// constants
 
@@ -164,8 +169,6 @@ public class CodeSimulator {
 		long total_cuckoo_insertions = 0;
 
 		// body:
-
-		Stack<Long> rList = new Stack<Long>();
 
 		System.out.println("Starting search ...");
 
@@ -191,7 +194,7 @@ public class CodeSimulator {
 
 				long inputPermutes = 1 << (inputBitCount);
 
-				for (long in = 0; in < inputPermutes; in++) {
+				for (in = 0; in < inputPermutes; in++) {
 
 					//@formatter:off
 					// long {INPUT_BIT} = -(in >> {INPUT_BIT_INDEX} & 1);
@@ -201,27 +204,27 @@ public class CodeSimulator {
 					// {COMB_ASSIGN}
 					//@formatter:on
 
-					long nxState2 = 0;
+					long nxState = 0;
 
 					//@formatter:off
-					// nxState2 |= {NEXT_STATE_BIT} & ((long) 1 << {STATE_BIT_INDEX});
+					// nxState |= {NEXT_STATE_BIT} & ((long) 1 << {STATE_BIT_INDEX});
 					//@formatter:on
 
 					// check assumptions
 
-					long union_assumptions = H;
+					long assumptions = H; // intersection of assumptions
 
 					//@formatter:off
-					// union_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? L : H);
+					// if (distance >= {MAXDELAY}) assumptions &= {ASSUMPTION};
 					//@formatter:on
 
-					if (union_assumptions == H) {
+					if (assumptions == H) {
 
 						boolean found = false;
 
 						for (int bank = 0; bank < 2; bank++) {
 
-							int hash = getHash(nxState2, bank);
+							int hash = getHash(nxState, bank);
 
 							hash &= (1 << BUF_SIZE_2_LOG2) - 1;
 
@@ -233,7 +236,7 @@ public class CodeSimulator {
 
 								long recorded_state = TAB[calIndex(bank, hash, 0)];
 
-								found = (recorded_state == nxState2);
+								found = (recorded_state == nxState);
 
 								if (found)
 									break;
@@ -252,7 +255,7 @@ public class CodeSimulator {
 
 							statesDiscovered++;
 
-							toVisitNextArr[toVisitNextArrOccupied] = nxState2;
+							toVisitNextArr[toVisitNextArrOccupied] = nxState;
 
 							toVisitNextArrOccupied++;
 
@@ -260,7 +263,7 @@ public class CodeSimulator {
 
 							int bank = 0;
 
-							long insert_record_state = nxState2;
+							long insert_record_state = nxState;
 							long insert_record_parent = state;
 							long insert_record_inpVec = in;
 
@@ -315,28 +318,19 @@ public class CodeSimulator {
 
 						}
 
-					}
+						long assertions = H; // intersection of assertions
 
+						//@formatter:off
+						// assertions &= {ASSERTION} | (distance < {MAXDELAY} ? H : L);
+						//@formatter:on
 
-					// In the code below we logically AND all assumptions
-					// and assertions.
+						if (assertions == L) {
 
-					long union_assertions = H;
+							counter_example_found = true;
 
-					// We don't want any property to evaluate to false until
-					// we're at least {MAXDELAY} transitions away from the
-					// initial state, where {MAXDELAY} is the max depth of
-					// flip-flop chains within the property.
+							break search_loop;
 
-					//@formatter:off
-					// union_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? L : H);
-					//@formatter:on
-
-					if (union_assumptions == H && union_assertions == L) {
-
-						rList.push(in);
-
-						break search_loop;
+						}
 
 					}
 
@@ -390,13 +384,17 @@ public class CodeSimulator {
 
 		System.out.println("");
 
-		if (!rList.isEmpty()) {
+		if (counter_example_found) {
 
 			System.out.printf("Counter-example found (distance = %d)!\n", distance);
 
 			long currentState = state;
 
 			int transitions = distance;
+
+			Stack<Long> rList = new Stack<Long>();
+
+			rList.push(in);
 
 			while (transitions > 0) {
 
@@ -454,19 +452,22 @@ public class CodeSimulator {
 
 	}
 
-	public ArrayList<String> getSignalNames() {
+	public List<String> getSignalNames() {
 
 		ArrayList<String> result = new ArrayList<String>();
 
-		//@formatter:off
-		// result.add("{STATE_BIT_ORG}");
+		String[] signalNames = {
 
-		// result.add("{INPUT_BIT_ORG}");
+			// "{STATE_BIT_ORG}",
 
-		// result.add("{NON_STATE_BIT_ORG}");
-		//@formatter:on
+			// "{INPUT_BIT_ORG}",
 
-		return result;
+			// "{NON_STATE_BIT_ORG}",
+
+		};
+
+		return Arrays.asList(signalNames);
+
 	}
 
 	public int getStateBitCount() {
@@ -485,7 +486,7 @@ public class CodeSimulator {
 
 	public void simulate(long initial, long[] inputs, File txtFile) throws Exception {
 
-		ArrayList<String> sigNames = getSignalNames();
+		List<String> sigNames = getSignalNames();
 
 		ArrayList<long[]> waveforms = simulate_internal(initial, inputs);
 
@@ -545,7 +546,7 @@ public class CodeSimulator {
 		return String.format(bitFmt, Long.toBinaryString(num)).replace(' ', '0');
 	}
 
-	private void generateTextFile(ArrayList<String> sigNames, ArrayList<long[]> waveforms, File txtFile)
+	private void generateTextFile(List<String> sigNames, ArrayList<long[]> waveforms, File txtFile)
 			throws FileNotFoundException {
 
 		// prepare file content

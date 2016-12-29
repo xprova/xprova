@@ -97,9 +97,9 @@ public class CodeSimulator {
 
 		int state = initial;
 
-		int union_assumptions;
+		int assumptions;
 
-		int union_assertions;
+		int assertions;
 
 		// state LUT and discovery arrays
 
@@ -161,23 +161,23 @@ public class CodeSimulator {
 
 					// check assumptions
 
-					union_assumptions = H;
+					assumptions = H; // intersection of assumptions
 
-					union_assertions = H;
+					assertions = H; // intersection of assertions
 
 					//@formatter:off
-					// union_assumptions &= {ASSUMPTION} | (distance >= {MAXDELAY} ? L : H);
+					// assumptions &= {ASSUMPTION} | (distance < {MAXDELAY} ? H : L);
 					//@formatter:on
 
 					//@formatter:off
-					// union_assertions &= {ASSERTION} | (distance >= {MAXDELAY} ? L : H);
+					// assertions &= {ASSERTION} | (distance < {MAXDELAY} ? H : L);
 					//@formatter:on
 
-					if (union_assumptions == H) {
+					if (assumptions == H) {
 
 						// check assertions
 
-						if (union_assertions == L) {
+						if (assertions == L) {
 
 							counter_example_found = true;
 
