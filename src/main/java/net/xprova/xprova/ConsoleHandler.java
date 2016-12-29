@@ -831,7 +831,7 @@ public class ConsoleHandler {
 			"Usage:",
 			"  prove [--print] [--vcd <file>] [--txt <file>] [--gtkwave]",
 			"        [--wavejson] [--signals sig1,sig2...] [--keep]",
-			"        [--onlycode] [--dfs]",
+			"        [--onlycode] [--dfs] [--hash]",
 			"",
 			"Options:",
 			"  -p --print       print counter-example to console",
@@ -843,6 +843,7 @@ public class ConsoleHandler {
 			"  -k --keep        keep assertion logic in current design (debugging)",
 			"  -c --onlycode    generate code but do not compile or run Java model (debugging)",
 			"  -d --dfs         use DFS (required for verifying liveness properties)",
+			"  -h --hash        force use of hash tables",
 		}
 	)
 	//@formatter:on
@@ -870,6 +871,8 @@ public class ConsoleHandler {
 
 				Option.builder("d").longOpt("depth").build(),
 
+				Option.builder("h").longOpt("hash").build(),
+
 		};
 
 		Options options = new Options();
@@ -889,7 +892,17 @@ public class ConsoleHandler {
 
 		boolean useDepthTemplate = line.hasOption("d");
 
-		final String codeGenTemplateFile = useDepthTemplate ? "template2.j" : "template1.j";
+		String codeGenTemplateFile;
+
+		if (useDepthTemplate) {
+
+			codeGenTemplateFile = "template2.j";
+
+		} else {
+
+			codeGenTemplateFile = line.hasOption("h") ? "template4.j" : "template1.j";
+
+		}
 
 		final String codeGenClassName = "CodeSimulator";
 
@@ -907,7 +920,7 @@ public class ConsoleHandler {
 
 		String compileCmd = "javac " + javaFile;
 
-		String runCodeGenCmd = String.format("java -Xmx6g  -classpath %s %s %s", getTempFile(""), codeGenClassName,
+		String runCodeGenCmd = String.format("java -Xmx6g -classpath %s %s %s", getTempFile(""), codeGenClassName,
 				txtArg);
 
 		// generate code
