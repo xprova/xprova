@@ -200,9 +200,9 @@ public class ConsoleHandler {
 
 			for (Netlist nl : nls) {
 
-				newDesigns.add(new NetlistGraph(nl));
+				out.printf("Parsing design <%s> ...\n", nl.name, verilogFile);
 
-				out.printf("Parsed design <%s>\n", nl.name, verilogFile);
+				newDesigns.add(new NetlistGraph(nl));
 
 			}
 
