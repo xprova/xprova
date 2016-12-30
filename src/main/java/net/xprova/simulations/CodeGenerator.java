@@ -318,6 +318,21 @@ public class CodeGenerator {
 
 		}
 
+		if (root.name.equals(PropertyBuilder.BITS)) {
+
+			Vertex input = addProperty(graph, root.children.get(0), clk, rst, set);
+
+			Vertex mod = addPropertyModule(graph, "*BITS");
+
+			Vertex output = addPropertyNet(graph);
+
+			graph.addConnection(input, mod, "a");
+
+			graph.addConnection(mod, output, "y");
+
+			return output;
+
+		}
 
 		throw new Exception("property operator not yet implemented");
 
@@ -853,6 +868,7 @@ public class CodeGenerator {
 			final String strGE = "{PREFIX1}%s{POSTFIX1} = {PREFIX2}%s{POSTFIX2} >= {PREFIX2}%s{POSTFIX2} ? -1 : 0;";
 			final String strGroup_A = "{PREFIX1}%s{POSTFIX1} = 0;";
 			final String strGroup_B = "{PREFIX1}%s{POSTFIX1} += ({PREFIX1}%s{POSTFIX1} & 1) << %d;";
+			final String strBits = "{PREFIX1}%s{POSTFIX1} =  Integer.bitCount({PREFIX2}%s{POSTFIX2});";
 
 			for (Vertex n : toVisit) {
 
@@ -997,6 +1013,15 @@ public class CodeGenerator {
 						assigns.add(line);
 
 					}
+
+				} else if ("*BITS".equals(driver.subtype)) {
+
+					String netA = jNetNames.get(graph.getNet(driver, "a"));
+					String netY = jNetNames.get(graph.getNet(driver, "y"));
+
+					line = String.format(strBits, netY, netA);
+
+					assigns.add(line);
 
 				} else {
 

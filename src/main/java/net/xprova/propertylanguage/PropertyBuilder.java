@@ -42,6 +42,7 @@ public class PropertyBuilder {
 	public static final String WHEN = "$when";
 	public static final String ANY = "$any";
 	public static final String ALL = "$all";
+	public static final String BITS = "$bits";
 
 	public static final String[] comparisonOps = { EQ, NEQ, LT, GT, LE, GE };
 
@@ -294,7 +295,7 @@ public class PropertyBuilder {
 		String c0 = root.getChild(0).getText();
 		String c1 = root.getChild(1).getText();
 
-		final String[] funcs = { ROSE, FELL, STABLE, CHANGED, ALWAYS, NEVER, ONCE, ANY, ALL };
+		final String[] funcs = { ROSE, FELL, STABLE, CHANGED, ALWAYS, NEVER, ONCE, ANY, ALL, BITS };
 
 		if (Arrays.asList(funcs).contains(c0)) {
 

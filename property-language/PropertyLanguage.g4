@@ -58,7 +58,7 @@ atom
 	: ID
 	| LPAREN baseExpr RPAREN
 	| (ROSE|FELL|STABLE|CHANGED) LPAREN baseExpr RPAREN
-	| (ALWAYS|NEVER|ONCE|ANY|ALL) LPAREN baseExpr RPAREN
+	| (ALWAYS|NEVER|ONCE|ANY|ALL|BITS) LPAREN baseExpr RPAREN
 	| (UNTIL|WHEN) LPAREN baseExpr COMMA baseExpr RPAREN
 	| INTEGER
 	;
@@ -194,6 +194,10 @@ ANY
 
 ALL
 	: '$all'
+	;
+
+BITS
+	: '$bits'
 	;
 
 EVENTUALLY
