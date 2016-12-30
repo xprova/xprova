@@ -284,8 +284,6 @@ public class CodeSimulator {
 
 	public List<String> getSignalNames() {
 
-		ArrayList<String> result = new ArrayList<String>();
-
 		String[] signalNames = {
 
 			// "{STATE_BIT_ORG}",
