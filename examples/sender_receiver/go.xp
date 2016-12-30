@@ -1,0 +1,15 @@
+library load lib/xprova.v
+
+read -b examples/sender_receiver/topunit.v
+
+design current topunit
+
+assume busy |-> ~send
+
+# assert ~(valid & data_out==5)
+
+assert valid |-> (data_out == $when(send, data_in))
+
+prove -kgd
+
+# dot -m -e=CK,RS,ST --pdf output/netlist.pdf
