@@ -63,8 +63,13 @@ public class CodeSimulator {
 
 		final int VISITED = -2;
 
+		// note, MSB of inputVector values is reserved
+
 		if (inputBitCount > 31)
 			throw new Exception("Number of input bits exceeds 31");
+
+		if (stateBitCount > 29)
+			throw new Exception(String.format("Memory requirements exceed 4 GB (state bits = %d)", stateBitCount));
 
 		int stateStack[] = new int[MAX_SIZE];
 
