@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -50,12 +51,11 @@ public class CodeSimulator {
 
 	}
 
-	public int[] exploreSpace(int initial) {
+	public int[] exploreSpace(int initial) throws Exception {
 
-		//@formatter:off
-		// int stateBitCount = {STATE_BIT_COUNT};
-		// int inputBitCount = {INPUT_BIT_COUNT};
-		//@formatter:on
+		int stateBitCount = getStateBitCount();
+
+		int inputBitCount = getInputBitCount();
 
 		final int MAX_SIZE = 1 << stateBitCount;
 
@@ -63,7 +63,8 @@ public class CodeSimulator {
 
 		final int VISITED = -2;
 
-		final int inputCombinationCount = 1 << inputBitCount;
+		if (inputBitCount > 31)
+			throw new Exception("Number of input bits exceeds 31");
 
 		int stateStack[] = new int[MAX_SIZE];
 
@@ -77,13 +78,19 @@ public class CodeSimulator {
 
 		inputVectors[initial] = 0; // initial state
 
-		int all_assumptions;
-		int all_assertions;
+		int assumptions;
+
+		int assertions;
+
 		int any_liveness_armed;
 
 		int currentState = initial;
 
 		boolean livenessViolation = false;
+
+		int statesDiscovered = 1;
+
+		int statesVisited = 0;
 
 		//@formatter:off
 		// int {STATE_BIT};
@@ -93,19 +100,19 @@ public class CodeSimulator {
 		// int {NON_STATE_BIT};
 		//@formatter:on
 
-		while (stateStackPtr > 0) {
+		long startTime = System.nanoTime();
+
+		search_loop: while (stateStackPtr > 0) {
 
 			currentState = stateStack[stateStackPtr - 1]; // peek
 
 			int currentInputVec = inputVectors[currentState];
 
-			if (currentInputVec < inputCombinationCount) {
-
-				printState(stateStackPtr, String.format("(inpVec = %d) currentState", currentInputVec), currentState);
+			if (currentInputVec < (1 << inputBitCount)) {
 
 				// there is at least one more nextState to explore
 
-				// int nextState = graph[currentState][currentInputVec];
+				// printState(stateStackPtr, String.format("(inpVec = %d) currentState", currentInputVec), currentState);
 
 				//@formatter:off
 				// {STATE_BIT} = -(currentState >> {STATE_BIT_INDEX} & 1);
@@ -130,8 +137,7 @@ public class CodeSimulator {
 				// nextState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 				//@formatter:on
 
-				all_assumptions = H;
-				all_assertions = H;
+				assumptions = H;
 
 				// In the code below we logically AND all assumptions
 				// and assertions.
@@ -144,64 +150,75 @@ public class CodeSimulator {
 				int distance = stateStackPtr - 1;
 
 				//@formatter:off
-				// all_assumptions &= {ASSUMPTION} | (distance > {MAXDELAY} ? L : H);
-				// all_assertions &= {ASSERTION} | (distance > {MAXDELAY} ? L : H);
+				// if (distance >= {MAXDELAY}) assumptions &= {ASSUMPTION};
 				//@formatter:on
 
-				if (all_assumptions == H && all_assertions == L) {
+				if (assumptions == H) {
 
-					// TODO: expand this stub
-
-					System.out.println("violation of (non-liveness) property");
-
-					break;
-
-				}
-
-				if (inputVectors[nextState] == UNDISCOVERED) {
-
-					// push to stack
-
-					stateStack[stateStackPtr++] = nextState;
-
-					inputVectors[nextState] = 0;
-
-				} else if (inputVectors[nextState] != VISITED) {
-
-					// found a cycle in the state graph
-
-					any_liveness_armed = L;
-
-					// The expression LIVE_ASSERTION indicates whether the
-					// assertion is in an armed state. Violations are reported
-					// if state graph loops are discovered where the assertion
-					// is armed. For example, the property $eventually(a, y)
-					// will get armed once the trigger `a` is asserted and
-					// before the release expression `y` is asserted. The
-					// existence of a loop in which this assertion is
-					// triggered means that there is a case in which a is
-					// asserted but y never gets asserted eventually, i.e. a
-					// violation of the property.
-
-					// TODO: add code to handle delays in properties (ignored
-					// for now)
+					assertions = H;
 
 					//@formatter:off
-					// any_liveness_armed |= {LIVE_ASSERTION};
+					// if (distance >= {MAXDELAY}) assertions &= {ASSERTION};
 					//@formatter:on
 
-					if (any_liveness_armed == H) {
+					if (assertions == L) {
 
-						System.out.println("found violation of live assertion:");
+						// TODO: expand this stub
 
-						for (int i = 0; i < stateStackPtr; i++)
-							printState(stateStackPtr + 1, "State", stateStack[i]);
-
-						printState(stateStackPtr + 1, "State", nextState);
-
-						livenessViolation = true;
+						System.out.println("violation of (non-liveness) property");
 
 						break;
+
+					}
+
+					if (inputVectors[nextState] == UNDISCOVERED) {
+
+						// push to stack
+
+						statesDiscovered++;
+
+						stateStack[stateStackPtr++] = nextState;
+
+						inputVectors[nextState] = 0;
+
+					} else if (inputVectors[nextState] != VISITED) {
+
+						// found a cycle in the state graph
+
+						any_liveness_armed = L;
+
+						// The expression LIVE_ASSERTION indicates whether the
+						// assertion is in an armed state. Violations are reported
+						// if state graph loops are discovered where the assertion
+						// is armed. For example, the property $eventually(a, y)
+						// will get armed once the trigger `a` is asserted and
+						// before the release expression `y` is asserted. The
+						// existence of a loop in which this assertion is
+						// triggered means that there is a case in which a is
+						// asserted but y never gets asserted eventually, i.e. a
+						// violation of the property.
+
+						// TODO: add code to handle delays in properties (ignored
+						// for now)
+
+						//@formatter:off
+						// any_liveness_armed |= {LIVE_ASSERTION};
+						//@formatter:on
+
+						if (any_liveness_armed == H) {
+
+							System.out.println("found violation of live assertion:");
+
+							// for (int i = 0; i < stateStackPtr; i++)
+							// 	printState(stateStackPtr + 1, "State", stateStack[i]);
+
+							// printState(stateStackPtr + 1, "State", nextState);
+
+							livenessViolation = true;
+
+							break;
+
+						}
 
 					}
 
@@ -213,6 +230,8 @@ public class CodeSimulator {
 
 				// currentState is now marked as visited
 
+				statesVisited++;
+
 				inputVectors[currentState] = VISITED;
 
 				stateStackPtr--; // pop
@@ -220,6 +239,24 @@ public class CodeSimulator {
 			}
 
 		}
+
+		long endTime = System.nanoTime();
+
+		double searchTime = (endTime - startTime) / 1e9;
+
+		System.out.printf("Completed search in %f seconds\n", searchTime);
+
+		System.out.printf("State bits                     : %d\n", getStateBitCount());
+
+		System.out.printf("Input bits                     : %d\n", getInputBitCount());
+
+		System.out.printf("States visited                 : %d\n", statesVisited);
+
+		System.out.printf("States discovered              : %d\n", statesDiscovered);
+
+		System.out.printf("State stack                    : %s\n", getByteSize(4 * ((long) MAX_SIZE)));
+
+		System.out.printf("State LUT                      : %s\n", getByteSize(4 * ((long) MAX_SIZE)));
 
 		if (stateStackPtr != 0) {
 
@@ -237,30 +274,71 @@ public class CodeSimulator {
 
 		} else {
 
+			System.out.println("Assertion proven, no counter-examples were found.");
+
 			return null;
 
 		}
 
 	}
 
-	public ArrayList<String> getSignalNames() {
+	public List<String> getSignalNames() {
 
 		ArrayList<String> result = new ArrayList<String>();
 
+		String[] signalNames = {
+
+			// "{STATE_BIT_ORG}",
+
+			// "{INPUT_BIT_ORG}",
+
+			// "{NON_STATE_BIT_ORG}",
+
+		};
+
+		return Arrays.asList(signalNames);
+
+	}
+
+	public int getStateBitCount() {
+
 		//@formatter:off
-		// result.add("{STATE_BIT_ORG}");
-
-		// result.add("{INPUT_BIT_ORG}");
-
-		// result.add("{NON_STATE_BIT_ORG}");
+		// return {STATE_BIT_COUNT};
 		//@formatter:on
+	}
 
-		return result;
+	public int getInputBitCount() {
+
+		//@formatter:off
+		// return {INPUT_BIT_COUNT};
+		//@formatter:on
+	}
+
+	public String getByteSize(long bytes) {
+
+		if (bytes < 1024) {
+
+			return String.format("%d bytes", bytes);
+
+		} else if (bytes < 1024 * 1024) {
+
+			return String.format("%1.2f KB", (float) bytes / 1024);
+
+		} else if (bytes < 1024 * 1024 * 1024) {
+
+			return String.format("%1.2f MB", (float) bytes / 1024 / 1024);
+
+		} else {
+
+			return String.format("%1.2f GB", (float) bytes / 1024 / 1024 / 1024);
+
+		}
+
 	}
 
 	public void simulate(int initial, int[] inputs, File txtFile) throws Exception {
 
-		ArrayList<String> sigNames = getSignalNames();
+		List<String> sigNames = getSignalNames();
 
 		ArrayList<int[]> waveforms = simulate_internal(initial, inputs);
 
@@ -321,7 +399,7 @@ public class CodeSimulator {
 		System.out.println(label + ": " + state + " (" + (state >> 2) + ")");
 	}
 
-	private void generateTextFile(ArrayList<String> sigNames, ArrayList<int[]> waveforms, File txtFile)
+	private void generateTextFile(List<String> sigNames, ArrayList<int[]> waveforms, File txtFile)
 			throws FileNotFoundException {
 
 		// prepare file content
