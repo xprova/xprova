@@ -831,7 +831,7 @@ public class ConsoleHandler {
 			"Usage:",
 			"  prove [--print] [--vcd <file>] [--txt <file>] [--gtkwave]",
 			"        [--wavejson] [--signals sig1,sig2...] [--keep]",
-			"        [--onlycode] [--dfs] [--hash]",
+			"        [--onlycode] [--dfs|--hash|--cpp]",
 			"",
 			"Options:",
 			"  -p --print       print counter-example to console",
@@ -844,6 +844,7 @@ public class ConsoleHandler {
 			"  -c --onlycode    generate code but do not compile or run Java model (debugging)",
 			"  -d --dfs         use DFS (required for verifying liveness properties)",
 			"  -h --hash        force use of hash tables",
+			"  --cpp            generate and use c++ program",
 		}
 	)
 	//@formatter:on
@@ -873,6 +874,8 @@ public class ConsoleHandler {
 
 				Option.builder("h").longOpt("hash").build(),
 
+				Option.builder().longOpt("cpp").build(),
+
 		};
 
 		Options options = new Options();
@@ -892,23 +895,31 @@ public class ConsoleHandler {
 
 		boolean useDepthTemplate = line.hasOption("d");
 
+		boolean useHashTemplate = line.hasOption("h");
+
+		boolean useCppTemplate = line.hasOption("cpp");
+
 		String codeGenTemplateFile;
-
-		if (useDepthTemplate) {
-
-			codeGenTemplateFile = "template2.j";
-
-		} else {
-
-			codeGenTemplateFile = line.hasOption("h") ? "template4.j" : "template1.j";
-
-		}
 
 		final String codeGenClassName = "CodeSimulator";
 
-		NetlistGraph currentCopy = keepAssertionLogic ? current : new NetlistGraph(current);
+		if (useCppTemplate) {
 
-		(new Transformer(currentCopy, defsFF)).expandDFFx();
+			codeGenTemplateFile = "template1.c";
+
+		} else if (useDepthTemplate) {
+
+			codeGenTemplateFile = "template2.j";
+
+		} else if (useHashTemplate){
+
+			codeGenTemplateFile = "template4.j";
+
+		} else {
+
+			codeGenTemplateFile = "template1.j";
+
+		}
 
 		String defaultTextFile = getTempFile("counter-example.txt");
 
@@ -916,12 +927,37 @@ public class ConsoleHandler {
 
 		String txtArg = "--txt " + txtFile;
 
-		String javaFile = getTempFile(codeGenClassName + ".java");
+		String compileCmd;
 
-		String compileCmd = "javac " + javaFile;
+		String genCodeFile;
 
-		String runCodeGenCmd = String.format("java -Xmx6g -classpath %s %s %s", getTempFile(""), codeGenClassName,
-				txtArg);
+		String runCodeGenCmd;
+
+		boolean isJavaTemplate = !useCppTemplate;
+
+		if (isJavaTemplate) {
+
+			genCodeFile = getTempFile(codeGenClassName + ".java");
+
+			compileCmd = "javac " + genCodeFile;
+
+			runCodeGenCmd = String.format("java -Xmx6g -classpath %s %s %s", getTempFile(""), codeGenClassName,
+					txtArg);
+
+		} else {
+
+			genCodeFile = getTempFile(codeGenClassName + ".cpp");
+
+			compileCmd = String.format("g++ -o %s.exe -O2 %s", codeGenClassName, genCodeFile);
+
+			runCodeGenCmd = String.format("%s.exe", codeGenClassName);
+
+		}
+
+		NetlistGraph currentCopy = keepAssertionLogic ? current : new NetlistGraph(current);
+
+		(new Transformer(currentCopy, defsFF)).expandDFFx();
+
 
 		// generate code
 
@@ -929,9 +965,9 @@ public class ConsoleHandler {
 
 		ArrayList<String> lines = CodeGenerator.generate(currentCopy, assumptions, assertions, templateCode);
 
-		out.println("Saving code to " + javaFile + " ...");
+		out.println("Saving code to " + genCodeFile + " ...");
 
-		PrintStream fout = new PrintStream(javaFile);
+		PrintStream fout = new PrintStream(genCodeFile);
 
 		for (String l : lines)
 			fout.println(l);
@@ -941,7 +977,7 @@ public class ConsoleHandler {
 		if (line.hasOption("c"))
 			return;
 
-		// compile using javac
+		// compile
 
 		out.println("Compiling ...");
 
