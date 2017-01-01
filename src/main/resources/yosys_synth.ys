@@ -28,6 +28,9 @@ hilomap -singleton -hicell TIE1 y -locell TIE0 y
 
 #splitnets -format __
 
+# use buffer cells instead of assign statements
+insbuf -buf BUF a y
+
 # write synthesized design
 write_verilog %SYNTH_FILE%
 

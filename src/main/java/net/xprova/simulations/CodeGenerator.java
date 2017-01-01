@@ -924,7 +924,7 @@ public class CodeGenerator {
 
 					assigns.add(line);
 
-				} else if (VerilogParser.CASSIGN_MOD.equals(driver.subtype)) {
+				} else if (VerilogParser.CASSIGN_MOD.equals(driver.subtype) || "BUF".equals(driver.subtype)) {
 
 					line = String.format(strCASSIGN, nNameJ, net1);
 

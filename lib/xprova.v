@@ -18,6 +18,11 @@ module NOR (y, a, b);
 	output y;
 endmodule
 
+module BUF (y, a);
+	input a;
+	output y;
+endmodule
+
 module NOT (y, a);
 	input a;
 	output y;
