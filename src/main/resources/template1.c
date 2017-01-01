@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 using namespace std;
@@ -80,10 +81,9 @@ void exploreSpace(int initial) {
 	for (int k = 0; k < 2; k++)
 		buf[k] = new int[DISCOVERED_BUF_SIZE];
 
-	for (int k = 0; k < STATE_BUF_SIZE; k++) {
-		parentState[k] = 0;
-		inputVector[k] = 0;
-	}
+	memset(parentState, 0, STATE_BUF_SIZE<<2);
+
+	memset(inputVector, 0, STATE_BUF_SIZE<<2);
 
 	// net declarations
 
@@ -182,6 +182,14 @@ void exploreSpace(int initial) {
 	}
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
+
+	delete parentState;
+
+	delete inputVector;
+
+	delete buf[0];
+
+	delete buf[1];
 
  	double seconds = (endTime.tv_sec - startTime.tv_sec);
 
