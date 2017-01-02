@@ -34,11 +34,15 @@ void exploreSpace(int initial) {
 
 	// memory usage checks:
 
-//	if (stateBitCount > 29)
-		//throw new Exception(String.format("Memory requirements exceed 4 GB (state bits = %d)", stateBitCount));
+	if (stateBitCount > 29) {
+		fprintf(stderr, "Memory requirements exceed 4 GB (state bits = %d)", stateBitCount);
+		return; // add error code
+	}
 
-	//if (inputBitCount > 32)
-		//throw new Exception(String.format("Input vector not representable as int type (input bits = %d)", inputBitCount));
+	if (inputBitCount > 32) {
+		fprintf(stderr, "Input vector not representable as int type (input bits = %d)", inputBitCount);
+		return; // add error code
+	}
 
 	// search variables
 
@@ -105,7 +109,7 @@ void exploreSpace(int initial) {
 
 		int toVisitNextArrOccupied = 0;
 
-		for (int i1 = 0; i1 < toVisitArrOccupied && !counter_example_found; i1++) {
+		for (int i1 = 0; i1 < toVisitArrOccupied; i1++) {
 
 			state = toVisitArr[i1];
 
@@ -121,23 +125,20 @@ void exploreSpace(int initial) {
 
 				// {COMB_ASSIGN}
 
-				int nxState = 0;
-
-				// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 
 				// check assumptions
 
 				assumptions = H; // intersection of assumptions
 
-				assertions = H; // intersection of assertions
-
 				// assumptions &= {ASSUMPTION} | (distance < {MAXDELAY} ? H : L);
-
-				// assertions &= {ASSERTION} | (distance < {MAXDELAY} ? H : L);
 
 				if (assumptions == H) {
 
 					// check assertions
+
+					assertions = H; // intersection of assertions
+
+					// assertions &= {ASSERTION} | (distance < {MAXDELAY} ? H : L);
 
 					if (assertions == L) {
 
@@ -146,6 +147,10 @@ void exploreSpace(int initial) {
 						break;
 
 					}
+
+					int nxState = 0;
+
+					// nxState |= {NEXT_STATE_BIT} & (1 << {STATE_BIT_INDEX});
 
 					// Note: we check if state is discovered only if all
 					// assumptions hold. This avoids accessing
@@ -171,7 +176,13 @@ void exploreSpace(int initial) {
 
 			}
 
+			if (counter_example_found)
+				break;
+
 		}
+
+		if (counter_example_found)
+			break;
 
 		toVisitArr = toVisitNextArr;
 
