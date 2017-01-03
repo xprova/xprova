@@ -2,9 +2,14 @@ package net.xprova.xprova;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -174,9 +179,23 @@ public class ConsoleHandler {
 
 				String synthFile = getTempFile("synth.v");
 
-				out.printf("Synthesizing behavioral design to %s ...\n", synthFile);
+				String hash = getFileChecksum(verilogFile);
 
-				(new SynthesisEngine()).synthesis(verilogFile, synthFile, out);
+				String storedHash = getStoredChecksum();
+
+				if (hash.equals(storedHash)) {
+
+					System.out.println("No design file changes detected, synthesis skipped");
+
+				} else {
+
+					out.printf("Synthesizing behavioral design to %s ...\n", synthFile);
+
+					(new SynthesisEngine()).synthesis(verilogFile, synthFile, out);
+
+					storeChecksum(hash);
+
+				}
 
 				verilogFile = synthFile;
 
@@ -911,7 +930,7 @@ public class ConsoleHandler {
 
 			codeGenTemplateFile = "template2.j";
 
-		} else if (useHashTemplate){
+		} else if (useHashTemplate) {
 
 			codeGenTemplateFile = "template4.j";
 
@@ -941,8 +960,7 @@ public class ConsoleHandler {
 
 			compileCmd = "javac " + genCodeFile;
 
-			runCodeGenCmd = String.format("java -Xmx6g -classpath %s %s %s", getTempFile(""), codeGenClassName,
-					txtArg);
+			runCodeGenCmd = String.format("java -Xmx6g -classpath %s %s %s", getTempFile(""), codeGenClassName, txtArg);
 
 		} else {
 
@@ -957,7 +975,6 @@ public class ConsoleHandler {
 		NetlistGraph currentCopy = keepAssertionLogic ? current : new NetlistGraph(current);
 
 		(new Transformer(currentCopy, defsFF)).expandDFFx();
-
 
 		// generate code
 
@@ -1562,6 +1579,81 @@ public class ConsoleHandler {
 		}
 
 		return result;
+
+	}
+
+	private String getStoredChecksum() {
+
+		File hashFile = new File(".xprova.hash");
+
+		BufferedReader br;
+
+		FileReader fr;
+
+		try {
+
+			fr = new FileReader(hashFile);
+
+		} catch (Exception e) {
+
+			return null;
+
+		}
+
+		br = new BufferedReader(fr);
+
+		String result;
+
+		try {
+			result = br.readLine();
+
+			br.close();
+
+		} catch (IOException e) {
+
+			result = null;
+
+		}
+
+		return result;
+
+	}
+
+	private void storeChecksum(String checksum) throws IOException {
+
+		File hashFile = new File(".xprova.hash");
+
+		PrintWriter writer2 = new PrintWriter(hashFile);
+
+		writer2.print(checksum);
+
+		writer2.close();
+
+	}
+
+	private String getFileChecksum(String file) throws Exception {
+
+		MessageDigest md = MessageDigest.getInstance("SHA1");
+
+		FileInputStream fis = new FileInputStream(file);
+
+		byte[] dataBytes = new byte[1024];
+
+		int nread = 0;
+
+		while ((nread = fis.read(dataBytes)) != -1)
+			md.update(dataBytes, 0, nread);
+
+		fis.close();
+
+		byte[] mdbytes = md.digest();
+
+		StringBuffer sb = new StringBuffer("");
+
+		for (int i = 0; i < mdbytes.length; i++)
+			sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+
+		return sb.toString();
 
 	}
 
