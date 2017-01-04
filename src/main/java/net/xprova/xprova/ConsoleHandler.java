@@ -841,6 +841,11 @@ public class ConsoleHandler {
 
 		executeProgram(runCodeGenCmd, true, true);
 
+		int exitCode = executeProgram(compileCmd, true, true);
+
+		if (exitCode != 0)
+			throw new Exception("state space exploration failed");
+
 	}
 
 	//@formatter:off
