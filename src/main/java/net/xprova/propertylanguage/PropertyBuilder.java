@@ -91,7 +91,7 @@ public class PropertyBuilder {
 
 			Property notC1 = Property.build(NOT).setChild(new Property(c1));
 
-			notC1.delay += 2;
+			notC1.delay += 1;
 
 			root.setChild(c1).addChild(notC1).name = AND;
 
