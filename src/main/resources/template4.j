@@ -54,14 +54,44 @@ public class CodeSimulator {
 
 	public int getHash(long key, int bank) {
 
-		key = (~key) + (key << 18); // key = (key << 18) - key - 1;
-		key = key ^ (key >>> 31);
-		key = key * 21; // key = (key + (key << 2)) + (key << 4);
-		key = key ^ (key >>> 11);
-		key = key + (key << 6);
-		key = key ^ (key >>> 22);
+		// the mix and hashing functions below are taken from:
+		// https://gist.github.com/badboy/6267743
 
-		return bank == 0 ? (int) key : (int) (key >> 32);
+		// mixing
+
+		key = (~key) + (key << 21); // key = (key << 21) - key - 1;
+		key = key ^ (key >>> 24);
+		key = (key + (key << 3)) + (key << 8); // key * 265
+		key = key ^ (key >>> 14);
+		key = (key + (key << 2)) + (key << 4); // key * 21
+		key = key ^ (key >>> 28);
+		key = key + (key << 31);
+
+		if (bank == 0) {
+
+			return Long.hashCode(key);
+
+		} else {
+
+			key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+			key = key ^ (key >>> 31);
+			key = key * 21; // key = (key + (key << 2)) + (key << 4);
+			key = key ^ (key >>> 11);
+			key = key + (key << 6);
+			key = key ^ (key >>> 22);
+
+			return (int) key;
+
+		}
+
+		// key = (~key) + (key << 18); // key = (key << 18) - key - 1;
+		// key = key ^ (key >>> 31);
+		// key = key * 21; // key = (key + (key << 2)) + (key << 4);
+		// key = key ^ (key >>> 11);
+		// key = key + (key << 6);
+		// key = key ^ (key >>> 22);
+
+		// return bank == 0 ? (int) key : (int) (key >> 25);
 
 	}
 
@@ -98,17 +128,23 @@ public class CodeSimulator {
 
 		// method parameters:
 
-		final int DISCOVERED_BUF_SIZE = 1 << 24;
+		final int DISCOVERED_BUF_SIZE = 1 << 20;
 
-		final int cucko_swap_maximum = 150;
+		final double bytes_available = (double) 0.25/4 * 1024 * 1024 * 1024; // 2 GB
 
-		final int BUF_SIZE_2_LOG2 = 25;
+		final long record_size_bytes = 3 * 8;
+
+		final double BUF_SIZE = bytes_available / record_size_bytes;
+
+		final int BUF_SIZE_LOG2 = (int) (Math.floor(Math.log(BUF_SIZE) / Math.log(2)));
 
 		final boolean printStateList = false;
 
 		// method body:
 
-		final int BUF_SIZE_2 = 1 << BUF_SIZE_2_LOG2;
+		final int BUF_SIZE_HALF = 1 << (BUF_SIZE_LOG2-1);
+
+		final int cucko_swap_maximum = 1 << BUF_SIZE_LOG2;
 
 		int stateBitCount = getStateBitCount();
 
@@ -124,7 +160,7 @@ public class CodeSimulator {
 
 		// initialize hash table
 
-		int TAB_SIZE = 2 * 6 * BUF_SIZE_2;
+		int TAB_SIZE = 2 * 3 * BUF_SIZE_HALF;
 
 		long[] TAB = new long[TAB_SIZE];
 
@@ -226,7 +262,7 @@ public class CodeSimulator {
 
 							int hash = getHash(nxState, bank);
 
-							hash &= (1 << BUF_SIZE_2_LOG2) - 1;
+							hash &= BUF_SIZE_HALF - 1;
 
 							long recorded_inpVec = TAB[calIndex(bank, hash, 2)];
 
@@ -277,7 +313,7 @@ public class CodeSimulator {
 
 								int hash = getHash(insert_record_state, bank);
 
-								hash &= (1 << BUF_SIZE_2_LOG2) - 1;
+								hash &= BUF_SIZE_HALF - 1;
 
 								long recorded_inpVec = TAB[calIndex(bank, hash, 2)];
 
@@ -311,8 +347,18 @@ public class CodeSimulator {
 
 								swap_counter++;
 
-								if (swap_counter > cucko_swap_maximum)
+								if (swap_counter > cucko_swap_maximum) {
+
+									System.out.printf("Cuckoo insertions (total)     : %d\n", total_cuckoo_insertions);
+
+									System.out.printf("Cache size                    : %s\n", getByteSize(2 * 3 * 8 * BUF_SIZE_HALF));
+
+									System.out.printf("Cache load factor             : %1.3f\n", 0.5 * total_cuckoo_insertions / BUF_SIZE_HALF);
+
+									System.out.printf("Cuckoo swaps (mean / insert)  : %f\n", 1.0 * total_cuckoo_swaps / total_cuckoo_insertions);
+
 									throw new Exception("maximum number of cuckoo swaps reached");
+								}
 
 							}
 
@@ -362,7 +408,7 @@ public class CodeSimulator {
 
 		System.out.printf("Input bits                    : %d\n", getInputBitCount());
 
-		System.out.printf("Cache size                    : %s\n", getByteSize(2 * 3 * 8 * ((long) 1 << BUF_SIZE_2_LOG2+1)));
+		System.out.printf("Cache size                    : %s\n", getByteSize(2 * 3 * 8 * BUF_SIZE_HALF));
 
 		System.out.printf("State array size              : %s\n", getByteSize(2 * 8 * ((long) DISCOVERED_BUF_SIZE)));
 
@@ -376,7 +422,7 @@ public class CodeSimulator {
 
 		System.out.printf("Cuckoo insertions (total)     : %d\n", total_cuckoo_insertions);
 
-		System.out.printf("Cache utilization             : %s\n", getByteSize(3 * 8 * total_cuckoo_insertions));
+		System.out.printf("Cache load factor             : %1.3f\n", 0.5 * total_cuckoo_insertions / BUF_SIZE_HALF);
 
 		System.out.printf("Cache hits                    : %d (%1.1f%%)\n", cache_hit_counter, found_perc);
 
@@ -404,7 +450,7 @@ public class CodeSimulator {
 
 					int hash = getHash(currentState, bank);
 
-					hash &= (1 << BUF_SIZE_2_LOG2) - 1;
+					hash &= BUF_SIZE_HALF - 1;
 
 					long recorded_state = TAB[calIndex(bank, hash, 0)];
 
