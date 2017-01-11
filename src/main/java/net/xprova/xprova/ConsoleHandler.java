@@ -971,9 +971,9 @@ public class ConsoleHandler {
 
 			genCodeFile = getTempFile(codeGenClassName + ".cpp");
 
-			compileCmd = String.format("g++ -o %s.exe -O2 %s", codeGenClassName, genCodeFile);
+			runCodeGenCmd = getTempFile(codeGenClassName + ".exe");
 
-			runCodeGenCmd = String.format("%s.exe", codeGenClassName);
+			compileCmd = String.format("g++ -o %s -O2 %s", runCodeGenCmd, genCodeFile);
 
 		}
 
