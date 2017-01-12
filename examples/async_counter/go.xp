@@ -1,0 +1,9 @@
+library load lib/xprova.v
+
+read -b examples/async_counter/async_counter_conf.v
+
+# read -b examples/async_counter/oscillator.v
+
+# dot -m -e=CK,RS,ST --pdf output/netlist.pdf
+
+:t prove -d
