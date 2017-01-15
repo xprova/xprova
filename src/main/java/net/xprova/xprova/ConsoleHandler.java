@@ -191,7 +191,7 @@ public class ConsoleHandler {
 
 					out.printf("Synthesizing behavioral design to %s ...\n", synthFile);
 
-					(new SynthesisEngine()).synthesis(verilogFile, synthFile, out);
+					(new SynthesisEngine()).synthesis(verilogFile, synthFile, out, false);
 
 					storeChecksum(hash);
 
@@ -1065,21 +1065,52 @@ public class ConsoleHandler {
 		description = "synthesize behavioral verilog design using yosys",
 		help = {
 			"Usage:",
-			"  synth <input> <output>"
+			"  synth [-v] <input> <output>",
+			"",
+			"Options:",
+			"  -v --verbose  print yosys output to console",
 		}
 	)
 	//@formatter:on
 	public void synth(String args[]) throws Exception {
 
 		// TODO: implement the following switches
-		// -v : verbose mode, show output of yosys
 		// --lib myfile.lib: specify custom library for yosys
 
-		String behavioralDesign = args[0];
+		// parse command input
 
-		String synthDesign = args[1];
+		Option[] opts = {
 
-		(new SynthesisEngine()).synthesis(behavioralDesign, synthDesign, out);
+				Option.builder("v").longOpt("verbose").build(),
+
+		};
+
+		Options options = new Options();
+
+		for (Option o : opts)
+			options.addOption(o);
+
+		CommandLineParser parser = new DefaultParser();
+
+		CommandLine line = parser.parse(options, args);
+
+		// synthesize
+
+		boolean yosys_verbose = line.hasOption("v");
+
+		// use first non-empty argument as file name
+
+		ArrayList<String> posArgs = new ArrayList<String>();
+
+		for (String str : line.getArgList())
+			if (!str.isEmpty())
+				posArgs.add(str);
+
+		String behavioralDesign = posArgs.get(0);
+
+		String synthDesign = posArgs.get(1);
+
+		(new SynthesisEngine()).synthesis(behavioralDesign, synthDesign, out, yosys_verbose);
 
 	}
 

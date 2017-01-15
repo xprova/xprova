@@ -13,7 +13,8 @@ import net.xprova.piccolo.Console;
 
 public class SynthesisEngine {
 
-	public void synthesis(String behavioralDesign, String synthDesign, PrintStream out) throws Exception {
+	public void synthesis(String behavioralDesign, String synthDesign, PrintStream out, boolean yosys_verbose)
+			throws Exception {
 
 		// step 1: create temporary cell lib file
 
@@ -45,7 +46,9 @@ public class SynthesisEngine {
 
 		// step 3: execute yosys
 
-		String cmd = "yosys -q -s " + yScriptFile;
+		String yosys_quiet = yosys_verbose ? "" : " -q";
+
+		String cmd = "yosys" + yosys_quiet + " -s " + yScriptFile;
 
 		final Runtime rt = Runtime.getRuntime();
 
@@ -62,6 +65,21 @@ public class SynthesisEngine {
 		}
 
 		try {
+
+			if (yosys_verbose) {
+
+				BufferedReader stdOut = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+				String s = null;
+
+				System.out.println("Start of yosys output:");
+
+				while ((s = stdOut.readLine()) != null)
+					out.println(s);
+
+				System.out.println("End of yosys output");
+
+			}
 
 			proc.waitFor();
 
