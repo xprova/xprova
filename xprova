@@ -1,7 +1,7 @@
 #!/bin/bash
 
 XPROV_JAR=target/xprova-0.0.1-SNAPSHOT-jar-with-dependencies.jar
-
+MVNOUT=mvn_output.txt
 args=$@
 
 if [[ $1 = "--rebuild" || $1 = "-r" ]]
@@ -25,12 +25,15 @@ then
 
 	echo "Building Xprova for first time use ..."
 
-	mvn package > /dev/null
+	mvn package > $MVNOUT
 
 	if [ $? -ne 0 ]; then
 		echo "Maven build failed!"
+		cat $MVNOUT
+		echo "See output in file '$MVNOUT' for more informations"
 		exit 1
 	fi
+	rm $MVNOUT
 
 fi
 
