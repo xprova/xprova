@@ -8,6 +8,7 @@ release). More information on the tool is available on <https://xprova.net>.
 
 * java 8
 * Maven
+* Yosys
 
 ### Usage:
 
